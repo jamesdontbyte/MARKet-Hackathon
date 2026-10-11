@@ -1,0 +1,344 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Create Your Account</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-surface": "#0b1c30",
+            "on-tertiary-fixed": "#001d31",
+            "background": "#f8f9ff",
+            "surface-container-highest": "#d3e4fe",
+            "primary-fixed-dim": "#7ad0ff",
+            "outline": "#6e7980",
+            "secondary-container": "#dae2fd",
+            "surface-container-high": "#dce9ff",
+            "primary": "#006689",
+            "tertiary-container": "#6fbfff",
+            "surface-bright": "#f8f9ff",
+            "inverse-primary": "#7ad0ff",
+            "primary-container": "#3ec4ff",
+            "on-error": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "secondary": "#565e74",
+            "on-tertiary-container": "#004d76",
+            "on-secondary-fixed-variant": "#3f465c",
+            "inverse-on-surface": "#eaf1ff",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#93000a",
+            "surface-dim": "#cbdbf5",
+            "on-primary": "#ffffff",
+            "on-secondary-container": "#5c647a",
+            "surface-container-low": "#eff4ff",
+            "secondary-fixed-dim": "#bec6e0",
+            "on-primary-fixed-variant": "#004c68",
+            "primary-fixed": "#c3e8ff",
+            "tertiary-fixed-dim": "#93ccff",
+            "outline-variant": "#bdc8d1",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "tertiary-fixed": "#cce5ff",
+            "surface": "#f8f9ff",
+            "on-primary-container": "#004e6b",
+            "tertiary": "#006398",
+            "on-tertiary-fixed-variant": "#004b73",
+            "inverse-surface": "#213145",
+            "surface-variant": "#d3e4fe",
+            "on-background": "#0b1c30",
+            "on-secondary-fixed": "#131b2e",
+            "secondary-fixed": "#dae2fd",
+            "on-surface-variant": "#3e484f",
+            "error-container": "#ffdad6",
+            "on-primary-fixed": "#001e2c",
+            "surface-container": "#e5eeff",
+            "surface-tint": "#006689"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.75rem",
+            "space-md": "1rem",
+            "margin": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    /* Material Symbols base styles */
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    /* Soft clean modern shadows */
+    .elevation-level-1 {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .elevation-level-2 {
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Viewport Wrapper (max-w-md matching MSME app shell) -->
+<div class="max-w-md mx-auto min-h-screen bg-background flex flex-col relative pb-10">
+<!-- Shared TopAppBar Execution (Direct JSON Mapping) -->
+
+<!-- Main Content Area -->
+<main class="flex-1 px-margin-mobile pt-4 space-y-space-md">
+<!-- Hero Title Header Area -->
+<div class="px-1">
+
+<h1 class="font-display-lg-mobile text-display-lg-mobile text-on-surface tracking-tight mb-1">Create Your Account</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Join MARKet and discover local businesses near you.</p>
+</div>
+<!-- SECTION ONE: Personal Information -->
+<section class="bg-surface-container-lowest rounded-xl p-5 border border-[#F1F5F9] elevation-level-1 transition-all">
+<!-- Section Header -->
+<div class="flex items-center justify-between pb-3.5 mb-4 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Personal Information</h2>
+<p class="font-label-sm text-label-sm text-secondary">Step 1 of 2 • Basic profile</p>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant">Required</span>
+</div>
+<form class="space-y-4" onsubmit="event.preventDefault();">
+<!-- Full Name -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="fullName">Full Name</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-[#CBD5E1] rounded-xl px-3.5 py-3 text-body-md text-on-surface placeholder-secondary/50 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all" id="fullName" placeholder="e.g., Maria Aquino" type="text">
+</div>
+<p class="mt-1 font-label-sm text-label-sm text-secondary">As it appears on your official Philippine identification</p>
+</div>
+<!-- Email Address -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="email">Email Address</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-[#CBD5E1] rounded-xl px-3.5 py-3 text-body-md text-on-surface placeholder-secondary/50 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all" id="email" placeholder="e.g., maria.aquino@gmail.com" type="email">
+</div>
+</div>
+<!-- Mobile Number with +63 PH Prefix -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="phone">Mobile Number</label>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1.5 bg-surface-container-low border border-[#CBD5E1] rounded-xl px-3 py-3 h-[48px] select-none">
+<!-- Philippine Flag Emblem Indicator -->
+<span class="w-4 h-3 rounded-sm bg-primary flex items-center justify-center text-[8px] text-on-primary font-bold overflow-hidden relative">
+<span class="absolute inset-0 bg-red-600 top-1/2"></span>
+<span class="absolute left-0 top-0 bottom-0 w-2 bg-surface-bright flex items-center justify-center">★</span>
+</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">+63</span>
+</div>
+<input class="flex-1 bg-surface-container-lowest border border-[#CBD5E1] rounded-xl px-3.5 py-3 text-body-md text-on-surface placeholder-secondary/50 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all h-[48px]" id="phone" placeholder="917 888 4321" type="tel">
+</div>
+<p class="mt-1 font-label-sm text-label-sm text-secondary">Used for SMS instant order notifications and merchant updates</p>
+</div>
+<!-- Password -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="password">Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-[#CBD5E1] rounded-xl pl-3.5 pr-11 py-3 text-body-md text-on-surface placeholder-secondary/50 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all" id="password" placeholder="Create secure password" type="password">
+<button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface p-1 transition-colors" onclick="const input = document.getElementById('password'); const isPass = input.type === 'password'; input.type = isPass ? 'text' : 'password'; this.querySelector('span').innerText = isPass ? 'visibility_off' : 'visibility';" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+<div class="flex items-center gap-1.5 mt-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-label-sm text-label-sm text-secondary">Minimum 8 characters with letters &amp; numbers</span>
+</div>
+</div>
+<!-- Confirm Password -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="confirmPassword">Confirm Password</label>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest border border-[#CBD5E1] rounded-xl pl-3.5 pr-11 py-3 text-body-md text-on-surface placeholder-secondary/50 focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all" id="confirmPassword" placeholder="Repeat password" type="password">
+<button aria-label="Toggle confirm password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-secondary hover:text-on-surface p-1 transition-colors" onclick="const input = document.getElementById('confirmPassword'); const isPass = input.type === 'password'; input.type = isPass ? 'text' : 'password'; this.querySelector('span').innerText = isPass ? 'visibility_off' : 'visibility';" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+</form>
+</section>
+<!-- SECTION TWO: Government ID Verification -->
+<section class="bg-surface-container-lowest rounded-xl p-5 border border-[#F1F5F9] elevation-level-1 transition-all">
+<!-- Section Header -->
+<div class="flex items-start justify-between pb-3.5 mb-3 border-b border-outline-variant/20">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="badge">badge</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Government ID Verification</h2>
+
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm">
+            Recommended
+          </span>
+</div>
+<!-- Explanatory Context Pill Notice -->
+<div class="bg-surface-container-low rounded-xl p-3 mb-4 border border-[#BAE6FD]/40">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5" data-icon="verified_user">verified_user</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Verify your identity to unlock exclusive verified resident promotions, seamless merchant QR claims, and trusted community status in Antique.
+            </p>
+</div>
+</div>
+<div class="space-y-4">
+<!-- ID Type Selector -->
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1.5" for="idType">Select ID Type</label>
+<div class="relative">
+<select class="w-full appearance-none bg-surface-container-lowest border border-[#CBD5E1] rounded-xl px-3.5 py-3 pr-10 text-body-md text-on-surface focus:outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 transition-all cursor-pointer" id="idType">
+<option selected="" value="philsys">PhilSys National ID (ePhilID / Card)</option>
+<option value="umid">Unified Multi-Purpose ID (UMID)</option>
+<option value="drivers_license">LTO Driver's License</option>
+<option value="passport">DFA Philippine Passport</option>
+<option value="postal">PhlPost Postal ID</option>
+<option value="prc">Professional Regulation Commission (PRC) ID</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-secondary pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Upload Government ID Slots -->
+<div>
+<div class="flex items-center justify-between mb-2">
+<label class="block font-label-md text-label-md text-on-surface">Upload Government ID</label>
+<span class="font-label-sm text-label-sm text-secondary">JPG, PNG, or PDF up to 10MB</span>
+</div>
+<!-- Dual Upload Slots Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<!-- Slot 1: Front ID (State: Realistic Uploaded) -->
+<div class="rounded-xl border-2 border-dashed border-[#CBD5E1] bg-surface-container-lowest hover:bg-[#F0F9FF]/50 hover:border-primary-container p-3.5 transition-colors cursor-pointer flex flex-col items-center justify-center text-center group min-h-[105px]">
+<div class="w-9 h-9 rounded-full bg-surface-container-low group-hover:bg-[#E0F2FE] flex items-center justify-center text-primary mb-1.5 transition-colors">
+<span class="material-symbols-outlined" data-icon="cloud_upload">cloud_upload</span>
+</div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">Upload Front Side</p>
+<p class="font-label-sm text-label-sm text-secondary mt-0.5">Tap or drag file here</p>
+</div>
+<!-- Slot 2: Back ID (State: Ready to Upload Empty Slot) -->
+<div class="rounded-xl border-2 border-dashed border-[#CBD5E1] bg-surface-container-lowest hover:bg-[#F0F9FF]/50 hover:border-primary-container p-3.5 transition-colors cursor-pointer flex flex-col items-center justify-center text-center group min-h-[105px]">
+<div class="w-9 h-9 rounded-full bg-surface-container-low group-hover:bg-[#E0F2FE] flex items-center justify-center text-primary mb-1.5 transition-colors">
+<span class="material-symbols-outlined" data-icon="cloud_upload">cloud_upload</span>
+</div>
+<p class="font-label-md text-label-md font-semibold text-on-surface">Upload Back Side</p>
+<p class="font-label-sm text-label-sm text-secondary mt-0.5">Tap or drag file here</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION THREE: Privacy & Terms (RA 10173 Compliant) -->
+<section class="bg-surface-container-lowest rounded-xl p-5 border border-[#F1F5F9] elevation-level-1 space-y-3.5">
+<div class="flex items-start gap-3 bg-[#F0F9FF] border border-[#BAE6FD] rounded-xl p-3.5">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed-variant shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]" data-icon="security">security</span>
+</div>
+<div>
+<h3 class="font-label-md text-label-md text-on-surface font-semibold">Philippine Data Privacy Act (RA 10173)</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              Your personal information and ID documents are encrypted and processed strictly in accordance with RA 10173 for identity validation and local MSME verification in Antique.
+            </p>
+</div>
+</div>
+<!-- Agreement Checkbox -->
+<label class="flex items-start gap-3 cursor-pointer select-none pt-1">
+<div class="relative flex items-center pt-0.5">
+<input checked="" class="w-5 h-5 rounded-[6px] border-[#CBD5E1] text-primary-container focus:ring-primary-container/40 cursor-pointer" id="privacyAgreement" type="checkbox">
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant leading-snug">
+            I agree to the <a class="text-primary font-semibold hover:underline" href="#terms">Terms of Service</a> and acknowledge the <a class="text-primary font-semibold hover:underline" href="#privacy">Privacy Notice</a>.
+          </span>
+</label>
+</section>
+<!-- SECTION FOUR: Registration CTA & Navigation -->
+<div class="pt-2 pb-6 space-y-3">
+<!-- Main CTA Button -->
+<button class="w-full bg-primary-container hover:bg-[#38BDF8] active:scale-[0.98] transition-all font-headline-sm text-headline-sm py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-sm font-semibold text-on-primary" type="button">
+<span class="">Create Account &amp; Continue</span>
+<span class="material-symbols-outlined text-[20px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Subtitle Context Note -->
+<div class="text-center">
+<p class="font-label-sm text-label-sm text-secondary">
+            Next: Choose your local interests &amp; preferences (Food, Cafés, Retail, Salons)
+          </p>
+</div>
+<!-- Footer Navigation Link -->
+<div class="text-center pt-2">
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Already have an account? 
+            <a class="font-headline-sm text-body-md text-primary font-semibold hover:underline ml-1" href="#login">Log in</a>
+</p>
+</div>
+</div>
+</main>
+</div>
+
+
+</body></html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html><html class="h-full bg-background text-on-surface" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Catalog &amp; Promos</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#cce5ff",
+            "on-surface": "#0b1c30",
+            "primary-fixed-dim": "#7ad0ff",
+            "on-surface-variant": "#3e484f",
+            "inverse-on-surface": "#eaf1ff",
+            "error-container": "#ffdad6",
+            "surface-bright": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "tertiary": "#006398",
+            "secondary-fixed": "#dae2fd",
+            "secondary-container": "#dae2fd",
+            "tertiary-fixed-dim": "#93ccff",
+            "outline-variant": "#bdc8d1",
+            "primary-container": "#3ec4ff",
+            "surface-container-highest": "#d3e4fe",
+            "surface": "#f8f9ff",
+            "secondary": "#565e74",
+            "surface-container-low": "#eff4ff",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "surface-variant": "#d3e4fe",
+            "outline": "#6e7980",
+            "on-primary": "#ffffff",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#001d31",
+            "on-primary-fixed": "#001e2c",
+            "inverse-surface": "#213145",
+            "primary": "#006689",
+            "on-tertiary-container": "#004d76",
+            "surface-tint": "#006689",
+            "on-secondary-container": "#5c647a",
+            "background": "#f8f9ff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "on-tertiary": "#ffffff",
+            "primary-fixed": "#c3e8ff",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-primary-container": "#004e6b",
+            "on-secondary-fixed": "#131b2e",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "tertiary-container": "#6fbfff",
+            "secondary-fixed-dim": "#bec6e0",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#0b1c30",
+            "inverse-primary": "#7ad0ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-shadow-card {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .custom-shadow-float {
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    }
+  </style>
+</head>
+<body class="bg-background min-h-screen text-on-surface antialiased flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top App Bar / Header -->
+<header class="sticky top-0 z-40 flex items-center justify-between w-full px-margin-mobile py-space-sm bg-surface/90 backdrop-blur-sm border-b border-outline-variant/20 shadow-sm"><div class="flex items-center gap-space-sm"><div class="w-9 h-9 rounded-full overflow-hidden bg-surface-container-lowest flex items-center justify-center border border-outline-variant/30 shadow-sm"><img alt="MARKet Logo" class="w-7 h-7 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIxvS_ZHZlKvUf8tXuXkEZWmny9uF-8IqptYkl1SQDykEmNypzuODMZTreoSlqNKDwF-2PIBloFraTPDGr-OV_TNf97xWUTtrvLIYAPqVV_wF_K1aCrm7e2wkkkGe27LOJWPDuUte7OdQcB0WOmMvcFvVgYlmOeRm5djThf0ccH9Wx0ozzGpoFpwuGd5xC5nV2-8Wk159qPk-ILVlH0LBmXpaO0XrBseZd2YsLNncuwmDQUQZpsOUphfFVEFKU80IMaA"></div><div class="flex items-center leading-none"><span class="font-display-lg-mobile text-headline-sm-mobile font-extrabold text-primary-container tracking-tight">MARK</span><span class="font-display-lg-mobile text-headline-sm-mobile font-extrabold text-on-surface tracking-tight">et</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notifications" class="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors duration-150 active:scale-95"><span class="material-symbols-outlined text-[20px]">notifications</span></button></div></header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-md mx-auto px-margin-mobile pt-space-md pb-36"><div class="bg-surface-container-low p-1 rounded-xl mb-space-md flex border border-outline-variant/20"><button class="flex-1 py-space-xs px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded-lg shadow-sm font-bold text-center transition-all duration-150">Products &amp; Services <span class="ml-1 text-primary text-label-sm">(12)</span></button><button class="flex-1 py-space-xs px-space-sm text-secondary hover:text-on-surface font-label-md text-label-md rounded-lg text-center transition-all duration-150">Promotions <span class="ml-1 text-secondary text-label-sm">(3)</span></button></div><div class="flex items-center gap-space-xs overflow-x-auto pb-space-sm mb-space-sm no-scrollbar"><button class="shrink-0 bg-tertiary-fixed text-on-tertiary-container border border-primary-container px-3 py-1 rounded-full font-label-md text-label-md font-semibold">All</button><button class="shrink-0 bg-surface-container-lowest text-secondary border border-outline-variant/40 px-3 py-1 rounded-full font-label-md text-label-md hover:bg-surface-container transition-colors">Beverages</button><button class="shrink-0 bg-surface-container-lowest text-secondary border border-outline-variant/40 px-3 py-1 rounded-full font-label-md text-label-md hover:bg-surface-container transition-colors">Pastries</button><button class="shrink-0 bg-surface-container-lowest text-secondary border border-outline-variant/40 px-3 py-1 rounded-full font-label-md text-label-md hover:bg-surface-container transition-colors">Beans &amp; Merch</button></div><div class="space-y-space-sm"><article class="bg-surface-container-lowest rounded-2xl p-space-md custom-shadow-card border border-outline-variant/20 flex flex-col gap-space-sm transition-all duration-150 hover:border-primary-container/60"><div class="flex gap-space-md items-start"><div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container shrink-0 relative"><img class="w-full h-full object-cover" data-alt="An artisanal iced sea salt caramel latte in a clear tall glass, topped with velvety foam and golden caramel drizzle, set on a bright light-wood cafe counter illuminated by airy natural daylight with soft sky cyan and white reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDviGz1Y3cQmwtdvqBN2k_2UA8OyUvvK8F3-edmoQzX960STcxwNdI0508MzfhhKlK8q-_yH8rRHu_KehoKvaKX18O-oDa4JDTM9CzQTQ_dd_F9ll2EWrbqI1TBqb8wYttwc8VwLYkJJXBMT340g-qrSAxPF2hzryvH74wSxcR_O_qkCV5TAqI6iQFdhHN__JfR-8-KK8VOxt97O7G1B5HRsdYWLCgtDK7kI3hkkTvO-DBvg2ZBw9nW"><span class="absolute top-1 left-1 bg-on-surface/80 backdrop-blur-sm text-surface-container-lowest font-label-sm text-[10px] px-1.5 py-0.5 rounded-md font-bold">Latte</span></div><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-1"><h3 class="font-headline-sm text-headline-sm-mobile text-on-surface font-bold truncate">Sea Salt Caramel Latte</h3></div><div class="flex items-center gap-space-xs mt-0.5"><span class="font-headline-md text-headline-sm text-on-surface font-extrabold">₱180</span><span class="text-label-sm font-label-sm text-secondary bg-surface-container-low px-1.5 py-0.5 rounded">Beverages</span></div><p class="font-body-sm text-body-sm text-secondary mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">trending_up</span> 320 orders completed</p></div></div><div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between"><label class="flex items-center gap-2 cursor-pointer select-none"><div class="relative inline-block w-9 h-5"><input checked="" class="sr-only peer" type="checkbox"><div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div></div><span class="font-label-sm text-label-sm text-on-surface font-semibold">Best Seller</span></label><div class="flex items-center gap-space-xs"><button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-primary hover:bg-surface-container-low transition-colors duration-150 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">edit</span> Edit</button><button class="px-2 py-1 text-label-md font-label-md rounded-lg text-secondary hover:bg-surface-container-low transition-colors duration-150" title="Hide from counter menu"><span class="material-symbols-outlined text-[16px]">visibility</span></button></div></div></article><article class="bg-surface-container-lowest rounded-2xl p-space-md custom-shadow-card border border-outline-variant/20 flex flex-col gap-space-sm transition-all duration-150 hover:border-primary-container/60"><div class="flex gap-space-md items-start"><div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container shrink-0 relative"><img class="w-full h-full object-cover" data-alt="A freshly baked golden almond croissant with toasted sliced almonds and powdered sugar dusting on a clean ceramic plate, captured in bright morning coffee shop sunlight with high-contrast sharp bakery textures and modern light styling." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPreppA7s2nahQV5X68bp1XjlcqOEablCVlWzFD5M_N_Fr_AQ7DjJcng9kAWDVkBTJlzo6DdaY5746H-HC6MYgFxgMLvYGt352gUjlVU2n_IBJbH89VdYE85-uKpu8WvvopocBtgCj54ThkaKcfU1I5vg6FDx_FFQ4ily5QGTLC4nM1Tn5Weh6Hhz9MhkAE07B6cnetQas_KW-ZkGyO7NdDdoFIm67K3ezVC0pdti69aykRDuBDowa"><span class="absolute top-1 left-1 bg-primary text-surface-container-lowest font-label-sm text-[10px] px-1.5 py-0.5 rounded-md font-bold">Baked</span></div><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-1"><h3 class="font-headline-sm text-headline-sm-mobile text-on-surface font-bold truncate">Almond Flaky Croissant</h3></div><div class="flex items-center gap-space-xs mt-0.5"><span class="font-headline-md text-headline-sm text-on-surface font-extrabold">₱145</span><span class="text-label-sm font-label-sm text-secondary bg-surface-container-low px-1.5 py-0.5 rounded">Pastries</span></div><p class="font-body-sm text-body-sm text-secondary mt-1 flex items-center gap-1"><span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span> Freshly baked today</p></div></div><div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between"><label class="flex items-center gap-2 cursor-pointer select-none"><div class="relative inline-block w-9 h-5"><input checked="" class="sr-only peer" type="checkbox"><div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div></div><span class="font-label-sm text-label-sm text-on-surface font-semibold">Best Seller</span></label><div class="flex items-center gap-space-xs"><button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-primary hover:bg-surface-container-low transition-colors duration-150 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">edit</span> Edit</button><button class="px-2 py-1 text-label-md font-label-md rounded-lg text-secondary hover:bg-surface-container-low transition-colors duration-150" title="Hide from counter menu"><span class="material-symbols-outlined text-[16px]">visibility</span></button></div></div></article><article class="bg-surface-container-lowest rounded-2xl p-space-md custom-shadow-card border border-outline-variant/20 flex flex-col gap-space-sm transition-all duration-150 hover:border-primary-container/60"><div class="flex gap-space-md items-start"><div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container shrink-0 relative"><img class="w-full h-full object-cover" data-alt="A minimalist glass pour-over coffee dripper brewing artisanal specialty filter coffee into an elegant glass server, bright clean cafe studio setup with soft ambient lighting and pristine aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDJDejrMFeuPxXqD6GuUob1rYnsamnmOyrMQ2LZELTBT3XRZJVxnqJNF1_46mzVG6plIkiMFumUateOWAvVDfpM1BxBR8CvrO6GxUZ6G0IkoouIJIyisfXcfxKZ-FRYrXyIJ5xzM0hCN45pmGboSly11bfIVSLrEkz2fn1KKxMel3eabM4fe14rPhISZF23r0dA1z_hVad05H2Cc1uUe6dOOl4bLIXZ_4rlKrMP5ywV1IouPTU7Eyf"></div><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-1"><h3 class="font-headline-sm text-headline-sm-mobile text-on-surface font-bold truncate">Single Origin Pour-over</h3></div><div class="flex items-center gap-space-xs mt-0.5"><span class="font-headline-md text-headline-sm text-on-surface font-extrabold">₱160</span><span class="text-label-sm font-label-sm text-secondary bg-surface-container-low px-1.5 py-0.5 rounded">Beverages</span></div><p class="font-body-sm text-body-sm text-secondary mt-1">Benguet Arabica, Light Roast</p></div></div><div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between"><label class="flex items-center gap-2 cursor-pointer select-none"><div class="relative inline-block w-9 h-5"><input class="sr-only peer" type="checkbox"><div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div></div><span class="font-label-sm text-label-sm text-secondary font-medium">Best Seller</span></label><div class="flex items-center gap-space-xs"><button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-primary hover:bg-surface-container-low transition-colors duration-150 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">edit</span> Edit</button><button class="px-2 py-1 text-label-md font-label-md rounded-lg text-secondary hover:bg-surface-container-low transition-colors duration-150" title="Hide from counter menu"><span class="material-symbols-outlined text-[16px]">visibility</span></button></div></div></article><article class="bg-surface-container-lowest rounded-2xl p-space-md custom-shadow-card border border-outline-variant/20 flex flex-col gap-space-sm transition-all duration-150 hover:border-primary-container/60"><div class="flex gap-space-md items-start"><div class="w-20 h-20 rounded-xl overflow-hidden bg-surface-container shrink-0 relative"><img class="w-full h-full object-cover" data-alt="A slice of vibrant purple ube macapuno basque burnt cheesecake with a caramelized top crust on a minimalist white ceramic plate, professional studio product lighting in a modern airy Philippine bakery aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9o5dlZ3JzshIcEO3kAMXd3tN6hb8K8Ib7OiYEOXFTaROqkf9p3xceH4sjSMofyxhb1JGk6LosCsE8eUqJ_-th5zGt6GeeYXwWACGkwwaamCHtDGZAwykyfT6hxNeYnRBCM7hWiz9EMb9JYCKcqeSV9TNiJyX2FrkNjtlkG5lSEraaKjQR37jLyxNsJnirkWy-A5h2COLf5Avhsq10YoYyvHiEQBoEppKZL8qk65-olbUbwNd9tc1m"></div><div class="flex-1 min-w-0"><div class="flex items-start justify-between gap-1"><h3 class="font-headline-sm text-headline-sm-mobile text-on-surface font-bold truncate">Ube Macapuno Basque Cake</h3></div><div class="flex items-center gap-space-xs mt-0.5"><span class="font-headline-md text-headline-sm text-on-surface font-extrabold">₱220</span><span class="text-label-sm font-label-sm text-secondary bg-surface-container-low px-1.5 py-0.5 rounded">Pastries</span></div><p class="font-body-sm text-body-sm text-secondary mt-1">4 slices remaining</p></div></div><div class="pt-space-xs border-t border-outline-variant/20 flex items-center justify-between"><label class="flex items-center gap-2 cursor-pointer select-none"><div class="relative inline-block w-9 h-5"><input class="sr-only peer" type="checkbox"><div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary-container"></div></div><span class="font-label-sm text-label-sm text-secondary font-medium">Best Seller</span></label><div class="flex items-center gap-space-xs"><button class="px-2.5 py-1 text-label-md font-label-md rounded-lg text-primary hover:bg-surface-container-low transition-colors duration-150 flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">edit</span> Edit</button><button class="px-2 py-1 text-label-md font-label-md rounded-lg text-secondary hover:bg-surface-container-low transition-colors duration-150" title="Hide from counter menu"><span class="material-symbols-outlined text-[16px]">visibility</span></button></div></div></article></div></main>
+<!-- Floating Bottom Navigation Bar (Executed strictly from Shared Components JSON) -->
+<div class="fixed bottom-24 right-5 z-40"><button aria-label="Add Item" class="bg-primary text-white font-semibold flex items-center gap-2 px-5 py-3.5 hover:opacity-95 active:scale-95 transition-all text-label-md rounded-xl shadow-sm"><span class="material-symbols-outlined text-[20px]">add</span><span class="">Add Item</span></button></div><div class="fixed bottom-0 w-full z-50 flex justify-center pb-space-sm px-margin-mobile">
+<nav aria-label="Bottom Navigation" class="bg-surface-container-lowest shadow-lg border border-outline-variant/30 rounded-full mx-margin-mobile mb-margin-mobile px-space-sm py-1.5 flex items-center gap-1 max-w-sm w-full justify-between">
+<!-- Tab 1: Dashboard (Inactive) -->
+<a aria-label="Dashboard" class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Dashboard</span>
+</a>
+<!-- Tab 2: Catalog (ACTIVE - style_active_navigation applied) -->
+<a aria-current="page" aria-label="Catalog" class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-space-md py-space-xs font-semibold shadow-sm active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: &quot;FILL&quot; 1;">inventory_2</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Catalog</span>
+</a>
+<!-- Tab 3: Analytics (Inactive) -->
+<a aria-label="Analytics" class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[22px]">insights</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Analytics</span>
+</a>
+<!-- Tab 4: Account (Inactive) -->
+<a aria-label="Account" class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[22px]">shield_person</span>
+<span class="font-label-sm text-[11px] leading-tight mt-0.5">Account</span>
+</a>
+</nav>
+</div>
+
+
+
+
+
+
+</body></html>

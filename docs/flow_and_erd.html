@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MARKet — Architecture: Screen Flow & Database ERD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --primary: #006689;
+      --primary-container: #3ec4ff;
+      --on-primary-container: #004e6b;
+      --surface: #f8f9ff;
+      --surface-container: #e5eeff;
+      --card-bg: #ffffff;
+      --text-main: #0b1c30;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --border-subtle: #f1f5f9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--surface);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    header {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background: #e0f2fe;
+      color: #0284c7;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    h1 span {
+      color: var(--primary-container);
+      background: linear-gradient(135deg, #0284c7, #3ec4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: #eff4ff;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      font-family: inherit;
+      border: none;
+      background: transparent;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      background: white;
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.08);
+    }
+
+    .content-section {
+      display: none;
+      background: white;
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+      margin-bottom: 24px;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .section-header {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .diagram-container {
+      background: #fbfcfe;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      overflow-x: auto;
+      min-height: 400px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      font-size: 13px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    .table-spec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .table-spec-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      background: white;
+    }
+
+    .table-spec-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .table-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: var(--surface-container);
+      color: var(--on-primary-container);
+      font-weight: 600;
+    }
+
+    .col-list {
+      list-style: none;
+      font-size: 13px;
+    }
+
+    .col-list li {
+      padding: 4px 0;
+      border-bottom: 1px dashed #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .col-name {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .col-type {
+      color: var(--text-muted);
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="brand-title">
+        <h1>MARK<span>et</span> Visual Architecture</h1>
+        <span class="brand-badge">San Jose de Buenavista</span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 14px; margin-top: 4px;">
+        Role Screen Flows, Foreground Geofence Loop, and Supabase Relational ERD
+      </p>
+    </div>
+    <div style="font-size: 13px; color: var(--text-muted); text-align: right;">
+      <span>Platform: <b>Flutter (Android)</b></span><br>
+      <span>Database: <b>Supabase Postgres + RLS</b></span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('shopper')">Shopper Screen Flow</button>
+    <button class="tab-btn" onclick="showTab('merchant')">Merchant Screen Flow</button>
+    <button class="tab-btn" onclick="showTab('loop')">Demo Geofence & QR Loop</button>
+    <button class="tab-btn" onclick="showTab('erd')">Database ERD & RLS</button>
+  </div>
+
+  <!-- Shopper Screen Flow -->
+  <div id="tab-shopper" class="content-section active">
+    <div class="section-header">
+      <h2 class="section-title">Shopper Journey & Discovery Flow</h2>
+      <p class="section-subtitle">From onboarding and category preferences to hyperlocal OSM map roaming, stash collections, and voucher QR code generation.</p>
+    </div>
+
+    <div class="diagram-container">
+      <pre class="mermaid">
+flowchart TD
+    classDef shared fill:#e5eeff,stroke:#006689,stroke-width:2px,color:#0b1c30;
+    classDef shopper fill:#e0f2fe,stroke:#3ec4ff,stroke-width:2px,color:#0b1c30;
+    classDef trigger fill:#fff3cd,stroke:#f59e0b,stroke-width:2px,color:#0b1c30;
+    classDef modal fill:#ffffff,stroke:#64748b,stroke-width:2px,stroke-dasharray: 5 5,color:#0b1c30;
+
+    Splash[Splash Screen<br/>2s Auto-route]:::shared -->|No Session| RoleSelect[Role Selection Screen<br/>market_role_selection]:::shared
+    Splash -->|Session: Shopper| ShopperDash[Shopper Dashboard<br/>market_consumer_dashboard]:::shopper
+    
+    RoleSelect -->|Choose Shopper| ShopperReg[Shopper Registration<br/>market_consumer_registration]:::shopper
+    RoleSelect -->|Login Link| LoginScreen[Login Screen<br/>Email & Password]:::shared
+    LoginScreen -->|Role: Shopper| ShopperDash
+
+    ShopperReg -->|Demo OTP: 123456| Interests[Interest Selection<br/>market_consumer_interest_selection]:::shopper
+    Interests -->|Save / Skip| PermExplain[Permission Explainer<br/>3-Point Dialog / Screen]:::modal
+    PermExplain -->|Grant Permissions| ShopperDash
+
+    subgraph Shopper Tabs
+        ShopperDash -->|Tab 1: Home| FeatPromos[Featured Promos<br/>& Recommended MSMEs]:::shopper
+        ShopperDash -->|Tab 2: Roam| RoamMap[Roam Map Discovery<br/>flutter_map + OSM + 1500m circle]:::shopper
+        ShopperDash -->|Tab 3: Stash| StashScreen[Stash Saved Promos<br/>market_consumer_stash]:::shopper
+        ShopperDash -->|Tab 4: Account| ShopperAccount[Account & Preferences<br/>market_consumer_account]:::shopper
+    end
+
+    ShopperDash -->|Long Press MARK Logo| SimSheet[Simulate Zone Enter/Exit<br/>Hidden Demo Action Sheet]:::trigger
+    SimSheet -->|Enter San Jose Zone| GeoNotif[Foreground Service<br/>Fires Local Notification]:::trigger
+
+    RoamMap -->|Tap Marker / Card| Storefront[MSME Storefront Screen<br/>Profile, Catalog, Active Promos]:::shopper
+    ShopperDash -->|Tap Promo| PromoDetail[Promo Detail Screen<br/>Terms, Save, Get Voucher]:::shopper
+    GeoNotif -->|Tap Notification| PromoDetail
+    Storefront -->|Tap Promo| PromoDetail
+
+    PromoDetail -->|Save to Stash| StashScreen
+    PromoDetail -->|Get Voucher| VoucherScreen[Voucher Screen<br/>8-char Code & QR via qr_flutter]:::shopper
+    StashScreen -->|Open Voucher| VoucherScreen
+      </pre>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-color" style="background:#e5eeff; border:1px solid #006689;"></div> Shared Onboarding</div>
+      <div class="legend-item"><div class="legend-color" style="background:#e0f2fe; border:1px solid #3ec4ff;"></div> Shopper Screens</div>
+      <div class="legend-item"><div class="legend-color" style="background:#fff3cd; border:1px solid #f59e0b;"></div> Geofence & Demo Triggers</div>
+    </div>
+  </div>
+
+  <!-- Merchant Screen Flow -->
+  <div id="tab-merchant" class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Merchant (MSME) Flow & Administration</h2>
+      <p class="section-subtitle">4-step registration, 10-second auto-verification, catalog management, promotion scheduling, and counter QR scanner.</p>
+    </div>
+
+    <div class="diagram-container">
+      <pre class="mermaid">
+flowchart TD
+    classDef shared fill:#e5eeff,stroke:#006689,stroke-width:2px,color:#0b1c30;
+    classDef merchant fill:#d3e4fe,stroke:#006398,stroke-width:2px,color:#0b1c30;
+    classDef auto fill:#dcfce7,stroke:#10b981,stroke-width:2px,color:#0b1c30;
+
+    RoleSelect[Role Selection Screen]:::shared -->|Choose Merchant| MSMEReg1[Reg Step 1: Basics<br/>Owner Info & OTP]:::merchant
+    LoginScreen[Login Screen]:::shared -->|Role: Merchant & Verified| MDash[Merchant Dashboard<br/>market_tab_1_dashboard]:::merchant
+    LoginScreen -->|Role: Merchant & Unverified| Waiting[Waiting Screen<br/>market_waiting_for_verification]:::merchant
+    LoginScreen -->|Role: Merchant & No Business| MSMEReg2[Reg Step 2: Business Info<br/>Resume Incomplete Registration]:::merchant
+    Splash -->|Session: Merchant & No Business| MSMEReg2
+
+    MSMEReg1 -->|Continue| MSMEReg2[Reg Step 2: Business Info<br/>Name, Category, Lat/Lng default Kape Tahanan]:::merchant
+    MSMEReg2 -->|Continue| MSMEReg3[Reg Step 3: Permits<br/>DTI, BIR, Mayor's Permit to Storage]:::merchant
+    MSMEReg3 -->|Continue| MSMEReg4[Reg Step 4: Review<br/>Review Summary & Submit]:::merchant
+
+    MSMEReg4 -->|Submit Business| Waiting
+    Waiting -->|10s Demo Timer| AutoVerify[Auto-set businesses.verified = true]:::auto
+    AutoVerify --> Verified[Verified Congratulations Page<br/>market_verified_page_mobile]:::auto
+    Verified -->|Proceed to Dashboard| MDash
+
+    subgraph Merchant Tabs
+        MDash -->|Tab 1: Dashboard| StoreOverview[Performance Stats &<br/>Active Deals Summary]:::merchant
+        MDash -->|Tab 2: Catalog| Catalog[Catalog Management<br/>Products & Services Tab]:::merchant
+        Catalog -->|Subtab: Promos| PromosCatalog[Promotions Catalog<br/>Active, Scheduled, Expired]:::merchant
+        MDash -->|Tab 3: Analytics| Analytics[Analytics Tab<br/>7-Day Funnel & Peak Footfall]:::merchant
+        MDash -->|Tab 4: Account| MAccount[Account & Compliance<br/>Permit Vault & Settings]:::merchant
+    end
+
+    Catalog -->|Add Item Button| AddProductModal[Add Product Form<br/>Name, Price, Category, Desc]:::merchant
+    PromosCatalog -->|New Promo Button| AddPromoModal[Create Promo Form<br/>Title, Type, Dates, Limits]:::merchant
+    PromosCatalog -->|Scan QR Button| ScanScreen[Scan QR Voucher Screen<br/>mobile_scanner + Manual Input]:::merchant
+    MDash -->|Create Promo Shortcut| AddPromoModal
+      </pre>
+    </div>
+  </div>
+
+  <!-- Demo Geofence & QR Loop -->
+  <div id="tab-loop" class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">The Demo-Critical Hyperlocal Loop</h2>
+      <p class="section-subtitle">How geofencing, interest matching, local notifications, voucher generation, QR scanning, and analytics interconnect.</p>
+    </div>
+
+    <div class="diagram-container">
+      <pre class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Shopper as Shopper App
+    participant Geo as GeofenceService
+    participant Notif as Local Notifications
+    participant Supa as Supabase DB
+    actor Merchant as Merchant App
+
+    Note over Shopper,Geo: Background Position Stream Active (Foreground Service)
+    Shopper->>Geo: Cross into San Jose zone OR Long-Press Simulate Enter
+    Geo->>Supa: Query active promos from verified businesses matching shopper interests
+    Supa-->>Geo: Returns top promo (e.g., Kape Tahanan BOGO)
+    Geo->>Supa: INSERT INTO geofence_events (event_type: 'ping_sent')
+    Geo->>Notif: showPromo("Promos near you in San Jose", "Buy 1 Take 1 Afternoon Coffee Hour (+2 more)")
+    
+    Note over Shopper,Notif: User receives notification (even screen locked)
+    Shopper->>Notif: Tap notification
+    Notif->>Shopper: Open PromoDetailScreen with promo payload
+    Shopper->>Supa: INSERT INTO geofence_events (event_type: 'opened')
+    
+    Shopper->>Shopper: Tap "Save to Stash"
+    Shopper->>Supa: INSERT INTO stash (user_id, promo_id)
+    
+    Shopper->>Shopper: Tap "Get Voucher" (First Open)
+    Shopper->>Supa: INSERT INTO redemptions (status: 'issued', code: 'KT8924B1')
+    Shopper->>Supa: INSERT INTO geofence_events (event_type: 'claimed')
+    Shopper->>Shopper: Display scannable QR Voucher (8-char code)
+    
+    Note over Shopper,Merchant: Shopper presents QR voucher at counter
+    Merchant->>Merchant: Open Scan Screen (camera scans QR or manual code)
+    Merchant->>Supa: SELECT rpc('redeem_voucher', params: {'p_code': 'KT8924B1'})
+    Note over Supa: Atomic PL/pgSQL function:<br/>1. Verifies business ownership<br/>2. Checks active date & limit<br/>3. Sets redemptions.status='redeemed'<br/>4. Increments promos.redeemed_count<br/>5. Inserts geofence_events('redeemed')
+    Supa-->>Merchant: Returns status 'ok' (or error code)
+    Merchant-->>Shopper: Coffee discount honored!
+    
+    Merchant->>Merchant: Open Analytics Screen
+    Merchant->>Supa: Aggregates geofence_events (7-day funnel reflects +1 ping, open, claim, redemption)
+      </pre>
+    </div>
+  </div>
+
+  <!-- Database ERD & RLS -->
+  <div id="tab-erd" class="content-section">
+    <div class="section-header">
+      <h2 class="section-title">Supabase Database Entity Relationship Diagram (ERD)</h2>
+      <p class="section-subtitle">Normalized relational schema supporting RLS security policies and storage documents.</p>
+    </div>
+
+    <div class="diagram-container">
+      <pre class="mermaid">
+erDiagram
+    PROFILES ||--o| BUSINESSES : "owns (0..1)"
+    PROFILES ||--o{ STASH : "saves (0..N)"
+    PROFILES ||--o{ REDEMPTIONS : "claims (0..N)"
+    PROFILES ||--o{ GEOFENCE_EVENTS : "triggers (0..N)"
+
+    BUSINESSES ||--o{ PRODUCTS : "offers (1..N)"
+    BUSINESSES ||--o{ PROMOS : "publishes (0..N)"
+    BUSINESSES ||--o{ GEOFENCE_EVENTS : "attributes (0..N)"
+
+    PROMOS ||--o{ STASH : "saved_in (0..N)"
+    PROMOS ||--o{ REDEMPTIONS : "redeemed_as (0..N)"
+    PROMOS ||--o{ GEOFENCE_EVENTS : "subject_of (0..N)"
+
+    PROFILES {
+        uuid id PK "references auth.users(id)"
+        text role "check: shopper, merchant"
+        text full_name
+        text phone
+        text_array interests "e.g. food, cafe, retail"
+        jsonb prefs "flash_promos, expiry_reminders"
+        timestamptz created_at
+    }
+
+    BUSINESSES {
+        uuid id PK
+        uuid owner_id FK "references profiles(id)"
+        text name "e.g. Kape Tahanan"
+        text category "food, cafe, salon, retail, etc."
+        text subtitle
+        text bio
+        text address
+        text phone
+        text hours
+        text cover_url
+        float lat "e.g. 10.754707"
+        float lng "e.g. 121.934428"
+        float radius_m "default 1500"
+        numeric rating "default 4.5"
+        boolean verified "default false, auto-verified"
+        timestamptz created_at
+    }
+
+    PRODUCTS {
+        uuid id PK
+        uuid business_id FK "references businesses(id)"
+        text name
+        numeric price "in Philippine Peso (PHP)"
+        text category
+        text description
+        timestamptz created_at
+    }
+
+    PROMOS {
+        uuid id PK
+        uuid business_id FK "references businesses(id)"
+        text title
+        text description
+        text promo_type "bogo, percent, amount_off"
+        text value_label "e.g. BOGO, 20% OFF, P100 OFF"
+        timestamptz starts_at
+        timestamptz ends_at
+        int redeem_limit "default 100"
+        int redeemed_count "default 0"
+        boolean active "default true"
+        timestamptz created_at
+    }
+
+    STASH {
+        uuid id PK
+        uuid user_id FK "references profiles(id)"
+        uuid promo_id FK "references promos(id)"
+        timestamptz saved_at
+    }
+
+    REDEMPTIONS {
+        uuid id PK
+        uuid promo_id FK "references promos(id)"
+        uuid user_id FK "references profiles(id)"
+        text code "8-char uppercase unique"
+        text status "issued, redeemed"
+        timestamptz created_at
+        timestamptz redeemed_at
+    }
+
+    GEOFENCE_EVENTS {
+        bigserial id PK
+        uuid user_id FK "references profiles(id)"
+        uuid business_id FK "references businesses(id)"
+        uuid promo_id FK "references promos(id)"
+        text event_type "ping_sent, opened, viewed, claimed, redeemed"
+        timestamptz created_at
+    }
+      </pre>
+    </div>
+
+    <div class="table-spec-grid">
+      <div class="table-spec-card">
+        <div class="table-spec-name">profiles <span class="table-badge">RLS: Own row</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">id</span><span class="col-type">uuid (auth.users)</span></li>
+          <li><span class="col-name">role</span><span class="col-type">shopper | merchant</span></li>
+          <li><span class="col-name">interests</span><span class="col-type">text[]</span></li>
+          <li><span class="col-name">prefs</span><span class="col-type">jsonb</span></li>
+        </ul>
+      </div>
+
+      <div class="table-spec-card">
+        <div class="table-spec-name">businesses <span class="table-badge">RLS: Read verified or own / Owner edit</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">id, owner_id</span><span class="col-type">uuid</span></li>
+          <li><span class="col-name">name, category</span><span class="col-type">text</span></li>
+          <li><span class="col-name">cover_url</span><span class="col-type">text (nullable)</span></li>
+          <li><span class="col-name">lat, lng, radius_m</span><span class="col-type">float</span></li>
+          <li><span class="col-name">verified</span><span class="col-type">boolean (default false)</span></li>
+        </ul>
+      </div>
+
+      <div class="table-spec-card">
+        <div class="table-spec-name">promos <span class="table-badge">RLS: Read visible / Owner write</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">id, business_id</span><span class="col-type">uuid</span></li>
+          <li><span class="col-name">title, value_label</span><span class="col-type">text</span></li>
+          <li><span class="col-name">promo_type</span><span class="col-type">bogo | percent | amount</span></li>
+          <li><span class="col-name">redeemed_count / limit</span><span class="col-type">int</span></li>
+        </ul>
+      </div>
+
+      <div class="table-spec-card">
+        <div class="table-spec-name">redemptions <span class="table-badge">RLS: Shopper issue / RPC redeem</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">id, promo_id, user_id</span><span class="col-type">uuid</span></li>
+          <li><span class="col-name">code</span><span class="col-type">text (8-char UNIQUE)</span></li>
+          <li><span class="col-name">status</span><span class="col-type">issued | redeemed</span></li>
+          <li><span class="col-name">redeemed_at</span><span class="col-type">timestamptz</span></li>
+        </ul>
+      </div>
+
+      <div class="table-spec-card">
+        <div class="table-spec-name">geofence_events <span class="table-badge">RLS: Analytics Funnel</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">id</span><span class="col-type">bigserial</span></li>
+          <li><span class="col-name">user_id, business_id, promo_id</span><span class="col-type">uuid</span></li>
+          <li><span class="col-name">event_type</span><span class="col-type">ping_sent | opened | etc</span></li>
+          <li><span class="col-name">created_at</span><span class="col-type">timestamptz</span></li>
+        </ul>
+      </div>
+
+      <div class="table-spec-card">
+        <div class="table-spec-name">merchant-docs <span class="table-badge">Storage (Read, upload & upsert)</span></div>
+        <ul class="col-list">
+          <li><span class="col-name">bucket</span><span class="col-type">private</span></li>
+          <li><span class="col-name">path pattern</span><span class="col-type">merchant-docs/{uid}/*</span></li>
+          <li><span class="col-name">policy</span><span class="col-type">own folder insert/select/update</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'neutral',
+      flowchart: { curve: 'basis' }
+    });
+
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const activeSection = document.getElementById('tab-' + tabId);
+      if (activeSection) activeSection.classList.add('active');
+    }
+  </script>
+</body>
+</html>

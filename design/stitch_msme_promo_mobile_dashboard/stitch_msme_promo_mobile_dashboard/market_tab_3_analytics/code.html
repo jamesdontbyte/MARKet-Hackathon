@@ -1,0 +1,329 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet MSME - Analytics &amp; Footfall</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#cce5ff",
+            "on-surface": "#0b1c30",
+            "primary-fixed-dim": "#7ad0ff",
+            "on-surface-variant": "#3e484f",
+            "inverse-on-surface": "#eaf1ff",
+            "error-container": "#ffdad6",
+            "surface-bright": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "tertiary": "#006398",
+            "secondary-fixed": "#dae2fd",
+            "secondary-container": "#dae2fd",
+            "tertiary-fixed-dim": "#93ccff",
+            "outline-variant": "#bdc8d1",
+            "primary-container": "#3ec4ff",
+            "surface-container-highest": "#d3e4fe",
+            "surface": "#f8f9ff",
+            "secondary": "#565e74",
+            "surface-container-low": "#eff4ff",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "surface-variant": "#d3e4fe",
+            "outline": "#6e7980",
+            "on-primary": "#ffffff",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#001d31",
+            "on-primary-fixed": "#001e2c",
+            "inverse-surface": "#213145",
+            "primary": "#006689",
+            "on-tertiary-container": "#004d76",
+            "surface-tint": "#006689",
+            "on-secondary-container": "#5c647a",
+            "background": "#f8f9ff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "on-tertiary": "#ffffff",
+            "primary-fixed": "#c3e8ff",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-primary-container": "#004e6b",
+            "on-secondary-fixed": "#131b2e",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "tertiary-container": "#6fbfff",
+            "secondary-fixed-dim": "#bec6e0",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#0b1c30",
+            "inverse-primary": "#7ad0ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .soft-card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .lifted-card-shadow {
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.92); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 0.3; }
+      100% { transform: scale(0.92); opacity: 0.8; }
+    }
+    .radar-pulse {
+      animation: pulse-ring 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen pb-32">
+<!-- Top App Bar (Shared Component Style Implementation) -->
+<header class="sticky top-0 z-40 flex items-center justify-between w-full px-margin-mobile py-space-sm bg-surface/90 backdrop-blur-sm border-b border-outline-variant/20 shadow-sm">
+<div class="flex items-center gap-space-sm"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center p-1 border border-outline-variant/30 shadow-sm overflow-hidden"><img alt="MARKet Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIxvS_ZHZlKvUf8tXuXkEZWmny9uF-8IqptYkl1SQDykEmNypzuODMZTreoSlqNKDwF-2PIBloFraTPDGr-OV_TNf97xWUTtrvLIYAPqVV_wF_K1aCrm7e2wkkkGe27LOJWPDuUte7OdQcB0WOmMvcFvVgYlmOeRm5djThf0ccH9Wx0ozzGpoFpwuGd5xC5nV2-8Wk159qPk-ILVlH0LBmXpaO0XrBseZd2YsLNncuwmDQUQZpsOUphfFVEFKU80IMaA"></div><div class="flex items-center tracking-tight"><span class="font-display-lg-mobile text-headline-sm text-primary-container font-extrabold">MARK</span><span class="font-display-lg-mobile text-headline-sm text-on-surface font-extrabold">et</span></div></div></div>
+<div class="flex items-center gap-space-xs">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container active:scale-95 transition-all"><span class="material-symbols-outlined text-on-surface-variant text-[22px]">notifications</span></button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full max-w-lg mx-auto px-margin-mobile pt-space-md space-y-space-md">
+<!-- Store Context & Date Filter Row -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">storefront</span>
+<span class="font-label-lg text-label-lg text-on-surface font-semibold">Kape Tahanan</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-container font-bold">
+            San Jose de Buenavista
+          </span>
+</div>
+
+</div>
+<!-- Segmented Date Filter Selector -->
+
+</div>
+<!-- 100m Geofence Radar Visualizer Card -->
+<section class="bg-surface-container-lowest rounded-2xl border border-surface-container-high soft-card-shadow p-space-md space-y-space-md overflow-hidden relative">
+  <div class="space-y-0.5"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[22px]">radar</span><h2 class="font-headline-sm text-headline-sm text-on-surface font-bold tracking-tight">Geofence Range</h2></div><p class="font-body-sm text-body-sm text-on-surface-variant">Real-time localized customer proximity</p></div>
+  <div class="relative w-full h-56 rounded-2xl overflow-hidden border border-outline-variant/30 flex items-center justify-center bg-gradient-to-b from-surface-container-lowest via-surface-container-low to-surface-container-lowest shadow-inner" data-location="San Jose de Buenavista, Philippines">
+    <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#3ec4ff_1.5px,transparent_1.5px)] [background-size:16px_16px]"></div>
+    <div class="absolute w-52 h-52 rounded-full border border-primary-container/20 pointer-events-none"></div>
+    <div class="absolute w-40 h-40 rounded-full border border-primary-container/30 radar-pulse pointer-events-none bg-primary-container/5"></div>
+    <div class="absolute w-28 h-28 rounded-full border border-dashed border-primary-container/50 pointer-events-none flex items-center justify-center">
+      <div class="w-16 h-16 rounded-full border border-primary/20 bg-primary-container/10"></div>
+    </div>
+    <div class="absolute top-10 left-20 w-2 h-2 rounded-full bg-primary-container shadow-sm animate-ping"></div>
+    <div class="absolute top-14 right-20 w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+    <div class="absolute bottom-12 left-24 w-1.5 h-1.5 rounded-full bg-primary-container"></div>
+    <div class="absolute bottom-14 right-20 w-2 h-2 rounded-full bg-primary shadow-sm"></div>
+    <div class="absolute top-24 right-12 w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></div>
+    <div class="absolute bottom-20 left-12 w-2 h-2 rounded-full bg-tertiary-container/80"></div>
+    <div class="relative z-10 flex flex-col items-center gap-1.5 select-none">
+      <div class="w-12 h-12 rounded-2xl bg-on-surface text-surface-container-lowest shadow-lg flex items-center justify-center border-2 border-primary-container ring-4 ring-primary-container/20 transition-transform active:scale-95">
+        <span class="material-symbols-outlined text-primary-container text-[24px]" style="font-variation-settings: 'FILL' 1;">local_cafe</span>
+      </div>
+      <span class="px-2.5 py-0.5 rounded-full bg-on-surface/90 text-surface-container-lowest font-label-sm text-[11px] font-semibold tracking-wide shadow-md backdrop-blur-sm">Kape Tahanan</span>
+    </div>
+    <div class="absolute top-2.5 right-2.5 bg-surface-container-lowest/90 backdrop-blur-sm px-2.5 py-1 rounded-full border border-outline-variant/30 text-[10px] font-label-sm text-primary font-bold shadow-sm flex items-center gap-1">
+      <span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+      Active Discovery Radius
+    </div>
+  </div>
+  <div class="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-surface-container-low/70 border border-outline-variant/20">
+    <span class="material-symbols-outlined text-primary text-[18px] shrink-0">verified_user</span>
+    <p class="font-body-sm text-[11px] leading-[16px] text-on-surface-variant">Complies with <span class="font-semibold text-on-surface">RA 10173 (Philippine Data Privacy Act)</span> — aggregated anonymous footfall only.</p>
+  </div>
+</section>
+<!-- Geofence Conversion Funnel Card -->
+<section class="bg-surface-container-lowest rounded-2xl border border-surface-container-high soft-card-shadow p-space-md space-y-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">filter_alt</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Conversion Funnel</h2>
+</div>
+<span class="font-label-md text-label-md text-primary font-bold">7-Day Cohort</span>
+</div>
+<!-- Step 1 -->
+<div class="space-y-1">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-2 text-on-surface font-semibold">
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center text-[10px] text-primary font-bold">1</span>
+<span class="">Geofence Pings Sent</span>
+</div>
+<span class="text-on-surface font-bold text-label-lg">1,840 <span class="text-secondary font-normal text-body-sm">pedestrians</span></span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary rounded-full w-full"></div>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="space-y-1">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-2 text-on-surface font-semibold">
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center text-[10px] text-primary font-bold">2</span>
+<span class="">Delivered &amp; Opened Notifications</span>
+</div>
+<span class="text-on-surface font-bold text-label-lg">620 <span class="text-primary font-semibold text-label-sm">· 33.7%</span></span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[33.7%]"></div>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="space-y-1">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-2 text-on-surface font-semibold">
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center text-[10px] text-primary font-bold">3</span>
+<span class="">Store &amp; Promo Views</span>
+</div>
+<span class="text-on-surface font-bold text-label-lg">412 <span class="text-primary font-semibold text-label-sm">· 66.4%</span></span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full w-[66.4%]"></div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="space-y-1">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-2 text-on-surface font-semibold">
+<span class="w-5 h-5 rounded-full bg-surface-container flex items-center justify-center text-[10px] text-primary font-bold">4</span>
+<span class="">Promo Claims Generated</span>
+</div>
+<span class="text-on-surface font-bold text-label-lg">142 <span class="text-primary font-semibold text-label-sm">· 34.5%</span></span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-container overflow-hidden">
+<div class="h-full bg-primary-fixed-dim rounded-full w-[34.5%]"></div>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="p-3 rounded-xl bg-surface-container-low border border-primary-container/30 space-y-1.5">
+<div class="flex items-center justify-between text-label-sm font-label-sm">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary flex items-center justify-center text-[10px] font-bold">5</span>
+<span class="">Counter QR Scanned / Redeemed</span>
+</div>
+<span class="text-primary font-extrabold text-label-lg">118 <span class="text-emerald-600 font-bold text-label-sm">· 83.1% redemption</span></span>
+</div>
+<div class="w-full h-3.5 rounded-full bg-surface-container overflow-hidden p-0.5">
+<div class="h-full bg-primary-container rounded-full w-[83.1%]"></div>
+</div>
+<p class="font-body-sm text-[11px] text-secondary text-right pt-0.5">High in-store walk-in completion</p>
+</div>
+</section>
+<!-- Peak Footfall Insights Card -->
+<section class="bg-surface-container-lowest rounded-2xl border border-surface-container-high soft-card-shadow p-space-md space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">insights</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Peak Footfall Insights</h2>
+</div>
+<span class="px-2 py-0.5 rounded-full text-label-sm bg-primary-fixed text-on-primary-fixed-variant font-bold">AI Proximity</span>
+</div>
+<div class="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[18px]">lightbulb</span>
+</div>
+<div class="space-y-1">
+<p class="font-body-md text-body-md text-on-surface font-semibold">
+            Peak nearby foot traffic is <span class="text-primary font-bold">4:00 PM – 6:30 PM</span> on Thursdays &amp; Fridays.
+          </p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Recommend launching happy hour promos during this window to capture afternoon office-commute coffee drinkers.
+          </p>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<button class="w-full py-2.5 px-4 rounded-xl bg-primary-container text-on-primary-container font-label-md font-bold hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span class="">Schedule Footfall Promo</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Semantic Shared Component Match) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-center pb-space-sm px-margin-mobile">
+<div class="flex items-center justify-between w-full max-w-md bg-surface-container-lowest border border-outline-variant/30 rounded-full mx-margin-mobile mb-margin-mobile px-3 py-2 shadow-lg">
+<!-- Tab 1: Dashboard -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#dashboard">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-label-sm text-label-sm mt-0.5">Dashboard</span>
+</a>
+<!-- Tab 2: Catalog -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#catalog">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-sm text-label-sm mt-0.5">Catalog</span>
+</a>
+<!-- Tab 3: Analytics (ACTIVE ITEM - EXACT MATCH) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-space-md py-space-xs font-semibold active:scale-95 transition-transform duration-150" href="#analytics">
+<span class="material-symbols-outlined text-[20px]" data-weight="fill" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-label-sm text-label-sm mt-0.5">Analytics</span>
+</a>
+<!-- Tab 4: Account -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#account">
+<span class="material-symbols-outlined text-[20px]">shield_person</span>
+<span class="font-label-sm text-label-sm mt-0.5">Account</span>
+</a>
+</div>
+</nav>
+
+
+
+
+
+
+</body></html>

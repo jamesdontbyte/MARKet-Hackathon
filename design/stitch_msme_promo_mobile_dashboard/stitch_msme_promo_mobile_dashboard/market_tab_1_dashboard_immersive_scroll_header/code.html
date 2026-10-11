@@ -1,0 +1,465 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet MSME - Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed": "#cce5ff",
+            "on-surface": "#0b1c30",
+            "primary-fixed-dim": "#7ad0ff",
+            "on-surface-variant": "#3e484f",
+            "inverse-on-surface": "#eaf1ff",
+            "error-container": "#ffdad6",
+            "surface-bright": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "tertiary": "#006398",
+            "secondary-fixed": "#dae2fd",
+            "secondary-container": "#dae2fd",
+            "tertiary-fixed-dim": "#93ccff",
+            "outline-variant": "#bdc8d1",
+            "primary-container": "#3ec4ff",
+            "surface-container-highest": "#d3e4fe",
+            "surface": "#f8f9ff",
+            "secondary": "#565e74",
+            "surface-container-low": "#eff4ff",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "surface-variant": "#d3e4fe",
+            "outline": "#6e7980",
+            "on-primary": "#ffffff",
+            "on-error": "#ffffff",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#001d31",
+            "on-primary-fixed": "#001e2c",
+            "inverse-surface": "#213145",
+            "primary": "#006689",
+            "on-tertiary-container": "#004d76",
+            "surface-tint": "#006689",
+            "on-secondary-container": "#5c647a",
+            "background": "#f8f9ff",
+            "surface-container": "#e5eeff",
+            "surface-dim": "#cbdbf5",
+            "on-tertiary": "#ffffff",
+            "primary-fixed": "#c3e8ff",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-primary-container": "#004e6b",
+            "on-secondary-fixed": "#131b2e",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "tertiary-container": "#6fbfff",
+            "secondary-fixed-dim": "#bec6e0",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#0b1c30",
+            "inverse-primary": "#7ad0ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen pb-32">
+<!-- Top App Bar (Full-bleed Overlay with Smooth Scroll Transition to Solid White) -->
+<header class="fixed top-0 inset-x-0 z-40 flex items-center justify-between w-full px-margin-mobile py-3.5 transition-all duration-300 bg-transparent text-white" id="main-header">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-white/90 p-0.5 shadow-sm flex items-center justify-center shrink-0">
+<img alt="MARKet Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIxvS_ZHZlKvUf8tXuXkEZWmny9uF-8IqptYkl1SQDykEmNypzuODMZTreoSlqNKDwF-2PIBloFraTPDGr-OV_TNf97xWUTtrvLIYAPqVV_wF_K1aCrm7e2wkkkGe27LOJWPDuUte7OdQcB0WOmMvcFvVgYlmOeRm5djThf0ccH9Wx0ozzGpoFpwuGd5xC5nV2-8Wk159qPk-ILVlH0LBmXpaO0XrBseZd2YsLNncuwmDQUQZpsOUphfFVEFKU80IMaA">
+</div>
+<div class="flex items-center tracking-tight drop-shadow-sm transition-colors duration-300" id="header-brand-text">
+<span class="font-headline-md text-headline-md font-extrabold text-[#3EC4FF]">MARK</span>
+<span class="font-headline-md text-headline-md font-extrabold text-white" id="header-brand-suffix">et</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs">
+
+<button class="relative w-10 h-10 rounded-full flex items-center justify-center bg-black/20 backdrop-blur-md text-white hover:bg-black/30 active:scale-95 transition-all shadow-sm" id="header-btn-notif">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+
+</button>
+</div>
+</header>
+<!-- Immersive Hero Photograph Section (Full-bleed to top) -->
+<section class="relative w-full h-80 sm:h-96 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Modern and welcoming aesthetic cafe exterior in the Philippines with warm ambient lighting, lush tropical indoor plants visible through large glass windows, polished concrete walls, contemporary wood accents, and a tidy outdoor patio table under daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLzrpY9w83rqnuUq_EPqtkJ0NHWlJvmwB4xq1rbeFcbsuLxwaX6qRtKb3UsdVHBOh45mYPZq0bCpHiRrmXbWmilc4MR3NwGT0O67IsAoHBySyubKvU9XwQutAJT2l1Pjov7-KonUxNFFsiCNgW7ma4pSM7Ba3ADAy_f6iaopA0CRdRsS1Oo-HFB7HviUn1lLZDwLJFN_U7Y7WQesdYY-ZMVvEOA5pWyeklk2DHOAqy6-qonL0mrGyr">
+<!-- Top and Bottom Gradient Scrims for perfect text contrast -->
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90 pointer-events-none"></div>
+<!-- Open Badge & Business Header Information -->
+<div class="absolute inset-x-0 bottom-0 p-margin-mobile flex flex-col justify-end gap-2.5">
+<div class="flex items-center">
+<div class="bg-surface-container-lowest/95 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-outline-variant/20">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Open • Closes 9:00 PM</span>
+</div>
+</div>
+<div class="flex items-end justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high/95 backdrop-blur-sm flex items-center justify-center font-headline-sm text-headline-sm text-primary font-bold border border-white/40 shrink-0 shadow-sm">KT</div>
+<div class="text-white drop-shadow-sm">
+<div class="flex items-center gap-1">
+<h1 class="font-headline-sm text-headline-sm text-white font-bold leading-tight">Kape Tahanan</h1>
+<span class="material-symbols-outlined text-primary-container text-base" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<p class="font-body-sm text-body-sm text-slate-200">Coffee Shop &amp; Bakery</p>
+</div>
+</div>
+<button class="p-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/30 active:scale-95 transition-all shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="edit">edit</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Main Content Container (Mobile-first 4-column layout) -->
+<main class="w-full max-w-md mx-auto px-margin-mobile space-y-space-md pt-space-md">
+<!-- Quick Stats Strip & Create Promo CTA -->
+<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
+<div>
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider">Performance Overview</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">This Week</h2>
+</div>
+<button class="bg-[#3EC4FF] hover:bg-primary-fixed-dim text-[#0F172A] font-label-md text-label-md font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1 shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-base" data-icon="add">add</span>
+<span class="">Create Promo</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-space-sm pt-space-sm">
+<!-- Stat 1 -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-sm border border-outline-variant/20">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-sm text-label-sm">Store Views</span>
+<span class="material-symbols-outlined text-base" data-icon="visibility">visibility</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">2,410</div>
+<div class="flex items-center gap-1 text-emerald-600 font-label-sm text-label-sm mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="">+18% vs last week</span>
+</div>
+</div>
+<!-- Stat 2 -->
+<div class="bg-surface-container-low/60 rounded-xl p-space-sm border border-outline-variant/20">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-sm text-label-sm">Promo Claims</span>
+<span class="material-symbols-outlined text-base" data-icon="confirmation_number">confirmation_number</span>
+</div>
+<div class="font-headline-md text-headline-md text-on-surface font-bold">142</div>
+<div class="flex items-center gap-1 text-emerald-600 font-label-sm text-label-sm mt-0.5">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+<span class="">+34% claims rate</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Active Promos Section -->
+<section class="space-y-space-sm">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="campaign">campaign</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Active Promos</h2>
+</div>
+<button class="font-label-md text-label-md text-primary font-semibold hover:underline">Manage</button>
+</div>
+<div class="space-y-space-sm">
+<!-- Promo 1 -->
+<div class="bg-surface-container-lowest rounded-2xl border border-[#BAE6FD] bg-[#F0F9FF]/40 p-space-md shadow-sm relative overflow-hidden">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="bg-[#3EC4FF] text-[#0F172A] font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-bold">20% Off</span>
+<span class="text-[#0369A1] font-label-sm text-label-sm font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="schedule">schedule</span>
+                  Expires in 3 days
+                </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Morning Brew Combo</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Includes any signature coffee &amp; pastry before 10 AM.</p>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs border-t border-[#BAE6FD]/40 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary"><strong>86</strong> claimed by locals</span>
+<span class="text-[#0369A1] font-label-sm text-label-sm font-bold flex items-center gap-1 cursor-pointer">
+              Details <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+<!-- Promo 2 -->
+<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-md shadow-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="space-y-1">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container text-on-surface font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-bold">Buy 2 Get 1</span>
+<span class="text-secondary font-label-sm text-label-sm font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs" data-icon="event_repeat">event_repeat</span>
+                  Weekends only
+                </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold">Artisan Pastry Weekend Box</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Valid on all croissants and sourdough danishes.</p>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs border-t border-outline-variant/20 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary"><strong>41</strong> claimed this month</span>
+<span class="text-primary font-label-sm text-label-sm font-bold flex items-center gap-1 cursor-pointer">
+              Details <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Best Sellers Carousel -->
+<section class="space-y-space-sm">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">Best Sellers</h2>
+</div>
+<span class="font-label-md text-label-md text-secondary">Top performers</span>
+</div>
+<!-- Bleed Row for mobile thumb scroll -->
+<div class="-mx-margin-mobile px-margin-mobile flex gap-space-sm overflow-x-auto custom-scroll pb-1">
+<!-- Item 1 -->
+<div class="min-w-[210px] w-[210px] bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-3 shadow-sm flex flex-col justify-between shrink-0">
+<div>
+<div class="w-full h-28 rounded-xl overflow-hidden mb-2.5 relative">
+<img class="w-full h-full object-cover" data-alt="A crafted glass of cold iced sea salt caramel latte topped with creamy velvety foam and delicate caramel drizzle on a rustic wooden cafe tabletop bathed in crisp morning sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOL6ZwtARDMt9Gr_ZCq2XxmY_siAL-Fm9wfgFeFbd-vatcTJshppBuPr3zGQdOUChFy4PJ_qL8A2i739aMQmC5R1gZjn_scjNqSJhxZR90PGhV-t7Tnnhk9VsZOA3LxsCnNI4NMajpAy1_1t0blB9jQ5s4nPGk_j8bcutrYE9VJwXzzPsZzipynzbCP7amRxGRzckT4Mq43-G-m0cspwkbkHL_9MrwV7_ayryrZf-dFq381ILnt_nl">
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/90 px-2 py-0.5 rounded-md text-[10px] font-bold text-on-surface shadow-xs">#1 Drink</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface font-bold line-clamp-1">Sea Salt Caramel Latte</h3>
+<p class="font-headline-sm text-headline-sm text-primary font-bold mt-0.5">₱180</p>
+</div>
+<button class="mt-3 w-full py-1.5 px-3 rounded-xl border border-[#3EC4FF] bg-[#E0F2FE]/50 text-[#0284C7] font-label-sm text-label-sm font-bold flex items-center justify-center gap-1 hover:bg-[#E0F2FE] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+            Promote
+          </button>
+</div>
+<!-- Item 2 -->
+<div class="min-w-[210px] w-[210px] bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-3 shadow-sm flex flex-col justify-between shrink-0">
+<div>
+<div class="w-full h-28 rounded-xl overflow-hidden mb-2.5 relative">
+<img class="w-full h-full object-cover" data-alt="Golden crisp freshly baked artisanal almond croissant covered in toasted sliced almonds and powdered sugar dust placed on ceramic tableware in a bright sunlit bakery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7lXh3HIZ6-cqNVyl3TvkJN2jpdMe6yUoz7Nl-V3nRubV3HwzfkotfvnrsEe2BqJiTqc6qWZJJ5mOqwk3eZRklRp63oY0flYouxWfOJbTQsHF9-uZ7hjADJhlfVCytgAHP4XXo_eokvhLKyO0MNNn_ReDmNMfMv9x2NMnagNiJmPy3xEEDQCisC0A2IErVZ5fKGLwO11TBL_3bzUrlIywooQ1LPSse_MK6ny77ob1GSthiGOrj6WfZ">
+<span class="absolute bottom-2 left-2 bg-surface-container-lowest/90 px-2 py-0.5 rounded-md text-[10px] font-bold text-on-surface shadow-xs">#1 Pastry</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-on-surface font-bold line-clamp-1">Almond Flaky Croissant</h3>
+<p class="font-headline-sm text-headline-sm text-primary font-bold mt-0.5">₱145</p>
+</div>
+<button class="mt-3 w-full py-1.5 px-3 rounded-xl border border-[#3EC4FF] bg-[#E0F2FE]/50 text-[#0284C7] font-label-sm text-label-sm font-bold flex items-center justify-center gap-1 hover:bg-[#E0F2FE] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="rocket_launch">rocket_launch</span>
+            Promote
+          </button>
+</div>
+</div>
+</section>
+<!-- Customer Reviews Preview -->
+<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="flex items-center text-amber-500">
+<span class="material-symbols-outlined text-xl" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">4.9</span>
+<span class="font-body-sm text-body-sm text-secondary"> (128 reviews)</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface px-2.5 py-1 rounded-full font-semibold">98% positive</span>
+</div>
+<!-- Recent Review Card -->
+<div class="bg-surface-container-low/50 rounded-xl p-space-sm border border-outline-variant/20 space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-label-sm text-label-sm font-bold">
+              MS
+            </div>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-bold">Maria S.</span>
+<span class="text-xs text-secondary ml-1">• 2 hours ago</span>
+</div>
+</div>
+<div class="flex text-amber-500 text-xs">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-none: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant italic">
+          "The Sea Salt Caramel Latte has the absolute best foam! Love the fast Wi-Fi and friendly neighborhood atmosphere."
+        </p>
+<div class="flex justify-end pt-1">
+<button class="px-3 py-1 rounded-lg border border-outline-variant/40 bg-surface-container-lowest text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 hover:bg-surface-container active:scale-95 transition-all">
+<span class="material-symbols-outlined text-xs" data-icon="reply">reply</span>
+            Reply
+          </button>
+</div>
+</div>
+</section>
+<!-- About Our Business -->
+<section class="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 p-space-md shadow-sm space-y-space-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">About Our Business</h2>
+<button class="font-label-md text-label-md text-primary font-semibold hover:underline">Edit Info</button>
+</div>
+<!-- Operating Hours Strip -->
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-secondary text-lg" data-icon="schedule">schedule</span>
+<span class="">Mon – Sun: <strong>7:00 AM – 9:00 PM</strong></span>
+</div>
+<!-- Feature Chips -->
+<div class="flex flex-wrap gap-2 pt-1">
+<div class="bg-[#F8FAFC] border border-[#E2E8F0] text-[#64748B] font-label-md text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="eco">eco</span>
+<span class="">Locally Sourced</span>
+</div>
+<div class="bg-[#F8FAFC] border border-[#E2E8F0] text-[#64748B] font-label-md text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="pets">pets</span>
+<span class="">Pet Friendly</span>
+</div>
+<div class="bg-[#F8FAFC] border border-[#E2E8F0] text-[#64748B] font-label-md text-[12px] px-3 py-1.5 rounded-full flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="wifi">wifi</span>
+<span class="">Fast Wi-Fi</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Shared Components Blueprint: 4 Tabs) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-center pb-space-sm px-margin-mobile">
+<div class="w-full max-w-md bg-surface-container-lowest shadow-lg rounded-full border border-outline-variant/30 px-3 py-2 flex items-center justify-around">
+<!-- Tab 1: Dashboard (ACTIVE MATCH) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-space-md py-space-xs font-semibold active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="dashboard">dashboard</span>
+<span class="font-label-sm text-label-sm">Dashboard</span>
+</a>
+<!-- Tab 2: Catalog (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-sm text-label-sm">Catalog</span>
+</a>
+<!-- Tab 3: Analytics (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="insights">insights</span>
+<span class="font-label-sm text-label-sm">Analytics</span>
+</a>
+<!-- Tab 4: Account (INACTIVE) -->
+<a class="flex flex-col items-center justify-center text-secondary px-space-sm py-space-xs hover:text-primary transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="shield_person">shield_person</span>
+<span class="font-label-sm text-label-sm">Account</span>
+</a>
+</div>
+</nav>
+<!-- JavaScript to handle sticky scroll state transition -->
+<script>
+  (function() {
+    const header = document.getElementById('main-header');
+    const brandSuffix = document.getElementById('header-brand-suffix');
+    const btnStore = document.getElementById('header-btn-store');
+    const btnNotif = document.getElementById('header-btn-notif');
+
+    function onScroll() {
+      const scrollY = window.scrollY || window.pageYOffset;
+      if (scrollY > 60) {
+        // Scrolled state: Solid surface background with shadow
+        header.classList.remove('bg-transparent');
+        header.classList.add('bg-surface/95', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-outline-variant/30');
+
+        brandSuffix.classList.remove('text-white');
+        brandSuffix.classList.add('text-on-surface');
+
+        [btnStore, btnNotif].forEach(btn => {
+          btn.classList.remove('bg-black/20', 'text-white', 'hover:bg-black/30');
+          btn.classList.add('bg-transparent', 'text-on-surface-variant', 'hover:bg-surface-container');
+        });
+      } else {
+        // Top state: Transparent overlay over hero photo
+        header.classList.add('bg-transparent');
+        header.classList.remove('bg-surface/95', 'backdrop-blur-md', 'shadow-sm', 'border-b', 'border-outline-variant/30');
+
+        brandSuffix.classList.add('text-white');
+        brandSuffix.classList.remove('text-on-surface');
+
+        [btnStore, btnNotif].forEach(btn => {
+          btn.classList.add('bg-black/20', 'text-white', 'hover:bg-black/30');
+          btn.classList.remove('bg-transparent', 'text-on-surface-variant', 'hover:bg-surface-container');
+        });
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll(); // initial state verification
+  })();
+</script>
+
+
+
+
+
+
+</body></html>

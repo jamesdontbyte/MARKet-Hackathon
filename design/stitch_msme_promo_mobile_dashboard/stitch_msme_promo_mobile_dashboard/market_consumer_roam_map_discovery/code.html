@@ -1,0 +1,384 @@
+<!DOCTYPE html><html class="h-full" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>MARKet - Roam</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#3ec4ff",
+            "inverse-primary": "#7ad0ff",
+            "on-background": "#0b1c30",
+            "on-tertiary-fixed": "#001d31",
+            "tertiary-fixed-dim": "#93ccff",
+            "on-surface-variant": "#3e484f",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#e5eeff",
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary": "#ffffff",
+            "on-error": "#ffffff",
+            "tertiary-container": "#6fbfff",
+            "on-surface": "#0b1c30",
+            "on-primary": "#ffffff",
+            "secondary": "#565e74",
+            "tertiary-fixed": "#cce5ff",
+            "outline": "#6e7980",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary-fixed-variant": "#004c68",
+            "on-primary-fixed": "#001e2c",
+            "outline-variant": "#bdc8d1",
+            "inverse-surface": "#213145",
+            "on-tertiary-container": "#004d76",
+            "background": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary": "#006689",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-tint": "#006689",
+            "surface-variant": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-fixed": "#131b2e",
+            "on-secondary-fixed-variant": "#3f465c",
+            "surface-container-low": "#eff4ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-container": "#5c647a",
+            "tertiary": "#006398",
+            "on-primary-container": "#004e6b",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#dae2fd",
+            "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md text-body-md antialiased select-none h-full flex justify-center">
+<!-- Mobile Frame Container (Max 430px for authentic Android / Mobile device shell) -->
+<div class="relative w-full max-w-[420px] h-full min-h-screen bg-background flex flex-col shadow-2xl overflow-hidden pb-16">
+<!-- TopAppBar (From Shared Component JSON Anchor) -->
+<header class="sticky top-0 w-full z-40 shadow-sm bg-surface-container-lowest dark:bg-inverse-surface">
+<div class="flex justify-between items-center w-full px-4 py-3">
+<!-- Leading: Brand identity with logo icon and dual-tone wordmark -->
+<div class="flex items-center gap-2">
+<img alt="MARKet Logo" class="w-8 h-8 object-contain rounded-lg shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFQbyv0ENekWLKvI_0T7hMED8beq8E-57G_KVxKJXAeIUF8_VUcyhKpCxVYLEff7oxYxDaYlNHei_0UXYTDkRiebJmE_qhfLrKtwMHgPT_UUQHhlLsvzdY0oSbJwasuoCdHpIFd6lZPS0N6mYYj70EFIRzd85CXZzbo2MJo6I6p-VYDz-SSqAwQOwNqkJZv4eBxihAnZyV1_nWOcXDnbmo9LHb2mZ3hkpYNGZPvNVnWm3b3pG5HeGVmZ_ITOUCeIiNxg">
+<div class="flex items-baseline">
+<span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-primary-container">MARK</span>
+<span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-on-surface">et</span>
+</div>
+<!-- Roam Pill Badge -->
+
+</div>
+<!-- Trailing action: Notifications icon from Shared Spec -->
+<div class="flex items-center gap-1">
+<button aria-label="Notifications" class="relative p-2 rounded-full hover:bg-surface-container dark:hover:bg-surface-container-high transition-colors duration-150 active:scale-95 text-on-surface-variant dark:text-outline-variant">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+
+</button>
+</div>
+</div>
+<!-- Search & Filters Header Bar -->
+<div class="px-4 pb-3 space-y-2.5 bg-surface-container-lowest border-b border-outline-variant/20">
+<!-- Search Input with Map/List View Toggle Switch -->
+<div class="flex items-center gap-2">
+<div class="relative flex-1">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-outline flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface rounded-xl text-body-sm font-body-sm text-on-surface placeholder:text-outline border border-outline-variant/60 focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all" placeholder="Search nearby businesses..." type="text" value="">
+</div>
+<!-- Map/List Segmented Toggle -->
+<div class="flex items-center p-1 bg-surface-container-low rounded-xl border border-outline-variant/40 shrink-0">
+<button class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-primary-container shadow-sm font-label-sm text-label-sm transition-all">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">map</span>
+<span>Map</span>
+</button>
+<button class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-secondary hover:text-on-surface font-label-sm text-label-sm transition-all">
+<span class="material-symbols-outlined text-[16px]">format_list_bulleted</span>
+<span>List</span>
+</button>
+</div>
+</div>
+<!-- Horizontal Filter Chips Carousel -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pt-0.5">
+<!-- Active Promos Highlight Chip -->
+<button class="shrink-0 flex items-center gap-1 px-3 py-1 rounded-full bg-primary-container/20 border border-primary-container text-on-primary-container font-label-md text-label-md shadow-sm">
+<span class="material-symbols-outlined text-[15px] text-primary font-bold">local_offer</span>
+<span>Active Promos</span>
+<span class="ml-0.5 w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+</button>
+<!-- Standard Category Chips -->
+<button class="shrink-0 px-3 py-1 rounded-full bg-primary text-on-primary font-label-md text-label-md shadow-sm">
+            All
+          </button>
+<button class="shrink-0 px-3 py-1 rounded-full bg-surface-container-lowest border border-outline-variant/50 text-secondary hover:bg-surface-container font-label-md text-label-md transition-colors">
+            Cafés
+          </button>
+<button class="shrink-0 px-3 py-1 rounded-full bg-surface-container-lowest border border-outline-variant/50 text-secondary hover:bg-surface-container font-label-md text-label-md transition-colors">
+            Food
+          </button>
+<button class="shrink-0 px-3 py-1 rounded-full bg-surface-container-lowest border border-outline-variant/50 text-secondary hover:bg-surface-container font-label-md text-label-md transition-colors">
+            Retail
+          </button>
+<button class="shrink-0 px-3 py-1 rounded-full bg-surface-container-lowest border border-outline-variant/50 text-secondary hover:bg-surface-container font-label-md text-label-md transition-colors">
+            Services
+          </button>
+</div>
+</div>
+</header>
+<!-- Interactive Business Map Section (San Jose de Buenavista, Antique) -->
+<main class="relative flex-1 w-full overflow-hidden bg-[#e6f1f8]" data-location="San Jose de Buenavista, Antique, Philippines">
+<!-- Styled Simulated Map Canvas with Antique Coastline, Streets & Landmarks -->
+<div class="absolute inset-0 w-full h-full pointer-events-none select-none overflow-hidden">
+<!-- Ocean / Coastline (Antique Bay, Panay Gulf) on Left -->
+<div class="absolute top-0 bottom-0 left-0 w-28 bg-[#cde4f7] border-r-2 border-[#b0d5f2] flex flex-col justify-center items-center">
+<div class="rotate-90 text-[10px] tracking-widest uppercase font-label-sm text-primary/40 whitespace-nowrap">
+            Cuyo East Pass • Antique Coast
+          </div>
+<div class="absolute bottom-16 left-3 text-[9px] text-primary/50 font-body-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">water</span> San Jose Port
+          </div>
+</div>
+<!-- Coastline shoreline wave decoration -->
+<svg class="absolute top-0 bottom-0 left-24 w-8 h-full opacity-40 text-[#b5ddfc]" preserveAspectRatio="none" viewBox="0 0 20 100">
+<path d="M0,0 Q15,25 5,50 T10,100 L0,100 Z" fill="currentColor"></path>
+</svg>
+<!-- Street Grid & Arterials -->
+<svg class="absolute inset-0 w-full h-full stroke-[#d5e3ed] stroke-[8]" fill="none">
+<!-- Coastline National Road (Tobias Fornier Street) -->
+<path class="stroke-[#ffffff] stroke-[12]" d="M 120 -20 L 135 600"></path>
+<path class="stroke-[#fed7aa] stroke-[6]" d="M 120 -20 L 135 600"></path> <!-- Main Highway Accent -->
+<!-- Bantayan Road / Market Arterial -->
+<path class="stroke-[#ffffff] stroke-[10]" d="M 110 180 L 420 160"></path>
+<path class="stroke-[#e2e8f0] stroke-[4]" d="M 110 180 L 420 160"></path>
+<!-- EBJ Freedom Park Avenue -->
+<path class="stroke-[#ffffff] stroke-[10]" d="M 130 330 L 420 300"></path>
+<path class="stroke-[#e2e8f0] stroke-[4]" d="M 130 330 L 420 300"></path>
+<!-- Secondary Cross Streets -->
+<path class="stroke-[#ffffff] stroke-[8]" d="M 240 40 L 260 520"></path>
+<path class="stroke-[#ffffff] stroke-[7]" d="M 350 80 L 370 560"></path>
+<path class="stroke-[#ffffff] stroke-[8]" d="M 130 460 L 420 440"></path>
+</svg>
+<!-- Municipal Plaza / Parks & Greenery Blocks -->
+<div class="absolute top-44 left-44 w-28 h-20 bg-[#d9f2e3] rounded-2xl border border-[#bbf0ce] opacity-90 p-2 flex flex-col justify-end">
+<span class="text-[9px] font-label-sm text-[#2e7d32] tracking-tight">EBJ Freedom Park</span>
+</div>
+<div class="absolute top-16 left-64 w-24 h-16 bg-[#e1f5e9] rounded-xl border border-[#c3ebcf] opacity-80 p-1.5">
+<span class="text-[8px] font-label-sm text-[#388e3c]">Provincial Capitol</span>
+</div>
+<div class="absolute bottom-36 left-48 w-32 h-20 bg-[#d9f2e3] rounded-2xl border border-[#bbf0ce] opacity-75 p-2">
+<span class="text-[8px] font-label-sm text-[#2e7d32]">San Jose Tradetown</span>
+</div>
+<!-- User Current Location Indicator (GPS Pulse) -->
+<div class="absolute top-52 left-36 -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+<div class="relative flex items-center justify-center">
+<span class="absolute w-8 h-8 rounded-full bg-primary/20 animate-ping"></span>
+<div class="w-4 h-4 rounded-full bg-primary border-2 border-surface-container-lowest shadow-md flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-primary-container rounded-full"></div>
+</div>
+</div>
+<span class="absolute top-4 left-1/2 -translate-x-1/2 px-1.5 py-0.5 bg-on-surface/80 backdrop-blur-sm text-surface-container-lowest text-[9px] font-label-sm rounded whitespace-nowrap shadow-sm">
+            You are here
+          </span>
+</div>
+<!-- 100m Geofence Radius around Active Merchant (Pin 1: Kape Tahanan) -->
+
+</div>
+<!-- Map Floating Utility Controls -->
+
+<div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
+<!-- 100m Fixed Geofence Notice Pill -->
+<button aria-label="Recenter Location" class="w-10 h-10 rounded-xl bg-surface-container-lowest shadow-md border border-outline-variant/40 text-primary flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: &quot;FILL&quot; 1;">my_location</span>
+</button>
+<!-- Map Layers Button -->
+<button aria-label="Map Layers" class="w-10 h-10 rounded-xl bg-surface-container-lowest shadow-md border border-outline-variant/40 text-secondary flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]">layers</span>
+</button>
+</div>
+<!-- MAP PINS (Interactive MSME Markers) -->
+<!-- MAP PINS (Interactive MSME Markers) -->
+<div class="absolute top-64 left-60 -translate-x-1/2 -translate-y-1/2 z-30 flex flex-col items-center cursor-pointer group">
+<!-- Floating Promo Live Pill Tag -->
+<div class="mb-1 px-2 py-0.5 bg-primary text-on-primary rounded-full shadow-md text-[10px] font-label-sm flex items-center gap-1 ring-2 ring-primary-container animate-bounce">
+<span class="material-symbols-outlined text-[11px] text-primary-container" style="font-variation-settings: &quot;FILL&quot; 1;">bolt</span>
+<span class="">Promo Live</span>
+</div>
+<!-- Pin Body -->
+<div class="relative flex items-center justify-center">
+<div class="w-11 h-11 rounded-2xl bg-primary-container text-on-primary-container shadow-lg flex items-center justify-center border-2 border-surface-container-lowest ring-4 ring-primary-container/30 transition-transform group-hover:scale-105">
+<span class="material-symbols-outlined text-[22px]">local_cafe</span>
+</div>
+<!-- Pointer Arrow Triangle -->
+<div class="absolute -bottom-1.5 w-3 h-3 bg-primary-container rotate-45 border-r-2 border-b-2 border-surface-container-lowest"></div>
+</div>
+<span class="mt-1.5 px-2 py-0.5 bg-on-surface text-surface-container-lowest text-label-sm font-label-sm rounded-md shadow-md whitespace-nowrap">
+          Kape Tahanan
+        </span>
+</div>
+<!-- PIN 2: "Madre Cacao Bistro" -->
+<div class="absolute top-28 right-16 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center cursor-pointer opacity-95 hover:opacity-100 transition-opacity">
+<div class="relative flex items-center justify-center">
+<div class="w-9 h-9 rounded-xl bg-inverse-surface text-surface-container-lowest shadow-md flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">restaurant</span>
+</div>
+<div class="absolute -bottom-1 w-2.5 h-2.5 bg-inverse-surface rotate-45"></div>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-surface-container-lowest/90 border border-outline-variant/40 text-on-surface text-[10px] font-label-sm rounded shadow-sm whitespace-nowrap">
+          Madre Cacao Bistro
+        </span>
+</div>
+<!-- PIN 3: "Antique Weaves" -->
+<div class="absolute top-80 right-10 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center cursor-pointer opacity-95 hover:opacity-100 transition-opacity">
+<div class="relative flex items-center justify-center">
+<div class="w-9 h-9 rounded-xl bg-inverse-surface text-surface-container-lowest shadow-md flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">checkroom</span>
+</div>
+<div class="absolute -bottom-1 w-2.5 h-2.5 bg-inverse-surface rotate-45"></div>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-surface-container-lowest/90 border border-outline-variant/40 text-on-surface text-[10px] font-label-sm rounded shadow-sm whitespace-nowrap">
+          Antique Weaves
+        </span>
+</div>
+<!-- PIN 4: "Isla Verde Barber" -->
+<div class="absolute bottom-52 left-32 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center cursor-pointer opacity-95 hover:opacity-100 transition-opacity">
+<div class="relative flex items-center justify-center">
+<div class="w-9 h-9 rounded-xl bg-inverse-surface text-surface-container-lowest shadow-md flex items-center justify-center border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-[18px]">content_cut</span>
+</div>
+<div class="absolute -bottom-1 w-2.5 h-2.5 bg-inverse-surface rotate-45"></div>
+</div>
+<span class="mt-1 px-2 py-0.5 bg-surface-container-lowest/90 border border-outline-variant/40 text-on-surface text-[10px] font-label-sm rounded shadow-sm whitespace-nowrap">
+          Isla Verde Barber
+        </span>
+</div>
+<!-- Business Quick View Bottom Sheet / Detail Panel (Docked directly above BottomNav) -->
+<div class="absolute bottom-2 inset-x-3 z-30 bg-surface-container-lowest rounded-2xl p-3.5 shadow-[0_12px_32px_-4px_rgba(15,23,42,0.18)] border border-outline-variant/30">
+<!-- Grabber handle indicator -->
+<div class="w-10 h-1 bg-outline-variant/60 rounded-full mx-auto mb-3"></div>
+<div class="flex gap-3">
+<!-- Storefront Exterior Thumbnail -->
+<div class="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="Exterior photograph of an artisanal local Filipino coffee shop called Kape Tahanan in Antique Philippines. The storefront features warm native bamboo accents, tropical green indoor potted plants, and modern clear glass windows reflecting soft afternoon sunlight. Customers enjoy iced drinks at clean wooden tables in a cozy welcoming atmosphere under a modern sky-blue sign." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAX6LSchZbeTzqa3vmFsOggqkb6Yzcgyhkd3eu09lMwKVWCG5H6O0gzqWEfX5OYqf16UU-XTHpQXwsBG1YTMazxwJ67DaVrwHdJ-thKMm3CYw6Zc7xyQx30RbSmkJx0d33e4dBlPMP08tpetFLJTJ7K51TTG74tA3BzzBtmmVdB2274lxnhV1yFvBloEV0JXCwNPBKqF2LPTTex0ogVm86_IFYAY7PrDYNFlbKNX1ulLUb4o4EgeGUz">
+<span class="absolute bottom-1 right-1 px-1 py-0.5 bg-black/60 backdrop-blur-xs rounded text-[9px] font-label-sm text-surface-container-lowest">
+              4.9 ★
+            </span>
+</div>
+<!-- Merchant Info & Promo Details -->
+<div class="flex-1 min-w-0 flex flex-col justify-between">
+<div>
+<div class="flex items-start justify-between gap-1">
+<h3 class="text-headline-sm font-headline-sm text-on-surface truncate">Kape Tahanan</h3>
+<!-- Operational Badge -->
+<span class="shrink-0 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-label-sm rounded-full">
+                  Open Now
+                </span>
+</div>
+<p class="text-secondary text-body-sm font-body-sm flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-outline">distance</span>
+<span class="">Café &amp; Bakery • 120m away</span>
+</p>
+</div>
+<!-- Active Voucher / Deal Badge -->
+<div class="mt-1.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F0F9FF] border border-dashed border-[#BAE6FD]">
+<span class="material-symbols-outlined text-[#0284C7] text-[15px]" style="font-variation-settings: &quot;FILL&quot; 1;">confirmation_number</span>
+<span class="text-[#0369A1] font-label-sm text-label-sm truncate">BOGO Afternoon Coffee Hour</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons (Primary & Secondary Outlined) -->
+<div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-outline-variant/20">
+<button class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container-low text-on-surface font-label-md text-label-md active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px] text-primary">navigation</span>
+<span class="">Get Directions</span>
+</button>
+<button class="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-label-md text-label-md shadow-sm active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[16px]">storefront</span>
+<span class="">View Storefront</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (From Shared Component JSON Anchor) -->
+<!-- Destination count: 4 | Labels: Dashboard, Roam, Stash, Account | Icons: grid_view, explore, inventory_2, person -->
+<!-- Active State: 'Roam' matches this screen's intent -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-4 px-4 pointer-events-none max-w-md mx-auto"><div class="pointer-events-auto flex items-center justify-around bg-surface-container-lowest/95 backdrop-blur-md px-3 py-2 rounded-full shadow-2xl border border-outline-variant/40 w-full"><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="whitespace-nowrap">Dashboard</span></button><button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1.5 font-label-sm text-label-sm shadow-sm active:scale-95 transition-transform duration-150"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: &quot;FILL&quot; 1;">explore</span><span class="whitespace-nowrap">Roam</span></button><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="whitespace-nowrap">Stash</span></button><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">person</span><span class="whitespace-nowrap">Account</span></button></div></nav>
+</div>
+
+
+</body></html>

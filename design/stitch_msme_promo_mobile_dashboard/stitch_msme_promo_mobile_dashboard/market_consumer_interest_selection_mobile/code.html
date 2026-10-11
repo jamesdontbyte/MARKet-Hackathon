@@ -1,0 +1,290 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet Consumer - Interest Selection</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#006689",
+            "primary-container": "#3ec4ff",
+            "on-primary": "#ffffff",
+            "on-primary-container": "#004e6b",
+            surface: "#f8f9ff",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#eff4ff",
+            "surface-container": "#e5eeff",
+            "surface-container-high": "#dce9ff",
+            "on-surface": "#0b1c30",
+            "on-surface-variant": "#3e484f",
+            secondary: "#565e74",
+            "secondary-container": "#dae2fd",
+            outline: "#6e7980",
+            "outline-variant": "#bdc8d1"
+          },
+          fontFamily: {
+            sans: ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface font-sans antialiased min-h-screen flex justify-center items-start selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Viewport Canvas Container (Max 420px width) -->
+<div class="w-full max-w-[390px] bg-white min-h-screen flex flex-col relative shadow-2xl">
+<!-- TOP APP BAR -->
+
+<!-- MAIN SCROLLABLE CONTENT -->
+<main class="flex-1 px-5 pt-4 pb-6 flex flex-col">
+<!-- ONBOARDING PROGRESS INDICATOR -->
+
+<!-- TITLE & GUIDANCE HEADER -->
+<div class="mb-4">
+<h1 class="text-[24px] font-extrabold tracking-tight text-[#0b1c30] leading-tight">
+          What interests you?
+        </h1>
+<p class="text-[13.5px] text-secondary mt-1 leading-normal">
+          Select the types of businesses you want to discover on MARKet.
+        </p>
+</div>
+<!-- SELECTION GUIDANCE & COUNTER -->
+<div class="flex items-center justify-between bg-surface-container-low/70 border border-outline-variant/30 rounded-xl px-3.5 py-2 mb-4">
+<div class="flex items-center space-x-2 text-[12.5px] font-semibold text-on-surface">
+<span class="material-symbols-outlined text-primary text-[17px]">checklist</span>
+<span class="">Choose all that apply</span>
+</div>
+<span class="text-[11.5px] font-bold px-2 py-0.5 rounded-full bg-white text-primary border border-outline-variant/40 shadow-xs" id="selected-counter">
+          3 selected
+        </span>
+</div>
+<!-- 8 BUSINESS INTEREST CATEGORIES (2-Column Grid) -->
+<div class="grid grid-cols-2 gap-3 flex-1 mb-5" id="categories-grid">
+<!-- 1. Food & Restaurants (Selected by default) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border-2 border-primary-container bg-surface-container-low/50 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="food" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">restaurant</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full bg-primary-container flex items-center justify-center text-[#0b1c30] shadow-xs">
+<span class="material-symbols-outlined material-symbols-fill text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Food &amp; Restaurants</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Diners, bistros &amp; native food</p>
+</div>
+</button>
+<!-- 2. Cafés (Selected by default) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border-2 border-primary-container bg-surface-container-low/50 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="cafes" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">local_cafe</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full bg-primary-container flex items-center justify-center text-[#0b1c30] shadow-xs">
+<span class="material-symbols-outlined material-symbols-fill text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Cafés</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Coffee, tea &amp; bakeries</p>
+</div>
+</button>
+<!-- 3. Salons & Barbershops (Unselected) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border border-outline-variant/40 bg-white hover:bg-surface-container-low/30 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="salons" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-primary">content_cut</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full border border-outline-variant/50 bg-white flex items-center justify-center text-transparent">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Salons &amp; Barbershops</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Hair, nails &amp; styling</p>
+</div>
+</button>
+<!-- 4. Retail & Shopping (Selected by default) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border-2 border-primary-container bg-surface-container-low/50 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="retail" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full bg-primary-container flex items-center justify-center text-[#0b1c30] shadow-xs">
+<span class="material-symbols-outlined material-symbols-fill text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Retail &amp; Shopping</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Apparel, crafts &amp; gifts</p>
+</div>
+</button>
+<!-- 5. Groceries & Convenience Stores (Unselected) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border border-outline-variant/40 bg-white hover:bg-surface-container-low/30 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="groceries" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-primary">local_grocery_store</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full border border-outline-variant/50 bg-white flex items-center justify-center text-transparent">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Groceries &amp; Convenience Stores</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Sari-sari, snacks &amp; fresh</p>
+</div>
+</button>
+<!-- 6. Health & Wellness (Unselected) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border border-outline-variant/40 bg-white hover:bg-surface-container-low/30 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="wellness" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-primary">spa</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full border border-outline-variant/50 bg-white flex items-center justify-center text-transparent">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Health &amp; Wellness</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Spas, gyms &amp; pharmacies</p>
+</div>
+</button>
+<!-- 7. Services (Unselected) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border border-outline-variant/40 bg-white hover:bg-surface-container-low/30 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="services" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-primary">build</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full border border-outline-variant/50 bg-white flex items-center justify-center text-transparent">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Services</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Repair, laundry &amp; print</p>
+</div>
+</button>
+<!-- 8. Travel & Accommodation (Unselected) -->
+<button class="cat-card group text-left p-3.5 rounded-2xl border border-outline-variant/40 bg-white hover:bg-surface-container-low/30 relative flex flex-col justify-between transition-all duration-150 active:scale-[0.98] shadow-xs cursor-pointer" data-category="travel" type="button">
+<div class="flex items-start justify-between w-full mb-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-low flex items-center justify-center text-on-surface shadow-xs group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[20px] text-primary">hotel</span>
+</div>
+<div class="check-box w-5 h-5 rounded-full border border-outline-variant/50 bg-white flex items-center justify-center text-transparent">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+</div>
+<div>
+<h3 class="text-[14px] font-bold text-[#0b1c30] leading-snug">Travel &amp; Accommodation</h3>
+<p class="text-[11px] text-secondary mt-0.5 line-clamp-1">Inns, resorts &amp; tour stays</p>
+</div>
+</button>
+</div>
+<!-- LOCAL BENEFIT HIGHLIGHT CALLOUT -->
+
+<!-- BOTTOM ACTIONS (CTA + Skip) -->
+<div class="space-y-3 pt-1 mt-auto">
+<!-- Primary Action Button -->
+<button class="w-full py-3.5 px-4 bg-primary-container hover:brightness-105 active:scale-[0.99] font-bold text-[15px] rounded-xl shadow-sm flex items-center justify-center space-x-2 transition-all text-white" id="continue-btn" type="button">
+            <span class="">Continue to Dashboard</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+<!-- Skip for now link -->
+<div class="text-center">
+<button class="text-[13px] font-semibold text-secondary hover:text-[#0b1c30] transition-colors py-1" type="button">
+            Skip for now
+          </button>
+</div>
+<p class="text-[11px] text-center text-secondary/80">
+          You can update your interests anytime in Account &amp; Preferences.
+        </p>
+<div class="w-full flex justify-center pt-2 pb-1"><div class="w-32 h-1 bg-outline-variant/60 rounded-full"></div></div></div>
+</main>
+</div>
+<!-- Interactive Client-side Script for Category Toggling -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const cards = document.querySelectorAll('.cat-card');
+      const counter = document.getElementById('selected-counter');
+      const continueBtn = document.getElementById('continue-btn');
+
+      function updateCounter() {
+        const selectedCount = document.querySelectorAll('.cat-card.border-primary-container').length;
+        counter.textContent = `${selectedCount} selected`;
+      }
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          const isSelected = card.classList.contains('border-primary-container');
+          const iconWrapper = card.querySelector('.w-10');
+          const checkBox = card.querySelector('.check-box');
+          const checkIcon = checkBox.querySelector('span');
+
+          if (isSelected) {
+            // Unselect
+            card.classList.remove('border-2', 'border-primary-container', 'bg-surface-container-low/50');
+            card.classList.add('border', 'border-outline-variant/40', 'bg-white');
+
+            iconWrapper.classList.remove('bg-primary-container', 'text-on-surface');
+            iconWrapper.classList.add('bg-surface-container-low', 'text-primary');
+
+            checkBox.classList.remove('bg-primary-container', 'text-[#0b1c30]');
+            checkBox.classList.add('border', 'border-outline-variant/50', 'bg-white', 'text-transparent');
+          } else {
+            // Select
+            card.classList.remove('border', 'border-outline-variant/40', 'bg-white');
+            card.classList.add('border-2', 'border-primary-container', 'bg-surface-container-low/50');
+
+            iconWrapper.classList.remove('bg-surface-container-low', 'text-primary');
+            iconWrapper.classList.add('bg-primary-container', 'text-on-surface');
+
+            checkBox.classList.remove('border', 'border-outline-variant/50', 'bg-white', 'text-transparent');
+            checkBox.classList.add('bg-primary-container', 'text-[#0b1c30]');
+          }
+          updateCounter();
+        });
+      });
+
+      // Visual tap response on continue button
+      continueBtn.addEventListener('click', () => {
+        continueBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          <span>Personalizing feed...</span>
+        `;
+        setTimeout(() => {
+          continueBtn.innerHTML = `
+            <span>Continue to Dashboard</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          `;
+        }, 1200);
+      });
+    });
+  </script>
+
+
+
+
+
+</body></html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet Consumer Dashboard - Antique</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#3ec4ff",
+            "inverse-primary": "#7ad0ff",
+            "on-background": "#0b1c30",
+            "on-tertiary-fixed": "#001d31",
+            "tertiary-fixed-dim": "#93ccff",
+            "on-surface-variant": "#3e484f",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#e5eeff",
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary": "#ffffff",
+            "on-error": "#ffffff",
+            "tertiary-container": "#6fbfff",
+            "on-surface": "#0b1c30",
+            "on-primary": "#ffffff",
+            "secondary": "#565e74",
+            "tertiary-fixed": "#cce5ff",
+            "outline": "#6e7980",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary-fixed-variant": "#004c68",
+            "on-primary-fixed": "#001e2c",
+            "outline-variant": "#bdc8d1",
+            "inverse-surface": "#213145",
+            "on-tertiary-container": "#004d76",
+            "background": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary": "#006689",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-tint": "#006689",
+            "surface-variant": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-fixed": "#131b2e",
+            "on-secondary-fixed-variant": "#3f465c",
+            "surface-container-low": "#eff4ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-container": "#5c647a",
+            "tertiary": "#006398",
+            "on-primary-container": "#004e6b",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#dae2fd",
+            "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    body {
+      background-color: #f8f9ff;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased flex justify-center min-h-screen">
+<!-- Mobile Viewport Wrapper (Android 390px Experience) -->
+<div class="w-full max-w-md bg-surface flex flex-col min-h-screen pb-24 shadow-2xl relative select-none">
+<!-- TopAppBar Component (from Shared Components JSON) -->
+<header class="sticky top-0 w-full z-40 bg-surface-container-lowest shadow-sm">
+<div class="flex justify-between items-center w-full px-4 py-3">
+<!-- Brand Cluster with Logo & Wordmark -->
+<div class="flex items-center gap-2.5">
+<img alt="MARKet" class="w-8 h-8 rounded-lg object-contain drop-shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFQbyv0ENekWLKvI_0T7hMED8beq8E-57G_KVxKJXAeIUF8_VUcyhKpCxVYLEff7oxYxDaYlNHei_0UXYTDkRiebJmE_qhfLrKtwMHgPT_UUQHhlLsvzdY0oSbJwasuoCdHpIFd6lZPS0N6mYYj70EFIRzd85CXZzbo2MJo6I6p-VYDz-SSqAwQOwNqkJZv4eBxihAnZyV1_nWOcXDnbmo9LHb2mZ3hkpYNGZPvNVnWm3b3pG5HeGVmZ_ITOUCeIiNxg">
+<div class="flex items-baseline">
+<span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-primary-container">MARK</span>
+<span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-on-surface">et</span>
+</div>
+</div>
+<!-- Trailing Action: Notifications with Alert Indicator -->
+<button aria-label="Notifications" class="relative p-2 rounded-full hover:bg-surface-container transition-colors duration-150 active:scale-95 text-on-surface">
+<span class="material-symbols-outlined" style="font-size: 24px;">notifications</span>
+
+</button>
+</div>
+<!-- Location Badge Context Pill -->
+<div class="px-4 pb-2.5 flex items-center">
+
+</div>
+</header>
+<!-- Main Content Stream -->
+<main class="flex-1 px-4 pt-3 space-y-6">
+<!-- Interactive Search Input Bar -->
+<section>
+<div class="relative flex items-center w-full">
+<span class="material-symbols-outlined absolute left-3.5 text-outline pointer-events-none text-[20px]">search</span>
+<input class="w-full h-12 pl-11 pr-11 bg-surface-container-lowest border border-outline-variant/40 rounded-xl text-body-md font-body-md text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary-container focus:border-primary-container shadow-sm transition-all" placeholder="Search businesses, products, or services" type="text">
+<button aria-label="Filter Options" class="absolute right-3 text-outline hover:text-primary transition-colors p-1">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</section>
+<!-- Category Filter Chips (Bleed Edge Horizontal Carousel) -->
+<section class="-mx-4 px-4 overflow-x-auto no-scrollbar flex items-center gap-2">
+<!-- Active Filter -->
+<button class="flex items-center gap-1.5 px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-label-md font-label-md shrink-0 shadow-sm transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">apps</span>
+<span>All Categories</span>
+</button>
+<!-- Inactive Filter: Food -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-outline-variant/50 text-secondary rounded-full text-label-md font-label-md shrink-0 hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">restaurant</span>
+<span>Food</span>
+</button>
+<!-- Inactive Filter: Cafés -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-outline-variant/50 text-secondary rounded-full text-label-md font-label-md shrink-0 hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">local_cafe</span>
+<span>Cafés</span>
+</button>
+<!-- Inactive Filter: Salons & Barbershops -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-outline-variant/50 text-secondary rounded-full text-label-md font-label-md shrink-0 hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">content_cut</span>
+<span>Salons &amp; Barbershops</span>
+</button>
+<!-- Inactive Filter: Retail -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-outline-variant/50 text-secondary rounded-full text-label-md font-label-md shrink-0 hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+<span>Retail</span>
+</button>
+<!-- Inactive Filter: Services -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-outline-variant/50 text-secondary rounded-full text-label-md font-label-md shrink-0 hover:bg-surface-container-low transition-all active:scale-95">
+<span class="material-symbols-outlined text-[16px]">handyman</span>
+<span>Services</span>
+</button>
+</section>
+<!-- Section: Businesses for You -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Businesses for You</h2>
+<p class="text-body-sm font-body-sm text-secondary">Handpicked local Antique MSMEs</p>
+</div>
+<button class="text-label-md font-label-md text-primary hover:underline">See All</button>
+</div>
+<div class="space-y-4">
+<!-- Card 1: Kape Tahanan -->
+<article class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] transition-transform active:scale-[0.99] space-y-3">
+<div class="relative w-full h-44 rounded-xl overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A warm, sunlit interior of a charming rustic-modern Philippine café featuring warm wooden counters, polished concrete floors, and artisan pour-over brew apparatus. Fresh artisan sourdough pastries and a purple ube macapuno basque cheesecake are displayed behind clean glass cases. Soft ambient light streams in through broad windows in a light airy aesthetic with subtle sky cyan accent plants." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8Kint4N9ty2fbKLk2s9rFIDyArM2YOxJceu4HveF9YhT217C32sLrII062C1RYF64mBoGTx6u9f28O5aYShxxGSy8V8946F5cKG4sBat7CzZZmzG2sgcXX-1H2N8LOE3NBaPZnhhPI4KGSMsSqEEQ4LveEznrSw73QO58i8Wo8JNCzhAvkJ_bp5mOG3wH4mLwhxseiia-zCRKB76EjPTEUrBIc5fZBErvIA-N_JJJ_dCgZicSgpM_">
+<!-- Verified MSME Pill Badge -->
+<div class="absolute top-3 left-3 bg-surface-container-lowest/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">verified</span>
+<span class="text-label-sm font-label-sm text-on-surface">Verified MSME</span>
+</div>
+<!-- Distance Badge -->
+<div class="absolute bottom-3 right-3 bg-inverse-surface/80 text-inverse-on-surface backdrop-blur-sm px-2 py-0.5 rounded-lg text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">near_me</span>
+<span>120m away</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Kape Tahanan</h3>
+<span class="text-label-md font-label-md text-primary bg-surface-container px-2 py-0.5 rounded-md">Café &amp; Bakery</span>
+</div>
+<p class="text-body-sm font-body-sm text-secondary line-clamp-2">
+                Artisan pour-over coffee, ube macapuno basque cake, and fresh sourdough pastries.
+              </p>
+</div>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/20">
+<div class="flex items-center gap-1 text-primary text-label-md font-label-md">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="text-on-surface font-bold">4.9</span>
+<span class="text-secondary font-normal">(84 reviews)</span>
+</div>
+<button class="px-3 py-1.5 bg-surface-container hover:bg-surface-container-high text-primary rounded-lg text-label-md font-label-md transition-colors flex items-center gap-1">
+<span>Explore Menu</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Card 2: Antique Weaves & Crafts -->
+<article class="bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] transition-transform active:scale-[0.99] space-y-3">
+<div class="relative w-full h-44 rounded-xl overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A bright and elegant boutique craft studio in the Philippines displaying vibrant handwoven Patadyong textiles, colorful geometric woven scarves, and finely polished bamboo craft souvenirs. Warm timber shelving is organized impeccably under bright soft daylight. The atmosphere is authentically artisanal, welcoming, and pristine with natural textures and modern clean minimal accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWNEgYw7Uos3v7IaynoWACZPUzxS99AkROy29P2N43_f1MPIfQNwWUNChlNHPB5YOArsxnKkj1_NT3_czFYaC0cQEEdctpSoCFHfals8twqc33D6UJlrZNUgOP4SQJomlUJGzQSZJWrejPR8AkcFcFnV8MK0JufJtkKlaiZKtpV212IQsDh0sgEencKsoB76kKulqbyQc1bHdJpYvVsdFh0nVeEGV6ZtDAc9qoIl0sMlMzAR8za4Op">
+<!-- Verified MSME Pill Badge -->
+<div class="absolute top-3 left-3 bg-surface-container-lowest/95 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">verified</span>
+<span class="text-label-sm font-label-sm text-on-surface">Verified MSME</span>
+</div>
+<!-- Distance Badge -->
+<div class="absolute bottom-3 right-3 bg-inverse-surface/80 text-inverse-on-surface backdrop-blur-sm px-2 py-0.5 rounded-lg text-label-sm font-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">near_me</span>
+<span>280m away</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Antique Weaves &amp; Crafts</h3>
+<span class="text-label-md font-label-md text-primary bg-surface-container px-2 py-0.5 rounded-md">Retail &amp; Artisans</span>
+</div>
+<p class="text-body-sm font-body-sm text-secondary line-clamp-2">
+                Traditional handwoven Patadyong textiles and local bamboo souvenirs.
+              </p>
+</div>
+<div class="flex items-center justify-between pt-1 border-t border-outline-variant/20">
+<div class="flex items-center gap-1 text-primary text-label-md font-label-md">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: &quot;FILL&quot; 1;">star</span>
+<span class="text-on-surface font-bold">4.8</span>
+<span class="text-secondary font-normal">(62 reviews)</span>
+</div>
+<button class="px-3 py-1.5 bg-surface-container hover:bg-surface-container-high text-primary rounded-lg text-label-md font-label-md transition-colors flex items-center gap-1">
+<span>View Store</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</article>
+</div>
+</section>
+<!-- Section: Popular Establishments -->
+<section class="space-y-3">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Popular Establishments</h2>
+<p class="text-body-sm font-body-sm text-secondary">Frequently visited around the municipality</p>
+</div>
+<button class="text-label-md font-label-md text-primary hover:underline">View Map</button>
+</div>
+<div class="grid grid-cols-1 gap-3">
+<!-- Establishment 1: Madre Cacao Garden Bistro -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/30 flex items-center gap-3.5 shadow-sm hover:border-primary-container transition-all">
+<div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="An inviting al fresco garden bistro restaurant patio set amidst lush tropical plants and soft warm string lighting in a modern clean dining setting. Crisp clean wooden outdoor dining furniture and plates with gourmet Filipino local culinary dishes. The lighting is sunny and cheerful, exuding high cleanliness and hospitality in an airy, contemporary garden atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCidaKy5GOkf-TWyvnu76EhH8URbZdLI5QAme2N7N8p-PcyA47lDOI_LDrE6T6-UUSWGcRl0l3XzKiH-FBC2CusJMCx5DOGnqgq7wXnC4XkylcgKytzz-KVwGtZ7hTpJNZep3qWmz0vMY1_MnxStLZh11-iH8Vwp90fn5AmLwJ1PPj-o0mK5YKqTHZ-DjbeLBE_SoWHhaQzG72sHjvbBKFuVChCt1n1gea9_BqU0xFhQYdjVDBQVJjL">
+</div>
+<div class="flex-1 min-w-0">
+<span class="text-label-sm font-label-sm text-primary tracking-wide">Food &amp; Dining</span>
+<h3 class="text-label-lg font-label-lg text-on-surface truncate">Madre Cacao Garden Bistro</h3>
+<p class="text-body-sm font-body-sm text-secondary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-outline">location_on</span>
+<span class="truncate">San Jose, Antique</span>
+</p>
+</div>
+<button class="px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 hover:bg-surface-container text-on-surface rounded-xl text-label-md font-label-md shrink-0 transition-colors">
+              View Details
+            </button>
+</div>
+<!-- Establishment 2: Isla Verde Grooming & Barber -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl border border-outline-variant/30 flex items-center gap-3.5 shadow-sm hover:border-primary-container transition-all">
+<div class="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="A modern, high-end clean barbershop and grooming salon interior with vintage-style hydraulic leather barber chairs, clean frameless mirrors, and organized stainless steel styling tools. Pristine light gray terrazzo floor, polished aesthetic with bright overhead ring lighting. Modern, sanitary, professional and stylish atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVAVVpYiq9bydI19HF4IwpxG3zwPFYTIlusnW4ftdvDXp4uWBzAAnP1r6q8Tx6Ho85PMQQgQk9xx6VQec34qgO2igM7_0RaZkioXsOhmOK_3PMTxxsU6UBZBsZ-QpICeUkbCuC3KtkXCMCS9o0Yw-GivgwT_VbtS5IJr8zLpWynipp0Jq-IOhlg59v4LVKLwq7j8EavnS3k7JXZU1uTtfNhte4MsAaBUxJbB7C1_zwnO6NGtSWEwUR">
+</div>
+<div class="flex-1 min-w-0">
+<span class="text-label-sm font-label-sm text-primary tracking-wide">Salons &amp; Barbershops</span>
+<h3 class="text-label-lg font-label-lg text-on-surface truncate">Isla Verde Grooming &amp; Barber</h3>
+<p class="text-body-sm font-body-sm text-secondary flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px] text-outline">location_on</span>
+<span class="truncate">Gov. Villavert St.</span>
+</p>
+</div>
+<button class="px-3 py-2 bg-surface-container-lowest border border-outline-variant/40 hover:bg-surface-container text-on-surface rounded-xl text-label-md font-label-md shrink-0 transition-colors">
+              View Details
+            </button>
+</div>
+</div>
+</section>
+<!-- Section: Featured Promotions -->
+<section class="space-y-3 pb-4">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">Featured Promotions</h2>
+<p class="text-body-sm font-body-sm text-secondary">Exclusive deals from participating MSMEs</p>
+</div>
+<span class="material-symbols-outlined text-primary-container">local_offer</span>
+</div>
+<!-- Horizontal Bleed Cards -->
+<div class="-mx-4 px-4 overflow-x-auto no-scrollbar flex gap-3.5">
+<!-- Promotion 1: Kape Tahanan Promo -->
+<div class="w-72 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] overflow-hidden shrink-0 flex flex-col justify-between">
+<div>
+<div class="relative h-32 w-full">
+<img class="w-full h-full object-cover" data-alt="Two freshly prepared iced artisanal lattes in clear glasses with perfect layers of creamy milk and rich espresso foam topped with delicate cinnamon dusting, placed on a light marble tabletop in bright morning sunlight. Crisp clean setting with soft turquoise reflections." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuKkwJC9nHcM8Y9lZHNCNZflWTxvVx2PRQzd9r6Mu9drSdDouUFzj6uV0tF7B2FwzNrfJXZccX89oRJrfs0FlteqxVLJvrXa_miEAFPJ3jQlMlMgRbLn8NTSuhLfkgixSqX7V0YBJQ9Xvuew0hJEyjS6IQBA09kFkFYY3AWLbph7vRcB7izvJlkYemHpTUzas89k-zpemrlcbFuvvDip_kQZelWgR6L1A8EDt8bENYhgYTB-MnfKf1">
+<div class="absolute top-2.5 left-2.5 bg-primary-container text-on-primary-container text-label-sm font-label-sm px-2.5 py-1 rounded-md shadow-sm font-bold">
+                  BOGO PROMO
+                </div>
+</div>
+<div class="p-3.5 space-y-1">
+<h4 class="text-label-lg font-label-lg text-on-surface line-clamp-1">Buy 1 Take 1 Afternoon Coffee Hour</h4>
+<p class="text-label-md font-label-md text-primary">Kape Tahanan</p>
+<div class="flex items-center gap-1 text-body-sm font-body-sm text-secondary pt-1">
+<span class="material-symbols-outlined text-[15px]">event</span>
+<span>Valid until Oct 18</span>
+</div>
+</div>
+</div>
+<div class="p-3.5 pt-0 flex items-center justify-between gap-2">
+<button class="flex-1 py-2 bg-surface-container hover:bg-surface-container-high text-primary rounded-xl text-label-md font-label-md transition-colors text-center font-bold">
+                Claim Code
+              </button>
+<button class="p-2 border border-outline-variant/40 rounded-xl hover:bg-surface-container text-secondary transition-all active:scale-95" onclick="toggleBookmark(this)" title="Save to Stash">
+<span class="material-symbols-outlined text-[20px] transition-colors">bookmark_border</span>
+</button>
+</div>
+</div>
+<!-- Promotion 2: Antique Weaves Promo -->
+<div class="w-72 bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] overflow-hidden shrink-0 flex flex-col justify-between">
+<div>
+<div class="relative h-32 w-full">
+<img class="w-full h-full object-cover" data-alt="A curated collection of handcrafted loom woven shoulder tote bags made of colorful authentic Patadyong fabrics from Antique province. Staged neatly in a brightly lit boutique environment with natural woven bamboo textures in a minimalist, warm Filipino artisan presentation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaslTxZ7hUe-v_FNVW4bDhhwNac_A8PNqYLaOaHfVKH1WxJuZX5AP9eTm-ZaOdp7g83wFE6QY-jhC0BXX_C1sp9IBvEPEBOdBp15EyuAwRcEW9OCZAAWBmztgwL4quvwsNfmCqewTv6VEYtBze4595835nSySnyhkqr-riS2oFBRLKsWqvsDWqdBoBisqnw_hCavztNGFjEpmPGSrkStSQxIZhNsxzO97c3ROUfYWxMHnCV0sODNzP">
+<div class="absolute top-2.5 left-2.5 bg-primary-container text-on-primary-container text-label-sm font-label-sm px-2.5 py-1 rounded-md shadow-sm font-bold">
+                  20% OFF
+                </div>
+</div>
+<div class="p-3.5 space-y-1">
+<h4 class="text-label-lg font-label-lg text-on-surface line-clamp-1">20% Off Handcrafted Loom Bags</h4>
+<p class="text-label-md font-label-md text-primary">Antique Weaves &amp; Crafts</p>
+<div class="flex items-center gap-1 text-body-sm font-body-sm text-secondary pt-1">
+<span class="material-symbols-outlined text-[15px]">event</span>
+<span>Valid until Oct 25</span>
+</div>
+</div>
+</div>
+<div class="p-3.5 pt-0 flex items-center justify-between gap-2">
+<button class="flex-1 py-2 bg-surface-container hover:bg-surface-container-high text-primary rounded-xl text-label-md font-label-md transition-colors text-center font-bold">
+                Claim Code
+              </button>
+<button class="p-2 border border-outline-variant/40 rounded-xl hover:bg-surface-container text-secondary transition-all active:scale-95" onclick="toggleBookmark(this)" title="Save to Stash">
+<span class="material-symbols-outlined text-[20px] transition-colors">bookmark_border</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Component (from Shared Components JSON) -->
+<!-- Destination 0: Dashboard (ACTIVE MATCH) -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-4 px-4 pointer-events-none max-w-md mx-auto"><div class="pointer-events-auto flex items-center justify-around bg-surface-container-lowest/95 backdrop-blur-md px-3 py-2 rounded-full shadow-2xl border border-outline-variant/40 w-full"><button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1.5 font-label-sm text-label-sm shadow-sm active:scale-95 transition-transform duration-150"><span class="material-symbols-outlined text-[20px]" style="font-variation-settings: &quot;FILL&quot; 1;">grid_view</span><span class="">Dashboard</span></button><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">explore</span><span class="">Roam</span></button><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span class="">Stash</span></button><button class="flex flex-col items-center justify-center text-secondary hover:text-primary px-3 py-1.5 font-label-sm text-label-sm hover:bg-surface-container-low transition-colors duration-150 rounded-full active:scale-95"><span class="material-symbols-outlined text-[20px]">person</span><span class="">Account</span></button></div></nav>
+</div>
+<!-- Micro-Interactions Script -->
+<script>
+    function toggleBookmark(btn) {
+      const icon = btn.querySelector('.material-symbols-outlined');
+      if (icon.textContent === 'bookmark_border') {
+        icon.textContent = 'bookmark';
+        icon.style.fontVariationSettings = "'FILL' 1";
+        btn.classList.add('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+        btn.classList.remove('text-secondary', 'border-outline-variant/40');
+      } else {
+        icon.textContent = 'bookmark_border';
+        icon.style.fontVariationSettings = "'FILL' 0";
+        btn.classList.remove('bg-primary-container', 'text-on-primary-container', 'border-primary-container');
+        btn.classList.add('text-secondary', 'border-outline-variant/40');
+      }
+    }
+  </script>
+
+
+</body></html>

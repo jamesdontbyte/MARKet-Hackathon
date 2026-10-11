@@ -1,0 +1,399 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Account &amp; Preferences</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-container": "#3ec4ff",
+            "inverse-primary": "#7ad0ff",
+            "on-background": "#0b1c30",
+            "on-tertiary-fixed": "#001d31",
+            "tertiary-fixed-dim": "#93ccff",
+            "on-surface-variant": "#3e484f",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#e5eeff",
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary": "#ffffff",
+            "on-error": "#ffffff",
+            "tertiary-container": "#6fbfff",
+            "on-surface": "#0b1c30",
+            "on-primary": "#ffffff",
+            "secondary": "#565e74",
+            "tertiary-fixed": "#cce5ff",
+            "outline": "#6e7980",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary-fixed-variant": "#004c68",
+            "on-primary-fixed": "#001e2c",
+            "outline-variant": "#bdc8d1",
+            "inverse-surface": "#213145",
+            "on-tertiary-container": "#004d76",
+            "background": "#f8f9ff",
+            "surface": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "primary": "#006689",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-tint": "#006689",
+            "surface-variant": "#d3e4fe",
+            "surface-bright": "#f8f9ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-fixed": "#131b2e",
+            "on-secondary-fixed-variant": "#3f465c",
+            "surface-container-low": "#eff4ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "error": "#ba1a1a",
+            "error-container": "#ffdad6",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-container": "#5c647a",
+            "tertiary": "#006398",
+            "on-primary-container": "#004e6b",
+            "on-error-container": "#93000a",
+            "secondary-fixed": "#dae2fd",
+            "on-secondary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter": "1rem",
+            "margin-mobile": "1rem",
+            "space-xs": "0.25rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex justify-center selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Viewport Shell (390px portrait target) -->
+<div class="w-full max-w-[420px] bg-background min-h-screen flex flex-col relative pb-28 shadow-xl">
+<!-- TopAppBar (Shared Component JSON anchor) -->
+<header class="sticky top-0 w-full z-40 bg-surface-container-lowest shadow-sm">
+<div class="flex justify-between items-center w-full px-4 py-3">
+<!-- Leading Icon & Wordmark Cluster -->
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center p-0.5 bg-surface-container-low border border-outline-variant/30 shadow-xs">
+<img alt="MARKet Logo" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFQbyv0ENekWLKvI_0T7hMED8beq8E-57G_KVxKJXAeIUF8_VUcyhKpCxVYLEff7oxYxDaYlNHei_0UXYTDkRiebJmE_qhfLrKtwMHgPT_UUQHhlLsvzdY0oSbJwasuoCdHpIFd6lZPS0N6mYYj70EFIRzd85CXZzbo2MJo6I6p-VYDz-SSqAwQOwNqkJZv4eBxihAnZyV1_nWOcXDnbmo9LHb2mZ3hkpYNGZPvNVnWm3b3pG5HeGVmZ_ITOUCeIiNxg">
+</div>
+<div class="flex items-baseline">
+<span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-primary">MARK</span><span class="text-headline-lg font-headline-lg font-extrabold tracking-tight text-primary-container">et</span>
+</div>
+</div>
+<!-- Center Subtitle / Destination context -->
+<div class="text-center">
+
+
+</div>
+<!-- Trailing Action -->
+<button aria-label="Notifications" class="w-9 h-9 rounded-full flex items-center justify-center text-primary hover:bg-surface-container transition-colors duration-150 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile pt-4 space-y-5">
+<!-- Profile Summary Card -->
+<section class="bg-surface-container-lowest rounded-[20px] p-4 border border-outline-variant/20 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] relative overflow-hidden">
+<div class="flex items-start justify-between gap-3">
+<div class="flex items-center gap-3.5">
+<!-- Avatar Initials Badge -->
+<div class="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-on-primary font-headline-md text-headline-md ring-4 ring-primary-fixed/40 shrink-0 shadow-sm">
+              MA
+            </div>
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="text-headline-md font-headline-md text-on-surface">Maria Aquino</h2>
+<span class="material-symbols-outlined text-[16px] text-primary fill-icon" title="Verified Local">verified</span>
+</div>
+<p class="text-label-md font-label-md text-primary font-semibold mt-0.5">Local Explorer • Antique Resident</p>
+<p class="text-body-sm font-body-sm text-secondary mt-1">maria.aquino@gmail.com</p>
+<p class="text-body-sm font-body-sm text-secondary">+63 917 888 4321</p>
+</div>
+</div>
+</div>
+<!-- Quick Action: Edit Profile -->
+<div class="mt-4 pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-secondary">Joined San Jose Community</span>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-surface-container text-primary font-label-md text-label-md rounded-xl hover:bg-surface-container-high transition-colors duration-150 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[16px]">edit</span>
+<span>Edit Profile</span>
+</button>
+</div>
+</section>
+<!-- Section: My Interests (Personalization Controls) -->
+<section class="bg-surface-container-lowest rounded-[20px] p-4 border border-outline-variant/20 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)]">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">My Interests</h3>
+</div>
+<button class="flex items-center gap-1 text-primary hover:text-tertiary transition-colors text-label-md font-label-md" type="button">
+<span class="material-symbols-outlined text-[15px]">edit</span>
+<span>Update Interests</span>
+</button>
+</div>
+<p class="text-body-sm font-body-sm text-secondary mb-3 leading-snug">
+          We tailor your Dashboard deals and nearby spots based on these topics.
+        </p>
+<!-- Interest Tags/Pills -->
+<div class="flex flex-wrap gap-2">
+<!-- Selected Pills -->
+<div class="inline-flex items-center gap-1.5 bg-[#E0F2FE] border border-primary-container text-primary px-3 py-1.5 rounded-full text-label-md font-label-md shadow-xs">
+<span class="material-symbols-outlined text-[14px]">local_cafe</span>
+<span>Cafés &amp; Coffee</span>
+<span class="material-symbols-outlined text-[14px] ml-0.5 fill-icon">check</span>
+</div>
+<div class="inline-flex items-center gap-1.5 bg-[#E0F2FE] border border-primary-container text-primary px-3 py-1.5 rounded-full text-label-md font-label-md shadow-xs">
+<span class="material-symbols-outlined text-[14px]">texture</span>
+<span>Local Crafts &amp; Weaving</span>
+<span class="material-symbols-outlined text-[14px] ml-0.5 fill-icon">check</span>
+</div>
+<div class="inline-flex items-center gap-1.5 bg-[#E0F2FE] border border-primary-container text-primary px-3 py-1.5 rounded-full text-label-md font-label-md shadow-xs">
+<span class="material-symbols-outlined text-[14px]">restaurant</span>
+<span>Local Delicacies</span>
+<span class="material-symbols-outlined text-[14px] ml-0.5 fill-icon">check</span>
+</div>
+<div class="inline-flex items-center gap-1.5 bg-[#E0F2FE] border border-primary-container text-primary px-3 py-1.5 rounded-full text-label-md font-label-md shadow-xs">
+<span class="material-symbols-outlined text-[14px]">temple_buddhist</span>
+<span>Heritage Dining</span>
+<span class="material-symbols-outlined text-[14px] ml-0.5 fill-icon">check</span>
+</div>
+<!-- Unselected Pill -->
+<div class="inline-flex items-center gap-1.5 bg-[#F8FAFC] border border-outline-variant/40 text-secondary px-3 py-1.5 rounded-full text-label-md font-label-md hover:border-primary-container transition-colors">
+<span class="material-symbols-outlined text-[14px]">eco</span>
+<span>Eco-Services</span>
+<span class="material-symbols-outlined text-[14px] ml-0.5">add</span>
+</div>
+</div>
+</section>
+<!-- Section: Location & Geofence Settings -->
+<section class="bg-surface-container-lowest rounded-[20px] p-4 border border-outline-variant/20 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)]">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">location_on</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Location &amp; Geofence Settings</h3>
+</div>
+<!-- Status Card inside -->
+<div class="bg-surface-container-low rounded-xl p-3.5 border border-outline-variant/30 flex items-center justify-between mb-3">
+<div class="flex items-center gap-2.5">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+</span>
+<div>
+<p class="text-label-lg font-label-lg text-on-surface">Precise Location: Enabled</p>
+<p class="text-label-sm font-label-sm text-secondary">High Accuracy GPS • Active</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary text-[20px]">my_location</span>
+</div>
+<p class="text-body-sm font-body-sm text-secondary leading-snug mb-3.5">
+          Enables automatic 100m geofence discovery when walking past participating Antique MSME storefronts.
+        </p>
+<button class="w-full py-2.5 px-4 bg-surface-container-lowest border border-outline-variant/40 rounded-xl text-label-lg font-label-lg text-on-surface flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors duration-150 active:scale-98" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">tune</span>
+<span>Manage App Permissions</span>
+</button>
+</section>
+<!-- Section: Notification Preferences -->
+<section class="bg-surface-container-lowest rounded-[20px] p-4 border border-outline-variant/20 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)]">
+<div class="flex items-center gap-2 mb-3">
+<div class="w-7 h-7 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</div>
+<h3 class="text-headline-sm font-headline-sm text-on-surface">Notification Preferences</h3>
+</div>
+<div class="divide-y divide-outline-variant/20">
+<!-- Toggle 1: Flash Promos (ON) -->
+<div class="py-3 flex items-start justify-between gap-3">
+<div class="pr-2">
+<label class="text-label-lg font-label-lg text-on-surface block cursor-pointer" for="toggle-flash">
+                Flash Promotions Nearby
+              </label>
+<p class="text-body-sm font-body-sm text-secondary mt-0.5">Instant alert within 100m</p>
+</div>
+<!-- Custom Styled Toggle Switch (ON) -->
+<label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+<input checked="" class="sr-only peer" id="toggle-flash" type="checkbox">
+<div class="w-11 h-6 bg-outline-variant/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Toggle 2: Stash Expiry Reminders (ON) -->
+<div class="py-3 flex items-start justify-between gap-3">
+<div class="pr-2">
+<label class="text-label-lg font-label-lg text-on-surface block cursor-pointer" for="toggle-stash">
+                Stash Expiry Reminders
+              </label>
+<p class="text-body-sm font-body-sm text-secondary mt-0.5">Notify 24h before saved deals expire</p>
+</div>
+<!-- Custom Styled Toggle Switch (ON) -->
+<label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+<input checked="" class="sr-only peer" id="toggle-stash" type="checkbox">
+<div class="w-11 h-6 bg-outline-variant/40 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Toggle 3: Discovery Digest (OFF) -->
+<div class="py-3 flex items-start justify-between gap-3">
+<div class="pr-2">
+<label class="text-label-lg font-label-lg text-on-surface block cursor-pointer" for="toggle-digest">
+                Weekly MSME Discovery Digest
+              </label>
+<p class="text-body-sm font-body-sm text-secondary mt-0.5">Curated showcase of newly verified artisans</p>
+</div>
+<!-- Custom Styled Toggle Switch (OFF) -->
+<label class="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+<input class="sr-only peer" id="toggle-digest" type="checkbox">
+<div class="w-11 h-6 bg-outline-variant/50 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+</div>
+</section>
+<!-- Section: Privacy & Support -->
+<section class="bg-surface-container-lowest rounded-[20px] p-2 border border-outline-variant/20 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.04)] overflow-hidden">
+<ul class="divide-y divide-outline-variant/15">
+<!-- Item 1: DPA Compliance -->
+<li>
+<a class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-low transition-colors duration-150" href="#dpa-notice">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">lock</span>
+</div>
+<div>
+<p class="text-label-lg font-label-lg text-on-surface">Philippine Data Privacy Act (RA 10173) Notice</p>
+<p class="text-body-sm font-body-sm text-secondary">Local compliance &amp; data vault protection</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
+</a>
+</li>
+<!-- Item 2: Help & Support -->
+<li>
+<a class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container-low transition-colors duration-150" href="#support">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">help_center</span>
+</div>
+<div>
+<p class="text-label-lg font-label-lg text-on-surface">Help &amp; MSME Support Center</p>
+<p class="text-body-sm font-body-sm text-secondary">FAQ, live agent chat, &amp; store assistance</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">chevron_right</span>
+</a>
+</li>
+<!-- Item 3: About App -->
+<li>
+<div class="flex items-center justify-between p-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+<span class="material-symbols-outlined text-[18px]">info</span>
+</div>
+<div>
+<p class="text-label-lg font-label-lg text-on-surface">About MARKet Antique</p>
+<p class="text-body-sm font-body-sm text-secondary">Empowering Micro &amp; Small Enterprises</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm px-2 py-0.5 bg-surface-container text-primary font-bold rounded-full">v1.4.0</span>
+</div>
+</li>
+</ul>
+</section>
+<!-- Account Action: Soft Logout -->
+<div class="pt-2 pb-4">
+<button class="w-full py-3 px-4 bg-error-container/60 hover:bg-error-container text-error rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 transition-all duration-150 active:scale-98 border border-error/20" type="button">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span>Log out of MARKet</span>
+</button>
+<p class="text-center text-label-sm font-label-sm text-outline mt-3">MARKet Consumer Platform • Province of Antique, Western Visayas</p>
+</div>
+</main>
+<!-- BottomNavBar (Shared Component JSON anchor) -->
+<!-- Docked full-width bottom-0, shadow elevation, exact active state mapping to "Account" -->
+<nav class="fixed bottom-4 left-4 right-4 max-w-[390px] mx-auto rounded-full bg-surface-container-lowest/95 backdrop-blur-md shadow-xl border border-outline-variant/30 px-3 py-1.5 flex items-center justify-around z-50">
+  <!-- Tab 1: Dashboard (Inactive) -->
+  <a class="flex flex-col items-center justify-center gap-0.5 text-secondary hover:text-primary transition-colors py-1 px-2 rounded-full group" href="#">
+    <span class="material-symbols-outlined text-[20px]">grid_view</span>
+    <span class="text-[10px] font-medium tracking-tight whitespace-nowrap">Dashboard</span>
+  </a>
+
+  <!-- Tab 2: Roam (Inactive) -->
+  <a class="flex flex-col items-center justify-center gap-0.5 text-secondary hover:text-primary transition-colors py-1 px-2 rounded-full group" href="#">
+    <span class="material-symbols-outlined text-[20px]">explore</span>
+    <span class="text-[10px] font-medium tracking-tight whitespace-nowrap">Roam</span>
+  </a>
+
+  <!-- Tab 3: Stash (Inactive) -->
+  <a class="flex flex-col items-center justify-center gap-0.5 text-secondary hover:text-primary transition-colors py-1 px-2 rounded-full group" href="#">
+    <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+    <span class="text-[10px] font-medium tracking-tight whitespace-nowrap">Stash</span>
+  </a>
+
+  <!-- Tab 4: Account (ACTIVE MATCH) -->
+  <a href="#" class="flex flex-col items-center justify-center gap-0.5 bg-primary-container text-on-primary-container py-1.5 px-4 rounded-full font-bold shadow-sm active:scale-95 transition-transform duration-150 group"><span class="material-symbols-outlined text-[20px] fill-icon">person</span><span class="text-[10px] font-bold tracking-tight whitespace-nowrap">Account</span></a>
+</nav>
+</div>
+
+
+</body></html>

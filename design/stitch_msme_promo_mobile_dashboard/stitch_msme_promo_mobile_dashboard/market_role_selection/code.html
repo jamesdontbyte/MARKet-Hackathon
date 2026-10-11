@@ -1,0 +1,307 @@
+<!DOCTYPE html><html class="h-full" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Role Selection</title>
+<!-- Google Fonts: Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS with Forms and Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary-fixed": "#001d31",
+            "inverse-on-surface": "#eaf1ff",
+            "on-error": "#ffffff",
+            "on-tertiary-container": "#004d76",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "on-primary-container": "#004e6b",
+            "inverse-surface": "#213145",
+            "on-surface": "#0b1c30",
+            "outline": "#6e7980",
+            "on-primary-fixed": "#001e2c",
+            "on-primary": "#ffffff",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#7ad0ff",
+            "surface-tint": "#006689",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-bright": "#f8f9ff",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "tertiary-fixed-dim": "#93ccff",
+            "surface-container-highest": "#d3e4fe",
+            "on-secondary-fixed-variant": "#3f465c",
+            "error-container": "#ffdad6",
+            "primary-container": "#3ec4ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-container": "#5c647a",
+            "on-surface-variant": "#3e484f",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "on-background": "#0b1c30",
+            "secondary-fixed": "#dae2fd",
+            "surface-container": "#e5eeff",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#cce5ff",
+            "outline-variant": "#bdc8d1",
+            "tertiary-container": "#6fbfff",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f8f9ff",
+            "primary": "#006689",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "on-secondary-fixed": "#131b2e",
+            "tertiary": "#006398",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+    .card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .card-shadow-selected {
+      box-shadow: 0 12px 32px -4px rgba(62, 196, 255, 0.18), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface min-h-full flex flex-col font-body-md antialiased selection:bg-primary-container selection:text-on-surface">
+<!-- Mobile Wrapper with Max Width -->
+<div class="w-full max-w-md mx-auto h-screen max-h-screen flex flex-col bg-background relative shadow-sm overflow-hidden">
+<!-- Top Navigation / TopAppBar Shared Component Blueprint -->
+
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto px-margin-mobile pt-5 pb-28 flex flex-col">
+<!-- Greeting & Header Section -->
+<section class="mb-6">
+
+<h1 class="text-display-lg-mobile font-display-lg-mobile text-on-surface tracking-tight mb-2">Welcome to <span class="text-primary-container">MARK</span><span class="text-on-surface">et</span></h1>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+          Select your role to get started with localized discovery and community commerce.
+        </p>
+</section>
+<!-- Role Selection Options (Interactive Container) -->
+<section aria-label="Choose your role" class="flex flex-col gap-3.5 mb-6" id="role-selection-group" role="radiogroup">
+<!-- Role Option 1: Merchant / MSME (Active by Default) -->
+<article aria-checked="false" class="relative rounded-[20px] bg-surface-container-lowest p-5 transition-all duration-200 cursor-pointer active:scale-[0.98] border-[#E2E8F0] card-shadow" id="role-merchant" onclick="selectRole('merchant')" role="radio" tabindex="0"><!-- Active Marker Check Circle Top Right -->
+<div class="absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full border-[1.5px] border-[#CBD5E1] bg-surface-container-lowest indicator-check"></div>
+<!-- Header & Badge -->
+<div class="flex items-start gap-3.5 mb-3 pr-8">
+  <div class="w-12 h-12 rounded-2xl bg-[#E0F2FE] flex items-center justify-center shrink-0 text-primary">
+    <span class="material-symbols-outlined text-[26px]" data-icon="storefront">storefront</span>
+  </div>
+  <div class="flex flex-col gap-1">
+    <div>
+      <span class="inline-block px-2.5 py-0.5 rounded-full bg-primary-container/20 text-[#0284C7] text-label-sm font-label-sm">
+        MSME Merchant
+      </span>
+    </div>
+    <h2 class="text-headline-sm font-headline-sm text-on-surface leading-snug">
+      I am a Business Owner
+    </h2>
+  </div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4 leading-relaxed">
+  Promote your shop, launch geofenced promos, verify walk-in redemptions, and grow local foot traffic.
+</p>
+<!-- Highlights Pills -->
+<div class="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center gap-2 text-label-sm font-label-sm text-secondary">
+  <span class="flex items-center gap-1 text-[#0369A1] shrink-0">
+    <span class="material-symbols-outlined text-[14px]" data-icon="verified">verified</span>
+    Free listing
+  </span>
+  <span class="text-outline-variant shrink-0">•</span>
+  <span class="flex items-center gap-1 text-[#0369A1] shrink-0">
+    <span class="material-symbols-outlined text-[14px]" data-icon="qr_code_scanner">qr_code_scanner</span>
+    Instant QR verification
+  </span>
+  <span class="text-outline-variant shrink-0">•</span>
+  <span class="flex items-center gap-1 text-[#0369A1] shrink-0">
+    <span class="material-symbols-outlined text-[14px]" data-icon="near_me">near_me</span>
+    Local discovery
+  </span>
+</div></article>
+<!-- Role Option 2: Shopper / Consumer -->
+<article aria-checked="true" class="relative rounded-[20px] bg-surface-container-lowest border p-5 transition-all duration-200 cursor-pointer active:scale-[0.98] hover:border-outline-variant border-primary-container card-shadow-selected border-2" id="role-shopper" onclick="selectRole('shopper')" role="radio" tabindex="0"><!-- Unchecked Radio Indicator Top Right -->
+<div class="absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full bg-primary-container text-on-surface indicator-check">
+          <span class="material-symbols-outlined text-[16px] font-bold text-on-surface" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+        </div>
+<!-- Header & Badge -->
+<div class="flex items-start gap-3.5 mb-3 pr-8">
+  <div class="w-12 h-12 rounded-2xl bg-surface-container-high flex items-center justify-center shrink-0 text-on-surface">
+    <span class="material-symbols-outlined text-[26px]" data-icon="local_mall">local_mall</span>
+  </div>
+  <div class="flex flex-col gap-1">
+    <div>
+      <span class="inline-block px-2.5 py-0.5 rounded-full bg-surface-container-high text-secondary text-label-sm font-label-sm">
+        Local Discovery
+      </span>
+    </div>
+    <h2 class="text-headline-sm font-headline-sm text-on-surface leading-snug">
+      I am a Shopper / Customer
+    </h2>
+  </div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4 leading-relaxed">
+  Discover nearby neighborhood gems, exclusive local promos, and secret daily discounts near you.
+</p>
+<!-- Highlights Pills -->
+<div class="pt-3 border-t border-[#F1F5F9] flex flex-wrap items-center gap-2 text-label-sm font-label-sm text-secondary">
+  <span class="flex items-center gap-1 shrink-0">
+    <span class="material-symbols-outlined text-[14px] text-tertiary" data-icon="percent">percent</span>
+    Nearby deals
+  </span>
+  <span class="text-outline-variant shrink-0">•</span>
+  <span class="flex items-center gap-1 shrink-0">
+    <span class="material-symbols-outlined text-[14px] text-tertiary" data-icon="notifications_active">notifications_active</span>
+    Real-time alerts
+  </span>
+  <span class="text-outline-variant shrink-0">•</span>
+  <span class="flex items-center gap-1 shrink-0">
+    <span class="material-symbols-outlined text-[14px] text-tertiary" data-icon="favorite">favorite</span>
+    Support local
+  </span>
+</div></article>
+</section>
+<!-- Storefront Contextual Visual Banner -->
+
+<!-- Sticky-Bottom CTA Area -->
+
+</main>
+<footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-50 bg-background/95 backdrop-blur-md border-t border-outline-variant/30 px-6 py-4 flex flex-col items-center gap-3"><button class="w-full py-3.5 px-6 bg-primary-container hover:bg-[#38bdf8] font-headline-sm text-headline-sm rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] text-white leading-normal text-center" id="cta-button" type="button"><span id="cta-text" class="whitespace-nowrap font-semibold">Continue as Shopper</span><span class="material-symbols-outlined text-[20px] shrink-0" data-icon="arrow_forward">arrow_forward</span></button><div class="text-center py-0.5 flex items-center justify-center"><span class="text-body-sm font-body-sm text-on-surface-variant">Already have an account?</span><button class="ml-1 text-label-lg font-label-lg text-primary hover:underline transition-all" type="button">Log In</button></div></footer></div>
+<!-- Interactive State Logic -->
+<script>
+    let activeRole = 'merchant';
+
+    function selectRole(role) {
+      activeRole = role;
+      const merchantCard = document.getElementById('role-merchant');
+      const shopperCard = document.getElementById('role-shopper');
+      const ctaText = document.getElementById('cta-text');
+
+      if (role === 'merchant') {
+        // Merchant card active
+        merchantCard.classList.remove('border-[#E2E8F0]', 'card-shadow');
+        merchantCard.classList.add('border-primary-container', 'card-shadow-selected', 'border-2');
+        merchantCard.setAttribute('aria-checked', 'true');
+        merchantCard.querySelector('.indicator-check').innerHTML = `
+          <span class="material-symbols-outlined text-[16px] font-bold text-on-surface" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+        `;
+        merchantCard.querySelector('.indicator-check').className = "absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full bg-primary-container text-on-surface indicator-check";
+
+        // Shopper card inactive
+        shopperCard.classList.remove('border-primary-container', 'card-shadow-selected', 'border-2');
+        shopperCard.classList.add('border-[#E2E8F0]', 'card-shadow');
+        shopperCard.setAttribute('aria-checked', 'false');
+        shopperCard.querySelector('.indicator-check').innerHTML = '';
+        shopperCard.querySelector('.indicator-check').className = "absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full border-[1.5px] border-[#CBD5E1] bg-surface-container-lowest indicator-check";
+
+        ctaText.textContent = 'Continue as Business Owner';
+      } else {
+        // Shopper card active
+        shopperCard.classList.remove('border-[#E2E8F0]', 'card-shadow');
+        shopperCard.classList.add('border-primary-container', 'card-shadow-selected', 'border-2');
+        shopperCard.setAttribute('aria-checked', 'true');
+        shopperCard.querySelector('.indicator-check').innerHTML = `
+          <span class="material-symbols-outlined text-[16px] font-bold text-on-surface" data-icon="check" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check</span>
+        `;
+        shopperCard.querySelector('.indicator-check').className = "absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full bg-primary-container text-on-surface indicator-check";
+
+        // Merchant card inactive
+        merchantCard.classList.remove('border-primary-container', 'card-shadow-selected', 'border-2');
+        merchantCard.classList.add('border-[#E2E8F0]', 'card-shadow');
+        merchantCard.setAttribute('aria-checked', 'false');
+        merchantCard.querySelector('.indicator-check').innerHTML = '';
+        merchantCard.querySelector('.indicator-check').className = "absolute top-4 right-4 flex items-center justify-center w-6 h-6 rounded-full border-[1.5px] border-[#CBD5E1] bg-surface-container-lowest indicator-check";
+
+        ctaText.textContent = 'Continue as Shopper';
+      }
+    }
+
+    // Keyboard navigation accessibility
+    ['role-merchant', 'role-shopper'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('keydown', (e) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            selectRole(id === 'role-merchant' ? 'merchant' : 'shopper');
+          }
+        });
+      }
+    });
+  </script>
+
+
+</body></html>

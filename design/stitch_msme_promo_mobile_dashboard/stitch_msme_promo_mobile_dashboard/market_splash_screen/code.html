@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Splash Screen</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Plus Jakarta Sans Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary-fixed": "#001d31",
+            "inverse-on-surface": "#eaf1ff",
+            "on-error": "#ffffff",
+            "on-tertiary-container": "#004d76",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "on-primary-container": "#004e6b",
+            "inverse-surface": "#213145",
+            "on-surface": "#0b1c30",
+            "outline": "#6e7980",
+            "on-primary-fixed": "#001e2c",
+            "on-primary": "#ffffff",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#7ad0ff",
+            "surface-tint": "#006689",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-bright": "#f8f9ff",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "tertiary-fixed-dim": "#93ccff",
+            "surface-container-highest": "#d3e4fe",
+            "on-secondary-fixed-variant": "#3f465c",
+            "error-container": "#ffdad6",
+            "primary-container": "#3ec4ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-container": "#5c647a",
+            "on-surface-variant": "#3e484f",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "on-background": "#0b1c30",
+            "secondary-fixed": "#dae2fd",
+            "surface-container": "#e5eeff",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#cce5ff",
+            "outline-variant": "#bdc8d1",
+            "tertiary-container": "#6fbfff",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f8f9ff",
+            "primary": "#006689",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "on-secondary-fixed": "#131b2e",
+            "tertiary": "#006398",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @keyframes pulseSoft {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.35;
+      }
+      50% {
+        transform: scale(1.08);
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes progressShift {
+      0% {
+        transform: translateX(-100%);
+      }
+      50% {
+        transform: translateX(30%);
+      }
+      100% {
+        transform: translateX(200%);
+      }
+    }
+
+    .animate-soft-pulse {
+      animation: pulseSoft 3s ease-in-out infinite;
+    }
+
+    .animate-progress {
+      animation: progressShift 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex items-center justify-center p-0 selection:bg-primary-container selection:text-on-primary-container">
+<!-- Mobile Canvas Device Frame Simulator -->
+<div class="relative w-full max-w-md h-screen max-h-[920px] bg-surface flex flex-col justify-between overflow-hidden shadow-2xl sm:rounded-[36px] sm:border sm:border-outline-variant/30">
+<!-- Top Status Bar Area (Mobile System Bar simulation) -->
+
+<!-- Soft Ambient Atmospheric Background Orbs (Soft Clean Modern System) -->
+<div class="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-primary-fixed/40 blur-3xl pointer-events-none"></div>
+<div class="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-surface-container-high/60 blur-3xl pointer-events-none"></div>
+<div class="absolute -bottom-20 right-1/4 w-64 h-64 rounded-full bg-tertiary-fixed/40 blur-2xl pointer-events-none"></div>
+<!-- Main Hero Splash Content -->
+<main class="relative z-10 flex-1 flex flex-col items-center justify-center px-margin-mobile text-center">
+<!-- Tactile Card Container for Logo with Soft Elevation Level 1 -->
+<div class="relative mb-6">
+<!-- Ambient Animated Aura Ring -->
+<div class="absolute -inset-3.5 rounded-[36px] bg-primary-container/25 blur-md animate-soft-pulse pointer-events-none"></div>
+<!-- Elevated Soft Modern Tile -->
+<div class="relative w-36 h-36 sm:w-40 sm:h-40 rounded-[32px] bg-surface-container-lowest border border-surface-container flex items-center justify-center p-5 shadow-[0_12px_32px_-4px_rgba(15,23,42,0.06),0_4px_12px_-2px_rgba(15,23,42,0.02)]">
+<img alt="MARKet Official Logo" class="w-full h-full object-contain drop-shadow-sm select-none p-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9_Q1rrE_2ItuFAbDcO4xb3gSHLKM_9qoqSX9GsiLTg5CgxauF9JlqD81mUh8mDtWix59qqEqdqN7Qeyk8sp-qb6aFHf2ZChQ5w2anh14exD_W8YhUMRJ2dIeRq5Ikg23rky0E3HiP0KQrpg7mKhCIWck4VT9AfdBTd_2WAdaEzb9lGFSyB8hEhDqx5PfoEJlMzBgsD51SNDw53D1PZjYl9s34Z2HAQrTCxvkztM1COAjgaNxmKG1B8PC0Ru5s3NhkZw">
+</div>
+</div>
+<!-- Dual-Tone Wordmark (MARK in electric sky cyan & et in deep slate navy) -->
+<div class="flex items-baseline justify-center tracking-tight select-none">
+<span class="text-[44px] leading-none font-extrabold text-primary-container drop-shadow-sm">MARK</span>
+<span class="text-[44px] leading-none font-extrabold text-on-surface">et</span>
+</div>
+<!-- Category Pill Badge -->
+<div class="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container-low border border-primary-container/30">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-ping"></span>
+<span class="text-label-sm font-label-sm text-primary tracking-wide">MSME HYPERLOCAL DISCOVERY</span>
+</div>
+<!-- Purpose-Driven Tagline -->
+<p class="mt-4 max-w-xs text-body-md font-body-md text-on-surface-variant font-medium leading-relaxed">
+        Connecting MSMEs to Potential Customers</p>
+<!-- Minimalist Progress Bar Loading State -->
+
+</main>
+<!-- Bottom Footer Trust Badge -->
+<footer class="relative z-10 pb-8 px-6 flex flex-col items-center select-none">
+
+<div class="mt-4 w-32 h-1 bg-on-surface-variant/20 rounded-full"></div>
+</footer>
+</div>
+
+
+</body></html>

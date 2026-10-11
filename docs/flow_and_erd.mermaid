@@ -1,0 +1,160 @@
+%% MARKet Architecture: Screen Flows and Supabase ERD
+
+%% -------------------------------------------------------------
+%% 1. Shopper Screen Flow
+%% -------------------------------------------------------------
+flowchart TD
+    Splash[Splash Screen] -->|No Session| RoleSelect[Role Selection Screen]
+    Splash -->|Session: Shopper| ShopperDash[Shopper Dashboard]
+    RoleSelect -->|Choose Shopper| ShopperReg[Shopper Registration]
+    RoleSelect -->|Login Link| LoginScreen[Login Screen]
+    LoginScreen -->|Role: Shopper| ShopperDash
+
+    ShopperReg -->|Demo OTP: 123456| Interests[Interest Selection Screen]
+    Interests -->|Save / Skip| PermExplain[Permission Explainer Screen]
+    PermExplain -->|Allow Permissions| ShopperDash
+
+    subgraph Shopper Tabs
+        ShopperDash -->|Tab 1: Home| FeatPromos[Featured Promos & Verified MSMEs]
+        ShopperDash -->|Tab 2: Roam| RoamMap[Roam Map Discovery OSM]
+        ShopperDash -->|Tab 3: Stash| StashScreen[Stash Saved Promos]
+        ShopperDash -->|Tab 4: Account| ShopperAccount[Account & Preferences]
+    end
+
+    ShopperDash -->|Long Press MARK Logo| SimSheet[Simulate Zone Enter/Exit Sheet]
+    SimSheet -->|Enter San Jose Zone| GeoNotif[Foreground Service Local Notification]
+
+    RoamMap -->|Tap Marker / Card| Storefront[Storefront Screen]
+    ShopperDash -->|Tap Promo| PromoDetail[Promo Detail Screen]
+    GeoNotif -->|Tap Notification| PromoDetail
+    Storefront -->|Tap Promo| PromoDetail
+
+    PromoDetail -->|Save to Stash| StashScreen
+    PromoDetail -->|Get Voucher| VoucherScreen[Voucher Screen QR]
+    StashScreen -->|Open Voucher| VoucherScreen
+
+%% -------------------------------------------------------------
+%% 2. Merchant Screen Flow
+%% -------------------------------------------------------------
+flowchart TD
+    RoleSelect2[Role Selection] -->|Choose Merchant| MSMEReg1[Reg Step 1: Basics]
+    LoginScreen2[Login Screen] -->|Role: Merchant & Verified| MDash[Merchant Dashboard]
+    LoginScreen2 -->|Role: Merchant & Unverified| Waiting[Waiting Screen]
+    LoginScreen2 -->|Role: Merchant & No Business| MSMEReg2[Reg Step 2: Business Info - Resume]
+
+    MSMEReg1 -->|Continue| MSMEReg2[Reg Step 2: Business Info]
+    MSMEReg2 -->|Continue| MSMEReg3[Reg Step 3: Permits]
+    MSMEReg3 -->|Continue| MSMEReg4[Reg Step 4: Review]
+    MSMEReg4 -->|Submit| Waiting
+    Waiting -->|10s Auto-verify Timer| Verified[Verified Congratulations]
+    Verified -->|Proceed to Dashboard| MDash
+
+    subgraph Merchant Tabs
+        MDash -->|Tab 1: Dashboard| StoreOverview[Performance Stats & Active Deals]
+        MDash -->|Tab 2: Catalog| Catalog[Catalog Products & Services]
+        Catalog -->|Subtab: Promos| PromosCatalog[Promotions Catalog]
+        MDash -->|Tab 3: Analytics| Analytics[Analytics 7-Day Funnel]
+        MDash -->|Tab 4: Account| MAccount[Account & Compliance]
+    end
+
+    Catalog -->|Add Item| AddProductModal[Add Product Modal]
+    PromosCatalog -->|New Promo| AddPromoModal[Create Promo Modal]
+    PromosCatalog -->|Scan QR| ScanScreen[Scan QR Voucher Screen]
+    MDash -->|Create Promo Shortcut| AddPromoModal
+
+%% -------------------------------------------------------------
+%% 3. Supabase Relational ERD
+%% -------------------------------------------------------------
+erDiagram
+    PROFILES ||--o| BUSINESSES : "owns"
+    PROFILES ||--o{ STASH : "saves"
+    PROFILES ||--o{ REDEMPTIONS : "claims"
+    PROFILES ||--o{ GEOFENCE_EVENTS : "triggers"
+
+    BUSINESSES ||--o{ PRODUCTS : "offers"
+    BUSINESSES ||--o{ PROMOS : "publishes"
+    BUSINESSES ||--o{ GEOFENCE_EVENTS : "attributes"
+
+    PROMOS ||--o{ STASH : "saved_in"
+    PROMOS ||--o{ REDEMPTIONS : "redeemed_as"
+    PROMOS ||--o{ GEOFENCE_EVENTS : "subject_of"
+
+    PROFILES {
+        uuid id PK
+        text role
+        text full_name
+        text phone
+        text_array interests
+        jsonb prefs
+        timestamptz created_at
+    }
+
+    BUSINESSES {
+        uuid id PK
+        uuid owner_id FK
+        text name
+        text category
+        text subtitle
+        text bio
+        text address
+        text phone
+        text hours
+        text cover_url
+        float lat
+        float lng
+        float radius_m
+        numeric rating
+        boolean verified
+        timestamptz created_at
+    }
+
+    PRODUCTS {
+        uuid id PK
+        uuid business_id FK
+        text name
+        numeric price
+        text category
+        text description
+        timestamptz created_at
+    }
+
+    PROMOS {
+        uuid id PK
+        uuid business_id FK
+        text title
+        text description
+        text promo_type
+        text value_label
+        timestamptz starts_at
+        timestamptz ends_at
+        int redeem_limit
+        int redeemed_count
+        boolean active
+        timestamptz created_at
+    }
+
+    STASH {
+        uuid id PK
+        uuid user_id FK
+        uuid promo_id FK
+        timestamptz saved_at
+    }
+
+    REDEMPTIONS {
+        uuid id PK
+        uuid promo_id FK
+        uuid user_id FK
+        text code
+        text status
+        timestamptz created_at
+        timestamptz redeemed_at
+    }
+
+    GEOFENCE_EVENTS {
+        bigserial id PK
+        uuid user_id FK
+        uuid business_id FK
+        uuid promo_id FK
+        text event_type
+        timestamptz created_at
+    }

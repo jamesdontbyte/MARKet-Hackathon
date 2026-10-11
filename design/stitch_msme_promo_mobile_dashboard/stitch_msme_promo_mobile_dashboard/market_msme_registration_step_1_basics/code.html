@@ -1,0 +1,243 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Merchant Onboarding</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary-fixed-dim": "#bec6e0",
+            "on-tertiary-fixed": "#001d31",
+            "inverse-on-surface": "#eaf1ff",
+            "on-error": "#ffffff",
+            "on-tertiary-container": "#004d76",
+            "primary-fixed": "#c3e8ff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-fixed-variant": "#004b73",
+            "on-primary-container": "#004e6b",
+            "inverse-surface": "#213145",
+            "on-surface": "#0b1c30",
+            "outline": "#6e7980",
+            "on-primary-fixed": "#001e2c",
+            "on-primary": "#ffffff",
+            "surface-variant": "#d3e4fe",
+            "inverse-primary": "#7ad0ff",
+            "surface-tint": "#006689",
+            "primary-fixed-dim": "#7ad0ff",
+            "surface-bright": "#f8f9ff",
+            "secondary": "#565e74",
+            "background": "#f8f9ff",
+            "tertiary-fixed-dim": "#93ccff",
+            "surface-container-highest": "#d3e4fe",
+            "on-secondary-fixed-variant": "#3f465c",
+            "error-container": "#ffdad6",
+            "primary-container": "#3ec4ff",
+            "secondary-container": "#dae2fd",
+            "on-secondary-container": "#5c647a",
+            "on-surface-variant": "#3e484f",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "on-background": "#0b1c30",
+            "secondary-fixed": "#dae2fd",
+            "surface-container": "#e5eeff",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#cce5ff",
+            "outline-variant": "#bdc8d1",
+            "tertiary-container": "#6fbfff",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f8f9ff",
+            "primary": "#006689",
+            "error": "#ba1a1a",
+            "on-primary-fixed-variant": "#004c68",
+            "on-secondary-fixed": "#131b2e",
+            "tertiary": "#006398",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.5rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-mobile": "0.75rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .custom-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .custom-lifted-shadow {
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen flex flex-col justify-between selection:bg-primary-container selection:text-on-primary-container">
+<!-- Shared TopAppBar Container (Linear/Task onboarding layout: BottomNavBar suppressed) -->
+
+<!-- Main Mobile Canvas -->
+<main class="w-full max-w-md mx-auto px-margin-mobile pb-28 flex-1 flex flex-col gap-5 p-5">
+<!-- Hero / Orientation Header with Dynamic Micro-Card -->
+
+<!-- Horizontal Step Wizard Progress Component -->
+<div class="bg-surface-container-lowest p-3.5 rounded-2xl border border-surface-container-high custom-shadow">
+<div class="flex items-center justify-between relative">
+<!-- Connecting baseline track -->
+<div class="absolute left-6 right-6 top-4 h-[2px] bg-surface-container-high -z-0"></div>
+<div class="absolute left-6 w-[28%] top-4 h-[2px] bg-primary-container -z-0 transition-all duration-300"></div>
+<!-- Step 1 (Active) -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-surface flex items-center justify-center font-label-md text-label-md ring-4 ring-primary-container/20 font-bold">
+            1
+          </div>
+<span class="font-label-sm text-label-sm text-primary font-bold">Basics</span>
+</div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-8 h-8 rounded-full bg-surface-container text-secondary flex items-center justify-center font-label-md text-label-md">
+            2
+          </div>
+<span class="font-label-sm text-label-sm text-secondary">Business</span>
+</div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-8 h-8 rounded-full bg-surface-container text-secondary flex items-center justify-center font-label-md text-label-md">
+            3
+          </div>
+<span class="font-label-sm text-label-sm text-secondary">Permits</span>
+</div>
+<!-- Step 4 -->
+<div class="flex flex-col items-center gap-1 z-10">
+<div class="w-8 h-8 rounded-full bg-surface-container text-secondary flex items-center justify-center font-label-md text-label-md">
+            4
+          </div>
+<span class="font-label-sm text-label-sm text-secondary">Review</span>
+</div>
+</div>
+</div>
+<!-- Onboarding Form -->
+<form class="flex flex-col gap-5" onsubmit="event.preventDefault();">
+<!-- Section 1: Account & Owner Credentials -->
+<section class="bg-surface-container-lowest rounded-2xl p-5 border border-surface-container-high custom-shadow flex flex-col gap-4"><div class="flex items-center justify-between pb-2 border-b border-surface-container-high"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[20px]">person</span><h2 class="font-headline-sm text-headline-sm text-on-surface">Personal Information</h2></div></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant flex items-center gap-1" for="fullName">Full Name (Owner / Authorized Representative)</label><div class="relative"><input class="w-full h-12 px-3.5 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="fullName" name="fullName" placeholder="First Name, Middle Name, Last Name" required="" type="text" value="Maria Santos"><span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-primary-tint text-[18px]">person</span></div></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant" for="dob">Date of Birth</label><input class="w-full h-12 px-3.5 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="dob" name="dob" required="" type="date" value="1990-05-14"></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant flex items-center justify-between" for="mobileNumber"><span class="">Mobile Number</span><span class="text-tertiary font-label-sm text-label-sm">SMS verification required</span></label><div class="flex gap-2"><div class="flex items-center justify-center px-3 h-12 rounded-[10px] bg-surface-container border border-outline-variant font-label-lg text-label-lg text-on-surface select-none">🇵🇭 +63</div><input class="flex-1 h-12 px-3.5 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="mobileNumber" name="mobileNumber" placeholder="9XX XXX XXXX" required="" type="tel" value="917 842 5521"></div><div class="mt-1 flex items-center justify-between bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/30"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-[18px]">verified_user</span><span class="font-label-sm text-label-sm text-on-surface-variant">Instant 6-digit passcode</span></div><button class="bg-primary-container hover:bg-primary-fixed-dim font-label-md text-label-md px-3.5 py-1.5 rounded-full font-semibold transition active:scale-[0.97] flex items-center gap-1 shadow-sm text-on-primary" id="otpButton" onclick="triggerOtp()" type="button"><span class="material-symbols-outlined text-[15px]">send</span><span id="otpText" class="">Verify via SMS</span></button></div></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant" for="email">Email Address</label><div class="relative"><input class="w-full h-12 px-3.5 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="email" name="email" placeholder="name@business.com" required="" type="email" value="maria.santos@kapeta.ph"><span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span></div></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant" for="passwordInput">Account Password</label><div class="relative"><input class="w-full h-12 pl-3.5 pr-11 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="passwordInput" name="password" required="" type="password" value="MarketCafe2025#"><button aria-label="Toggle password visibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition p-1" onclick="togglePassword()" type="button"><span class="material-symbols-outlined text-[20px]" id="passwordIcon">visibility</span></button></div><p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5"><span class="material-symbols-outlined text-[14px] text-tertiary">check_circle</span>Must include at least 8 characters, 1 number, and 1 symbol</p></div><div class="flex flex-col gap-1.5"><label class="font-label-md text-label-md text-on-surface-variant" for="confirmPasswordInput">Confirm Password</label><div class="relative"><input class="w-full h-12 px-3.5 rounded-[10px] bg-surface-container-lowest border border-outline-variant text-on-surface placeholder:text-outline text-body-md font-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container/40 outline-none transition" id="confirmPasswordInput" name="confirmPassword" required="" type="password" value="MarketCafe2025#"><span class="material-symbols-outlined absolute right-3.5 top-1/2 -translate-y-1/2 text-primary-tint text-[18px]">lock_reset</span></div></div></section>
+<!-- Section 2: Business Information -->
+
+</form>
+</main>
+<!-- Sticky Bottom Bar Anchor (Focused Linear Wizard) -->
+<footer class="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 py-3 px-margin-mobile">
+<div class="max-w-md mx-auto flex items-center gap-3">
+
+<button class="flex-1 h-12 bg-primary-container hover:bg-primary-fixed-dim font-label-lg text-label-lg font-bold rounded-xl transition duration-150 active:scale-[0.98] flex items-center justify-center gap-2 custom-shadow text-on-primary w-full" onclick="proceedNext()" type="button"><span class="">Continue to Business Information</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span></button>
+</div>
+</footer>
+<script>
+    // Password toggle
+    function togglePassword() {
+      const passwordInput = document.getElementById('passwordInput');
+      const passwordIcon = document.getElementById('passwordIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.textContent = 'visibility_off';
+      } else {
+        passwordInput.type = 'password';
+        passwordIcon.textContent = 'visibility';
+      }
+    }
+
+    // Category chip selection
+    function selectCategory(selectedBtn) {
+      const chips = document.querySelectorAll('.category-chip');
+      chips.forEach(chip => {
+        chip.className = 'category-chip px-3.5 py-2 rounded-full border text-label-md font-label-md flex items-center gap-1.5 transition active:scale-95 bg-surface-container-low border-surface-container-high text-secondary hover:bg-surface-container';
+      });
+      selectedBtn.className = 'category-chip px-3.5 py-2 rounded-full border text-label-md font-label-md flex items-center gap-1.5 transition active:scale-95 bg-primary-container/20 border-primary-container text-primary font-semibold';
+    }
+
+    // Character counter for textarea
+    function updateCount(textarea) {
+      const counter = document.getElementById('charCounter');
+      counter.textContent = `${textarea.value.length} / 240`;
+    }
+
+    // OTP Simulated trigger
+    function triggerOtp() {
+      const btn = document.getElementById('otpButton');
+      const txt = document.getElementById('otpText');
+      btn.classList.remove('bg-primary-container');
+      btn.classList.add('bg-surface-container', 'text-tertiary');
+      txt.textContent = 'OTP Sent (45s)';
+      btn.disabled = true;
+      setTimeout(() => {
+        txt.textContent = 'Verified ✓';
+        btn.classList.add('text-primary');
+      }, 2000);
+    }
+
+    // Linear submission feedback
+    function proceedNext() {
+      const btn = event.currentTarget;
+      btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Saving Basics...';
+      setTimeout(() => {
+        btn.innerHTML = '<span>Proceeding to Step 2</span><span class="material-symbols-outlined text-[20px]">arrow_forward</span>';
+      }, 700);
+    }
+  </script>
+
+
+
+
+
+
+</body></html>

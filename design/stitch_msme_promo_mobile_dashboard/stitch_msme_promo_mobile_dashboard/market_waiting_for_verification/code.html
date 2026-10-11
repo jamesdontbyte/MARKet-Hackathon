@@ -1,0 +1,240 @@
+<!DOCTYPE html><html class="h-full bg-surface" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>MARKet - Waiting for Verification</title>
+<!-- Plus Jakarta Sans Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary": "#ffffff",
+            "outline-variant": "#bdc8d1",
+            "on-primary-fixed-variant": "#004c68",
+            "on-secondary-container": "#5c647a",
+            "error-container": "#ffdad6",
+            "on-primary-container": "#004e6b",
+            "surface-dim": "#cbdbf5",
+            "secondary": "#565e74",
+            "secondary-fixed": "#dae2fd",
+            "primary-fixed-dim": "#7ad0ff",
+            "on-secondary-fixed": "#131b2e",
+            "inverse-surface": "#213145",
+            "on-primary-fixed": "#001e2c",
+            "secondary-container": "#dae2fd",
+            "surface": "#f8f9ff",
+            "on-secondary-fixed-variant": "#3f465c",
+            "primary-fixed": "#c3e8ff",
+            "on-background": "#0b1c30",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-highest": "#d3e4fe",
+            "error": "#ba1a1a",
+            "background": "#f8f9ff",
+            "on-error": "#ffffff",
+            "tertiary-fixed-dim": "#93ccff",
+            "inverse-primary": "#7ad0ff",
+            "surface-container": "#e5eeff",
+            "surface-variant": "#d3e4fe",
+            "outline": "#6e7980",
+            "on-tertiary-fixed-variant": "#004b73",
+            "surface-tint": "#006689",
+            "inverse-on-surface": "#eaf1ff",
+            "primary": "#006689",
+            "surface-container-low": "#eff4ff",
+            "tertiary-container": "#6fbfff",
+            "on-error-container": "#93000a",
+            "secondary-fixed-dim": "#bec6e0",
+            "tertiary": "#006398",
+            "on-tertiary-container": "#004d76",
+            "surface-container-high": "#dce9ff",
+            "on-surface": "#0b1c30",
+            "surface-bright": "#f8f9ff",
+            "on-secondary": "#ffffff",
+            "on-surface-variant": "#3e484f",
+            "primary-container": "#3ec4ff",
+            "on-tertiary-fixed": "#001d31",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed": "#cce5ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "margin": "1.5rem",
+            "gutter": "1rem",
+            "gutter-mobile": "0.75rem",
+            "margin-mobile": "1rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "headline-sm": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+            "display-lg-mobile": ["26px", { "lineHeight": "34px", "fontWeight": "800" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "700" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "700" }],
+            "display-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "700" }],
+            "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined[data-weight="fill"] {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    .soft-card-shadow {
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    }
+    .lifted-card-shadow {
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    }
+    @keyframes pulse-gentle {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+    .animate-gentle-pulse {
+      animation: pulse-gentle 3.5s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="h-full bg-surface text-on-surface antialiased font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Mobile Container Wrapper: Exactly targeted at mobile portrait ~390px, centered on larger displays -->
+<div class="min-h-full flex flex-col justify-between max-w-md mx-auto bg-surface relative px-margin-mobile pb-6">
+<!-- Top Navigation / Header Anchor (Shared Component: TopAppBar) -->
+
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col justify-center py-4">
+<!-- 4-Step Progress Stepper -->
+<div class="w-full mb-6 bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/30 soft-card-shadow"><div class="flex items-center justify-between relative px-2"><div class="absolute left-6 right-6 top-3.5 h-[2px] bg-outline-variant/30 -z-0"></div><div class="absolute left-6 right-6 top-3.5 h-[2px] bg-primary-container -z-0"></div><div class="flex flex-col items-center relative z-10 min-w-[56px]"><div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary ring-4 ring-white shadow-sm"><span class="material-symbols-outlined text-[16px] font-bold">check</span></div><span class="text-[11px] font-medium text-on-surface-variant mt-1.5 whitespace-nowrap text-center">Basics</span></div><div class="flex flex-col items-center relative z-10 min-w-[56px]"><div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary ring-4 ring-white shadow-sm"><span class="material-symbols-outlined text-[16px] font-bold">check</span></div><span class="text-[11px] font-medium text-on-surface-variant mt-1.5 whitespace-nowrap text-center">Business</span></div><div class="flex flex-col items-center relative z-10 min-w-[56px]"><div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-on-primary ring-4 ring-white shadow-sm"><span class="material-symbols-outlined text-[16px] font-bold">check</span></div><span class="text-[11px] font-medium text-on-surface-variant mt-1.5 whitespace-nowrap text-center">Permits</span></div><div class="flex flex-col items-center relative z-10 min-w-[56px]"><div class="w-7 h-7 rounded-full bg-primary-container flex items-center justify-center text-on-surface font-extrabold text-xs ring-4 ring-surface-container-high shadow-sm">4</div><span class="text-[11px] font-bold text-primary mt-1.5 whitespace-nowrap text-center">Review<br></span></div></div></div>
+<!-- Main Status Card -->
+<div class="bg-surface-container-lowest rounded-[20px] border border-outline-variant/40 p-5 soft-card-shadow flex flex-col items-center text-center">
+<!-- Status Pill Tag -->
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container text-primary border border-primary-fixed-dim/50 mb-5">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+<span class="text-label-sm font-label-sm font-bold tracking-wider">APPLICATION SUBMITTED</span>
+</div>
+<!-- Layered Visual Icon Badge -->
+<div class="relative w-24 h-24 mb-5 flex items-center justify-center">
+<!-- Ambient outermost ripple ring -->
+<div class="absolute inset-0 rounded-full bg-primary-fixed/30 animate-gentle-pulse"></div>
+<!-- Mid soft ring -->
+<div class="absolute inset-2 rounded-full bg-surface-container-low border border-primary-fixed/60"></div>
+<!-- Inner Core Badge with primary accent color -->
+<div class="relative w-16 h-16 rounded-full bg-surface-container-lowest border-2 border-primary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-primary text-[36px]" data-weight="fill">pending_actions</span>
+</div>
+</div>
+<!-- Card Title -->
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight mb-2">
+          Waiting for verification
+        </h1>
+<!-- Exact Mandated Description -->
+<p class="text-body-md font-body-md text-on-surface-variant max-w-[310px] leading-relaxed mb-6">
+          Your business is being reviewed. Please wait until your business is verified before you can use MARKet.
+        </p>
+<!-- Information Preview Box -->
+<div class="w-full bg-surface-container-low/80 rounded-2xl p-4 border border-outline-variant/30 text-left space-y-3.5">
+<!-- Turnaround time -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</div>
+<div class="flex-1">
+<span class="text-label-md font-label-md text-on-surface block">Turnaround Time</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">Processed within the day</span>
+</div>
+</div>
+<div class="h-px bg-outline-variant/20 w-full"></div>
+<!-- Notification Alert Note -->
+<div class="flex items-start gap-3">
+<div class="w-8 h-8 rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</div>
+<div class="flex-1">
+<span class="text-label-md font-label-md text-on-surface block">Live Status Updates</span>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-snug">
+                We'll send a push notification and SMS once your DTI, BIR, and Mayor's Permit documents have been approved.
+              </p>
+</div>
+</div>
+<!-- Verified Checkpoints Checklist Preview -->
+<div class="mt-2 pt-2 border-t border-outline-variant/20">
+<div class="flex items-center justify-between text-label-sm font-label-sm text-secondary">
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-weight="fill">check_circle</span>
+                DTI Certificate
+              </span>
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-weight="fill">check_circle</span>
+                BIR Form 2303
+              </span>
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[14px]" data-weight="fill">check_circle</span>
+                Mayor's Permit
+              </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Tips & Merchant Help card snippet -->
+
+</main>
+<!-- Bottom Actions Container -->
+<footer class="w-full pt-2 space-y-3">
+<!-- Primary Action: Back to home -->
+<button class="w-full py-3 px-5 bg-primary-container hover:bg-[#38bdf8] font-label-lg font-semibold rounded-xl text-center shadow-sm transition-all duration-150 active:scale-[0.98] flex items-center justify-center gap-2 text-on-primary" type="button">
+<span class="">Back to home</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+<!-- Secondary Link: Support Trigger -->
+<div class="text-center">
+<a class="inline-flex items-center gap-1.5 text-body-sm font-body-sm text-primary hover:text-on-primary-fixed-variant transition-colors py-1 px-2 rounded-lg font-semibold active:scale-[0.98]" href="#support">
+<span class="material-symbols-outlined text-[16px]">support_agent</span>
+<span class="">Need assistance? Contact Support</span>
+</a>
+</div>
+</footer>
+</div>
+
+
+</body></html>
