@@ -74,22 +74,29 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
         }
       }
 
-      final bizId = _business?.id ?? '00000000-0000-0000-0000-000000000001';
-      final data = await _dataService.fetchMerchantFunnel(bizId);
-
-      if (mounted) {
-        setState(() {
-          _analyticsData = data;
-          _isLoading = false;
-        });
+      if (_business != null) {
+        final data = await _dataService.fetchMerchantFunnel(_business!.id);
+        if (mounted) {
+          setState(() {
+            _analyticsData = data;
+            _isLoading = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _analyticsData = MerchantAnalyticsData.zero();
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _analyticsData = MerchantAnalyticsData.fallback();
+          _analyticsData = MerchantAnalyticsData.zero();
           _isLoading = false;
           _errorMessage =
-              'Could not reach Supabase telemetry: ${e.toString().replaceAll("Exception:", "").trim()}';
+              'Could not load telemetry: ${e.toString().replaceAll("Exception:", "").trim()}';
         });
       }
     }
@@ -130,7 +137,7 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
   Widget build(BuildContext context) {
     final bizName = _business?.name.isNotEmpty == true
         ? _business!.name
-        : 'Kape Tahanan';
+        : 'My Business';
 
     return Scaffold(
       backgroundColor: MarketColors.surface,
@@ -285,7 +292,7 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
                   const SizedBox(height: 16),
 
                   // 2. 7-Day Conversion Funnel Card
-                  _buildFunnelCard(_analyticsData ?? MerchantAnalyticsData.fallback()),
+                  _buildFunnelCard(_analyticsData ?? MerchantAnalyticsData.zero()),
                   const SizedBox(height: 16),
 
                   // 3. Peak Footfall Insights Card
@@ -637,9 +644,8 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
             title: data.pingsSent.title,
             countText: _formatCount(data.pingsSent.count),
             subtext: 'pedestrians',
-            barFillFraction: 1.0,
+            barFillFraction: data.pingsSent.count > 0 ? 1.0 : 0.0,
             barColor: MarketColors.primary,
-            isSampleData: data.pingsSent.isSampleData,
           ),
           const SizedBox(height: 14),
 
@@ -649,9 +655,10 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
             title: data.deliveredAndOpened.title,
             countText: _formatCount(data.deliveredAndOpened.count),
             subtext: '· ${data.deliveredAndOpened.conversionRate}%',
-            barFillFraction: (data.deliveredAndOpened.conversionRate / 100).clamp(0.05, 1.0),
+            barFillFraction: data.deliveredAndOpened.count > 0
+                ? (data.deliveredAndOpened.conversionRate / 100).clamp(0.05, 1.0)
+                : 0.0,
             barColor: MarketColors.primaryContainer,
-            isSampleData: data.deliveredAndOpened.isSampleData,
           ),
           const SizedBox(height: 14),
 
@@ -661,9 +668,10 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
             title: data.storeAndPromoViews.title,
             countText: _formatCount(data.storeAndPromoViews.count),
             subtext: '· ${data.storeAndPromoViews.conversionRate}%',
-            barFillFraction: (data.storeAndPromoViews.conversionRate / 100).clamp(0.05, 1.0),
+            barFillFraction: data.storeAndPromoViews.count > 0
+                ? (data.storeAndPromoViews.conversionRate / 100).clamp(0.05, 1.0)
+                : 0.0,
             barColor: const Color(0xFF6FBFFF),
-            isSampleData: data.storeAndPromoViews.isSampleData,
           ),
           const SizedBox(height: 14),
 
@@ -673,9 +681,10 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
             title: data.claimsGenerated.title,
             countText: _formatCount(data.claimsGenerated.count),
             subtext: '· ${data.claimsGenerated.conversionRate}%',
-            barFillFraction: (data.claimsGenerated.conversionRate / 100).clamp(0.05, 1.0),
+            barFillFraction: data.claimsGenerated.count > 0
+                ? (data.claimsGenerated.conversionRate / 100).clamp(0.05, 1.0)
+                : 0.0,
             barColor: const Color(0xFF7AD0FF),
-            isSampleData: data.claimsGenerated.isSampleData,
           ),
           const SizedBox(height: 14),
 
@@ -731,10 +740,6 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
                         ],
                       ),
                     ),
-                    if (data.counterRedemptions.isSampleData) ...[
-                      const SizedBox(width: 6),
-                      _buildSampleBadge(),
-                    ],
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -767,8 +772,9 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
                     color: MarketColors.surfaceContainerHigh,
                     child: FractionallySizedBox(
                       alignment: Alignment.centerLeft,
-                      widthFactor:
-                          (data.counterRedemptions.conversionRate / 100).clamp(0.05, 1.0),
+                      widthFactor: data.counterRedemptions.count > 0
+                          ? (data.counterRedemptions.conversionRate / 100).clamp(0.05, 1.0)
+                          : 0.0,
                       child: Container(color: MarketColors.primaryContainer),
                     ),
                   ),
@@ -788,6 +794,27 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
               ],
             ),
           ),
+          if (data.pingsSent.count == 0 && data.counterRedemptions.count == 0) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: MarketColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.info_outline_rounded, size: 16, color: MarketColors.outline),
+                  SizedBox(width: 8),
+                  Text(
+                    'No activity yet this week',
+                    style: TextStyle(fontSize: 12, color: MarketColors.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -800,7 +827,6 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
     required String subtext,
     required double barFillFraction,
     required Color barColor,
-    required bool isSampleData,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,35 +871,26 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
               ),
             ),
             const SizedBox(width: 8),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isSampleData) ...[
-                  _buildSampleBadge(),
-                  const SizedBox(width: 6),
-                ],
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: MarketColors.onSurface,
-                    ),
-                    children: [
-                      TextSpan(text: countText),
-                      const TextSpan(text: ' '),
-                      TextSpan(
-                        text: subtext,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: MarketColors.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+            RichText(
+              text: TextSpan(
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: MarketColors.onSurface,
                 ),
-              ],
+                children: [
+                  TextSpan(text: countText),
+                  const TextSpan(text: ' '),
+                  TextSpan(
+                    text: subtext,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: MarketColors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -886,31 +903,12 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
             color: MarketColors.surfaceContainerHigh,
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
-              widthFactor: barFillFraction.clamp(0.02, 1.0),
+              widthFactor: barFillFraction.clamp(0.0, 1.0),
               child: Container(color: barColor),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSampleBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFF59E0B)),
-      ),
-      child: const Text(
-        'Sample data',
-        style: TextStyle(
-          fontSize: 9,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF92400E),
-        ),
-      ),
     );
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/config.dart';
+
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/promo.dart';
@@ -58,7 +58,7 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
           _business = await _dataService.fetchMerchantBusiness(uid);
         }
       }
-      _business ??= await _dataService.fetchBusinessById(demoShopId);
+
 
       if (_business != null) {
         _promos = await _dataService.fetchPromosForBusiness(_business!.id);
@@ -319,7 +319,10 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
                                 setModalState(() => isSaving = true);
 
                                 try {
-                                  final bizId = _business?.id ?? demoShopId;
+                                  final bizId = _business?.id;
+                                  if (bizId == null) {
+                                    throw Exception('No business found. Please register your business.');
+                                  }
                                   final limitVal = int.tryParse(limitCtrl.text.trim()) ?? 100;
                                   final now = DateTime.now();
 

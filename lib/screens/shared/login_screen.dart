@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
 
-/// LoginScreen with standard email/password authentication and
-/// one-tap "Demo Shopper" / "Demo Merchant" shortcuts when demoMode == true.
+/// LoginScreen with standard email/password authentication.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -25,8 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
-  bool _isDemoShopperLoading = false;
-  bool _isDemoMerchantLoading = false;
   String? _errorMessage;
 
   @override
@@ -96,53 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _loginDemoShopper() async {
-    setState(() {
-      _isDemoShopperLoading = true;
-      _errorMessage = null;
-    });
 
-    try {
-      await _authService.signInDemoShopper();
-      await _handlePostLoginRouting();
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Demo Shopper sign-in failed: ${e.toString().replaceAll('Exception:', '').trim()}';
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDemoShopperLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _loginDemoMerchant() async {
-    setState(() {
-      _isDemoMerchantLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      await _authService.signInDemoMerchant();
-      await _handlePostLoginRouting();
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = 'Demo Merchant sign-in failed: ${e.toString().replaceAll('Exception:', '').trim()}';
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDemoMerchantLoading = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -303,85 +253,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         label: 'Log In',
                         isLoading: _isLoading,
-                        onPressed: (_isDemoShopperLoading || _isDemoMerchantLoading) ? null : _loginStandard,
+                        onPressed: _isLoading ? null : _loginStandard,
                       ),
                     ],
                   ),
                 ),
               ),
-
-              // Demo Shortcuts Section (shown only when demoMode == true)
-              if (demoMode) ...[
-                const SizedBox(height: 24),
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: MarketColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: MarketColors.primaryContainer.withValues(alpha: 0.35),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: MarketColors.primaryContainer.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(
-                              Icons.bolt_rounded,
-                              size: 18,
-                              color: MarketColors.primary,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'One-Tap Demo Logins',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: MarketColors.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Instant login for live evaluation (no typing required)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: MarketColors.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-
-                      // Demo Shopper Button
-                      SecondaryButton(
-                        width: double.infinity,
-                        label: 'Demo Shopper',
-                        icon: const Icon(Icons.shopping_bag_outlined, size: 18, color: MarketColors.primary),
-                        isLoading: _isDemoShopperLoading,
-                        onPressed: (_isLoading || _isDemoMerchantLoading) ? null : _loginDemoShopper,
-                      ),
-                      const SizedBox(height: 10),
-
-                      // Demo Merchant Button
-                      SecondaryButton(
-                        width: double.infinity,
-                        label: 'Demo Merchant (Kape Tahanan)',
-                        icon: const Icon(Icons.storefront_rounded, size: 18, color: MarketColors.primary),
-                        isLoading: _isDemoMerchantLoading,
-                        onPressed: (_isLoading || _isDemoShopperLoading) ? null : _loginDemoMerchant,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
 
               const SizedBox(height: 28),
 

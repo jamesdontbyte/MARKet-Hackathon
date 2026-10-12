@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/profile.dart';
@@ -47,10 +46,8 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
         _profile = await _authService.fetchCurrentProfile();
         _business ??= await _dataService.fetchMerchantBusiness(uid);
       }
-
-      _business ??= await _dataService.fetchBusinessById(demoShopId);
     } catch (_) {
-      // Graceful fallback to demo data
+      // Handled gracefully
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -95,9 +92,9 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
   @override
   Widget build(BuildContext context) {
     final biz = _business;
-    final ownerName = _profile?.fullName ?? 'Carlos Mendoza';
-    final email = _authService.currentUser?.email ?? 'carlos@kapetahanan.ph';
-    final phone = _profile?.phone ?? biz?.phone ?? '+63 917 555 0192';
+    final ownerName = _profile?.fullName ?? 'Business Owner';
+    final email = _authService.currentUser?.email ?? 'No email set';
+    final phone = _profile?.phone ?? biz?.phone ?? 'No phone set';
 
     return Scaffold(
       backgroundColor: MarketColors.surface,
@@ -201,7 +198,7 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                                       ),
                                     ),
                                     Text(
-                                      biz?.name ?? 'Kape Tahanan',
+                                      biz?.name ?? 'My Business',
                                       style: const TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w700,
@@ -402,31 +399,13 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Address: ${biz?.address ?? "San Jose de Buenavista, Antique"}',
+                            'Address: ${biz?.address ?? "Address not set"}',
                             style: const TextStyle(fontSize: 12, color: MarketColors.onSurfaceVariant),
                           ),
                           Text(
-                            'GPS: ${biz?.lat.toStringAsFixed(6) ?? demoShopLat.toStringAsFixed(6)}, ${biz?.lng.toStringAsFixed(6) ?? demoShopLng.toStringAsFixed(6)}',
+                            'GPS: ${biz != null ? "${biz.lat.toStringAsFixed(6)}, ${biz.lng.toStringAsFixed(6)}" : "Not set"}',
                             style: const TextStyle(fontSize: 12, color: MarketColors.outline),
                           ),
-                          if (demoMode) ...[
-                            const SizedBox(height: 10),
-                            OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size(double.infinity, 40),
-                                side: BorderSide(color: MarketColors.outlineVariant.withValues(alpha: 0.5)),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              ),
-                              icon: const Icon(Icons.developer_mode_rounded, size: 16),
-                              label: const Text(
-                                'Open Geofence Spike Screen',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pushNamed('/spike');
-                              },
-                            ),
-                          ],
                         ],
                       ),
                     ),

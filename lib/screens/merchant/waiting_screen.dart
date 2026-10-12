@@ -5,7 +5,6 @@ import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
-import '../../widgets/app_buttons.dart';
 import 'verified_screen.dart';
 import 'widgets/merchant_reg_stepper.dart';
 
@@ -82,9 +81,7 @@ class _WaitingScreenState extends State<WaitingScreen>
       // Continue with timer anyway
     }
 
-    if (demoMode) {
-      _startCountdown();
-    }
+    _startCountdown();
   }
 
   void _startCountdown() {
@@ -300,39 +297,37 @@ class _WaitingScreenState extends State<WaitingScreen>
                           ),
                           const SizedBox(height: 20),
 
-                          // Demo Auto-Verify Countdown Pill
-                          if (demoMode) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFEFF8FF),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: const Color(0xFFBAE6FD)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(
-                                    width: 14,
-                                    height: 14,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    _secondsRemaining > 0
-                                        ? 'Demo: Auto-verifying in $_secondsRemaining s...'
-                                        : 'Demo: Verifying account now...',
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Color(0xFF0284C7),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                          // Auto-Verify Countdown Pill
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEFF8FF),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: const Color(0xFFBAE6FD)),
                             ),
-                            const SizedBox(height: 16),
-                          ],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _secondsRemaining > 0
+                                      ? 'Auto-verifying in $_secondsRemaining s...'
+                                      : 'Verifying account now...',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF0284C7),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
                           if (_error != null) ...[
                             Text(
@@ -378,7 +373,7 @@ class _WaitingScreenState extends State<WaitingScreen>
                                             ),
                                           ),
                                           Text(
-                                            'Processed within the day (Instant for Demo)',
+                                            'Processed within the day',
                                             style: TextStyle(
                                               fontSize: 11,
                                               color: MarketColors.onSurfaceVariant,
@@ -431,15 +426,7 @@ class _WaitingScreenState extends State<WaitingScreen>
               ),
 
               // Bottom Actions
-              const SizedBox(height: 12),
-              PrimaryButton(
-                width: double.infinity,
-                height: 50,
-                label: _isVerifying ? 'Verifying...' : 'Verify Now (Demo Bypass)',
-                isLoading: _isVerifying,
-                icon: const Icon(Icons.verified_rounded, size: 20),
-                onPressed: _isVerifying ? null : _performAutoVerify,
-              ),
+              const SizedBox(height: 16),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () {

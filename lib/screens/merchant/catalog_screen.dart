@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/config.dart';
+
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/product.dart';
@@ -57,7 +57,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
           _business = await _dataService.fetchMerchantBusiness(uid);
         }
       }
-      _business ??= await _dataService.fetchBusinessById(demoShopId);
+
 
       if (_business != null) {
         _products = await _dataService.fetchProducts(_business!.id);
@@ -213,7 +213,10 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                 setModalState(() => isSaving = true);
 
                                 try {
-                                  final bizId = _business?.id ?? demoShopId;
+                                  final bizId = _business?.id;
+                                  if (bizId == null) {
+                                    throw Exception('No business found. Please register your business.');
+                                  }
                                   final priceVal = double.tryParse(priceCtrl.text.trim()) ?? 0.0;
 
                                   if (isEditing) {

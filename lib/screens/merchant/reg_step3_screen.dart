@@ -42,7 +42,7 @@ class _RegStep3ScreenState extends State<RegStep3Screen> {
   }
 
   Future<void> _pickAndUpload(String docType) async {
-    final uid = _authService.currentUserId ?? 'demo_merchant';
+    final uid = _authService.currentUserId ?? '';
     await _regController.pickAndUploadDocument(
       docType: docType,
       userId: uid,
@@ -106,7 +106,7 @@ class _RegStep3ScreenState extends State<RegStep3Screen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Demo Notice Pill
+                    // Notice Pill
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
@@ -121,7 +121,7 @@ class _RegStep3ScreenState extends State<RegStep3Screen> {
                           SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Demo Note: Document uploads go to the merchant-docs bucket. Skips or upload failures never block progress.',
+                              'Document uploads are securely stored in the merchant-docs bucket. Skips or upload failures do not block application progress.',
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,

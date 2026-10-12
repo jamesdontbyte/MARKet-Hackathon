@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/config.dart';
+
 import '../core/supabase.dart';
 import '../models/business.dart';
 import '../models/merchant_analytics.dart';
@@ -148,15 +148,7 @@ class DataService {
         return cat != null && interests.contains(cat);
       }).map((e) => Promo.fromJson(e as Map<String, dynamic>)).toList();
 
-      if (filtered.isNotEmpty) {
-        return filtered;
-      }
-
-      // If zero matches and fallback is enabled, return top overall
-      if (fallbackToTopPromoIfNoMatch && promos.isNotEmpty) {
-        return [promos.first];
-      }
-      return [];
+      return filtered;
     }
 
     return promos;
@@ -175,7 +167,7 @@ class DataService {
         .toList();
   }
 
-  /// Fetch a single promo by ID, with fallback for demo/notification ids
+  /// Fetch a single promo by ID.
   Future<Promo?> fetchPromoById(String promoId) async {
     try {
       final data = await _client
@@ -187,13 +179,8 @@ class DataService {
       if (data != null) {
         return Promo.fromJson(data);
       }
-    } catch (_) {
-      // Fallback below
-    }
-
-    // If promoId was a demo tag or not found in table, fallback to first active promo
-    final active = await fetchActivePromos();
-    return active.isNotEmpty ? active.first : null;
+    } catch (_) {}
+    return null;
   }
 
   /// Create a new promo
@@ -406,32 +393,19 @@ class DataService {
         }
       }
 
-      // If demo counts are zero, provide demo fallback numbers for presentation
-      if (counts.values.every((v) => v == 0)) {
-        return {
-          'ping_sent': 1840,
-          'opened': 620,
-          'viewed': 412,
-          'claimed': 142,
-          'redeemed': 118,
-        };
-      }
-
       return counts;
     } catch (_) {
       return {
-        'ping_sent': 1840,
-        'opened': 620,
-        'viewed': 412,
-        'claimed': 142,
-        'redeemed': 118,
+        'ping_sent': 0,
+        'opened': 0,
+        'viewed': 0,
+        'claimed': 0,
+        'redeemed': 0,
       };
     }
   }
 
-  /// Fetch 7-day conversion funnel metrics with real-data vs fallback tracking per step.
-  /// If a metric has no real data, uses fallback numbers from specs/04-demo-shortcuts.md.
-  /// As soon as real data exists (>0), it replaces the fallback.
+  /// Fetch 7-day conversion funnel metrics with real counts from geofence_events.
   Future<MerchantAnalyticsData> fetchMerchantFunnel(String businessId) async {
     try {
       final sevenDaysAgo =
@@ -476,7 +450,7 @@ class DataService {
         realRedeemed: realRedeemed,
       );
     } catch (_) {
-      return MerchantAnalyticsData.fallback();
+      return MerchantAnalyticsData.zero();
     }
   }
 

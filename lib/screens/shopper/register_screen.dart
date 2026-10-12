@@ -882,7 +882,7 @@ class _ShopperOtpBottomSheetState extends State<_ShopperOtpBottomSheet> {
               controller: _otpController,
               hintText: '123456',
               keyboardType: TextInputType.number,
-              helperText: demoMode ? 'Demo code: $demoOtp' : null,
+              helperText: 'Demo code: $demoOtp',
               autofocus: true,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _verifyOtp(),

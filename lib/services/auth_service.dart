@@ -1,11 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../core/env.dart';
 import '../core/supabase.dart';
 import '../models/profile.dart';
 import 'geofence_service.dart';
 
 /// AuthService handles user authentication, session streaming,
-/// profile management, and one-tap demo logins.
+/// and profile management.
 class AuthService {
   final SupabaseClient _client;
 
@@ -89,21 +88,7 @@ class AuthService {
     );
   }
 
-  /// One-tap demo shortcut for Shopper login
-  Future<AuthResponse> signInDemoShopper() async {
-    return await signInWithEmail(
-      email: demoShopperEmail,
-      password: demoShopperPassword,
-    );
-  }
 
-  /// One-tap demo shortcut for Merchant login (Kape Tahanan)
-  Future<AuthResponse> signInDemoMerchant() async {
-    return await signInWithEmail(
-      email: demoMerchantEmail,
-      password: demoMerchantPassword,
-    );
-  }
 
   /// Fetch the profile of the currently logged-in user
   Future<Profile?> fetchCurrentProfile() async {

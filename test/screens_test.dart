@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Log In'), findsOneWidget);
   });
 
-  testWidgets('LoginScreen displays fields, validation and demo quick login shortcuts', (tester) async {
+  testWidgets('LoginScreen displays fields and validation', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -91,10 +91,6 @@ void main() {
     expect(find.text('Log in to '), findsOneWidget);
     expect(find.text('Email Address'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
-
-    // Verify demoMode buttons exist
-    expect(find.text('Demo Shopper'), findsOneWidget);
-    expect(find.text('Demo Merchant (Kape Tahanan)'), findsOneWidget);
 
     // Tap Log In with empty fields to trigger validation
     await tester.tap(find.text('Log In'));
@@ -334,13 +330,12 @@ void main() {
     await tester.longPress(find.text('MARK'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Demo Geofence Simulation'), findsOneWidget);
+    expect(find.text('Geofence Simulation'), findsOneWidget);
     expect(find.text('Simulate entering zone'), findsOneWidget);
     expect(find.text('Simulate leaving zone'), findsOneWidget);
-    expect(find.text('Open Geofence Spike Screen'), findsOneWidget);
 
     // Dismiss bottom sheet and cleanup timers
-    Navigator.of(tester.element(find.text('Demo Geofence Simulation'))).pop();
+    Navigator.of(tester.element(find.text('Geofence Simulation'))).pop();
     await tester.pumpAndSettle();
   });
 }

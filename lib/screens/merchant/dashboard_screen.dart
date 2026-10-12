@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/business.dart';
+import '../../models/merchant_analytics.dart';
 import '../../models/promo.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
@@ -32,6 +33,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
 
   Business? _business;
   List<Promo> _promos = [];
+  MerchantAnalyticsData? _funnelData;
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -56,11 +58,9 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
         }
       }
 
-      // If still null, fallback to demo shop Kape Tahanan
-      _business ??= await _dataService.fetchBusinessById(demoShopId);
-
       if (_business != null) {
         _promos = await _dataService.fetchPromosForBusiness(_business!.id);
+        _funnelData = await _dataService.fetchMerchantFunnel(_business!.id);
       }
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception:', '').trim();
@@ -183,7 +183,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                                     ),
                                     const SizedBox(height: 6),
                                     Text(
-                                      biz?.name ?? 'Kape Tahanan',
+                                      biz?.name ?? 'My Business',
                                       style: const TextStyle(
                                         fontSize: 24,
                                         fontWeight: FontWeight.w800,
@@ -240,8 +240,10 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
   }
 
   Widget _buildPerformanceCard() {
-    final claimsCount = _promos.fold<int>(0, (sum, p) => sum + p.redeemedCount);
-    final displayClaims = claimsCount > 0 ? claimsCount.toString() : '142';
+    final viewsCount = _funnelData?.storeAndPromoViews.count ?? 0;
+    final claimsCount = _funnelData?.claimsGenerated.count ??
+        _promos.fold<int>(0, (sum, p) => sum + p.redeemedCount);
+    final hasActivity = viewsCount > 0 || claimsCount > 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -347,37 +349,22 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          const Text(
-                            '412',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: MarketColors.onSurface,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          _buildSampleBadge(),
-                        ],
+                      Text(
+                        '$viewsCount',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: MarketColors.onSurface,
+                        ),
                       ),
                       const SizedBox(height: 2),
-                      Row(
-                        children: const [
-                          Icon(Icons.trending_up_rounded,
-                              size: 14, color: Color(0xFF16A34A)),
-                          SizedBox(width: 4),
-                          Text(
-                            '+18% vs last week',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF16A34A),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        hasActivity ? 'Store & promo views' : 'No views yet this week',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: MarketColors.outline,
+                        ),
                       ),
                     ],
                   ),
@@ -414,39 +401,22 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
-                        children: [
-                          Text(
-                            displayClaims,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: MarketColors.onSurface,
-                            ),
-                          ),
-                          if (claimsCount <= 0) ...[
-                            const SizedBox(width: 6),
-                            _buildSampleBadge(),
-                          ],
-                        ],
+                      Text(
+                        '$claimsCount',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                          color: MarketColors.onSurface,
+                        ),
                       ),
                       const SizedBox(height: 2),
-                      Row(
-                        children: const [
-                          Icon(Icons.trending_up_rounded,
-                              size: 14, color: Color(0xFF16A34A)),
-                          SizedBox(width: 4),
-                          Text(
-                            '+34% claims rate',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF16A34A),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        hasActivity ? 'Vouchers claimed' : 'No claims yet this week',
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: MarketColors.outline,
+                        ),
                       ),
                     ],
                   ),
@@ -454,26 +424,28 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
               ),
             ],
           ),
+          if (!hasActivity) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: MarketColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: const [
+                  Icon(Icons.info_outline_rounded, size: 14, color: MarketColors.outline),
+                  SizedBox(width: 6),
+                  Text(
+                    'No activity yet this week',
+                    style: TextStyle(fontSize: 11, color: MarketColors.onSurfaceVariant),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildSampleBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFF59E0B)),
-      ),
-      child: const Text(
-        'Sample data',
-        style: TextStyle(
-          fontSize: 8,
-          fontWeight: FontWeight.w700,
-          color: Color(0xFF92400E),
-        ),
       ),
     );
   }

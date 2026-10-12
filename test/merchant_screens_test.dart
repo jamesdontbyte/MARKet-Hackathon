@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:market_final/core/config.dart';
 import 'package:market_final/models/business.dart';
 import 'package:market_final/models/profile.dart';
 import 'package:market_final/screens/merchant/account_screen.dart';
@@ -25,19 +24,19 @@ void main() {
     address: 'Corner Tradisyonal St., Brgy. San Pedro',
     phone: '917 842 5521',
     hours: 'Mon – Sun: 7:00 AM – 9:00 PM',
-    lat: demoShopLat,
-    lng: demoShopLng,
+    lat: 10.7674886,
+    lng: 121.9428977,
     verified: true,
     coverUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24',
     createdAt: DateTime.now(),
   );
 
   group('MerchantRegController Unit Tests', () {
-    test('Initial controller defaults to demo shop coordinates and cafe category', () {
+    test('Initial controller defaults to empty coordinates and empty category', () {
       final controller = MerchantRegController();
-      expect(controller.lat, equals(demoShopLat));
-      expect(controller.lng, equals(demoShopLng));
-      expect(controller.category, equals('cafe'));
+      expect(controller.lat, isNull);
+      expect(controller.lng, isNull);
+      expect(controller.category, equals(''));
       expect(controller.isOtpVerified, isFalse);
     });
 

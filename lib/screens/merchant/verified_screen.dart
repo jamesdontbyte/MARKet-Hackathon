@@ -57,7 +57,7 @@ class _VerifiedScreenState extends State<VerifiedScreen> {
   Widget build(BuildContext context) {
     final bizName = _business?.name.isNotEmpty == true
         ? _business!.name
-        : 'Kape Tahanan';
+        : 'Your Business';
 
     return Scaffold(
       backgroundColor: MarketColors.surface,

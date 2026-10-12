@@ -10,16 +10,9 @@ const Duration notificationCooldown = Duration(minutes: 3);
 const String demoOtp = '123456';
 const int demoAutoVerifySeconds = 10;
 
-// Demo shop = Kape Tahanan (real coordinates)
-const String demoShopId = '00000000-0000-0000-0000-000000000001';
-const String demoShopName = 'Kape Tahanan';
-const double demoShopLat = 10.754707481558897;
-const double demoShopLng = 121.93442817768808;
-
-// Demo & geofence flags
+// Geofence & simulation flags
 const bool perBusinessGeofence = false;
-const bool demoMode = true;
-const bool fallbackToTopPromoIfNoMatch = true;
+const bool emergencySimulate = true;
 
 /// 8 Canonical category slugs
 const List<String> canonicalCategories = [

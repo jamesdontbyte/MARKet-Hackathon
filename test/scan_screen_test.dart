@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:market_final/core/config.dart';
 import 'package:market_final/models/business.dart';
 import 'package:market_final/screens/merchant/analytics_screen.dart';
 import 'package:market_final/screens/merchant/scan_screen.dart';
@@ -51,8 +50,8 @@ void main() {
     address: 'Corner Tradisyonal St., Brgy. San Pedro',
     phone: '917 842 5521',
     hours: 'Mon – Sun: 7:00 AM – 9:00 PM',
-    lat: demoShopLat,
-    lng: demoShopLng,
+    lat: 10.7674886,
+    lng: 121.9428977,
     verified: true,
     coverUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24',
     createdAt: DateTime.now(),
@@ -312,7 +311,7 @@ void main() {
       expect(find.text('Geofence Range'), findsOneWidget);
       expect(find.text('Active Discovery Radius'), findsOneWidget);
 
-      // 5-Step Funnel with fallback numbers
+      // 5-Step Funnel with real counts and empty state when unpopulated
       expect(find.text('Conversion Funnel'), findsOneWidget);
       expect(find.text('Geofence Pings Sent'), findsOneWidget);
       expect(find.text('Delivered & Opened Notifications'), findsOneWidget);
@@ -320,8 +319,9 @@ void main() {
       expect(find.text('Promo Claims Generated'), findsOneWidget);
       expect(find.text('Counter QR Scanned / Redeemed'), findsOneWidget);
 
-      // Verify "Sample data" labels appear on unpopulated metrics
-      expect(find.text('Sample data'), findsWidgets);
+      // Verify no "Sample data" labels and that empty state appears when zero
+      expect(find.text('Sample data'), findsNothing);
+      expect(find.text('No activity yet this week'), findsOneWidget);
 
       // Peak Footfall Insights
       expect(find.text('Peak Footfall Insights'), findsOneWidget);

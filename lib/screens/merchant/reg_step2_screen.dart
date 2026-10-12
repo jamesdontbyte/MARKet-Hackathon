@@ -50,34 +50,24 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
     _regController = widget.controller;
 
     _nameController = TextEditingController(
-      text: _regController.businessName.isNotEmpty
-          ? _regController.businessName
-          : 'Kape Tahanan Specialty Brews',
+      text: _regController.businessName,
     );
     _bioController = TextEditingController(
-      text: _regController.bio.isNotEmpty
-          ? _regController.bio
-          : 'Hand-roasted heirloom Philippine coffee blends, slow drip brews, and homemade native pastries served in an open garden setting.',
+      text: _regController.bio,
     );
     _addressController = TextEditingController(
-      text: _regController.address.isNotEmpty
-          ? _regController.address
-          : 'Corner Tradisyonal St., Brgy. San Pedro',
+      text: _regController.address,
     );
     _phoneController = TextEditingController(
       text: _regController.contactPhone.isNotEmpty
           ? _regController.contactPhone
-          : (_regController.phone.isNotEmpty ? _regController.phone : '917 842 5521'),
+          : _regController.phone,
     );
     _hoursController = TextEditingController(
-      text: _regController.hours.isNotEmpty
-          ? _regController.hours
-          : 'Mon – Sun: 7:00 AM – 9:00 PM',
+      text: _regController.hours,
     );
 
-    _selectedCategory = _regController.category.isNotEmpty
-        ? _regController.category
-        : 'cafe';
+    _selectedCategory = _regController.category;
 
     _selectedMunicipality = _municipalities.contains(_regController.municipality)
         ? _regController.municipality
@@ -100,6 +90,20 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
     });
 
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedCategory.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please select a primary category';
+      });
+      return;
+    }
+
+    if (_regController.lat == null || _regController.lng == null) {
+      setState(() {
+        _errorMessage = 'Please tap "Use my current location" to set store GPS coordinates';
+      });
+      return;
+    }
 
     _regController.businessName = _nameController.text.trim();
     _regController.category = _selectedCategory;
@@ -218,7 +222,7 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
                             AppTextField(
                               controller: _nameController,
                               label: 'Registered Business Name *',
-                              hintText: 'e.g. Kape Tahanan',
+                              hintText: "e.g. Maria's Artisan Bakery",
                               prefixIcon: const Icon(Icons.storefront_rounded, size: 20, color: MarketColors.outline),
                               helperText: 'Must match your DTI or BIR trade name',
                               validator: (v) {
@@ -243,11 +247,15 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
                                   ),
                                 ),
                                 Text(
-                                  categoryLabels[_selectedCategory] ?? _selectedCategory,
-                                  style: const TextStyle(
+                                  _selectedCategory.isEmpty
+                                      ? 'None selected'
+                                      : (categoryLabels[_selectedCategory] ?? _selectedCategory),
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: MarketColors.primary,
+                                    color: _selectedCategory.isEmpty
+                                        ? MarketColors.outline
+                                        : MarketColors.primary,
                                   ),
                                 ),
                               ],
@@ -528,11 +536,15 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
                                     ListenableBuilder(
                                       listenable: _regController,
                                       builder: (context, _) => Text(
-                                        'Lat: ${_regController.lat.toStringAsFixed(6)}, Lng: ${_regController.lng.toStringAsFixed(6)}',
-                                        style: const TextStyle(
+                                        _regController.lat != null && _regController.lng != null
+                                            ? 'Lat: ${_regController.lat!.toStringAsFixed(6)}, Lng: ${_regController.lng!.toStringAsFixed(6)}'
+                                            : 'Coordinates not set',
+                                        style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.w600,
-                                          color: MarketColors.primary,
+                                          color: _regController.lat != null
+                                              ? MarketColors.primary
+                                              : MarketColors.outline,
                                         ),
                                       ),
                                     ),
@@ -583,9 +595,11 @@ class _RegStep2ScreenState extends State<RegStep2Screen> {
                                       const SizedBox(height: 6),
                                       Text(
                                         _regController.locationMessage!,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 11,
-                                          color: MarketColors.outline,
+                                          color: _regController.lat != null
+                                              ? MarketColors.outline
+                                              : MarketColors.error,
                                         ),
                                       ),
                                     ],

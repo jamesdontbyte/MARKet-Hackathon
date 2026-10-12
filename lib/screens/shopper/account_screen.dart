@@ -318,42 +318,7 @@ class _AccountScreenState extends State<AccountScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 20),
 
-                    // Debug & Geofence Spike Access (shown only when demoMode is true)
-                    if (demoMode) ...[
-                      AppCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: const [
-                                Icon(Icons.bug_report_rounded, size: 20, color: MarketColors.primary),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Hardware Spike Harness',
-                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Inspect raw GPS stream, mock locations, and lockscreen background alerts on physical device.',
-                              style: TextStyle(fontSize: 12, color: MarketColors.onSurfaceVariant),
-                            ),
-                            const SizedBox(height: 12),
-                            PrimaryButton(
-                              width: double.infinity,
-                              height: 44,
-                              label: 'Open Geofence Spike Screen',
-                              icon: const Icon(Icons.explore_rounded, size: 18),
-                              onPressed: () => Navigator.of(context).pushNamed('/spike'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
 
                     // Log out
                     SecondaryButton(

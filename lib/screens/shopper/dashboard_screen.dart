@@ -48,8 +48,8 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   String _selectedCategory = 'all';
   String _searchQuery = '';
 
-  double _userLat = demoZoneLat;
-  double _userLng = demoZoneLng;
+  double? _userLat;
+  double? _userLng;
   bool _hasPermissions = true;
 
   final List<Map<String, String>> _categories = const [
@@ -127,10 +127,13 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
         if (pos != null) {
           _userLat = pos.latitude;
           _userLng = pos.longitude;
+        } else {
+          _userLat = null;
+          _userLng = null;
         }
       } catch (_) {
-        _userLat = demoZoneLat;
-        _userLng = demoZoneLng;
+        _userLat = null;
+        _userLng = null;
       }
 
       if (mounted) {
@@ -210,7 +213,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Demo Geofence Simulation',
+                  'Geofence Simulation',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -240,6 +243,17 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                   subtitle: const Text('Fires promo notification in San Jose'),
                   onTap: () {
                     Navigator.pop(ctx);
+                    if (_activePromos.isEmpty) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No active promos to simulate'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
+                    }
                     GeofenceService().simulateEnter();
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -276,26 +290,6 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                     }
                   },
                 ),
-                if (demoMode) ...[
-                  const Divider(),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEFF6FF),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.bug_report_rounded, color: Color(0xFF2563EB)),
-                    ),
-                    title: const Text('Open Geofence Spike Screen', style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Live GPS logs, coordinates & diagnostics'),
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      Navigator.of(context).pushNamed('/spike');
-                    },
-                  ),
-                ],
               ],
             ),
           ),
@@ -304,8 +298,9 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     );
   }
 
-  double _getDistanceToBusiness(Business b) {
-    return Geolocator.distanceBetween(_userLat, _userLng, b.latitude, b.longitude);
+  double? _getDistanceToBusiness(Business b) {
+    if (_userLat == null || _userLng == null) return null;
+    return Geolocator.distanceBetween(_userLat!, _userLng!, b.latitude, b.longitude);
   }
 
   String _formatDistance(double meters) {
@@ -376,7 +371,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
         elevation: 0.5,
         titleSpacing: MarketSpacing.screenMargin,
         title: GestureDetector(
-          onLongPress: demoMode ? _showSimulationSheet : null,
+          onLongPress: emergencySimulate ? _showSimulationSheet : null,
           behavior: HitTestBehavior.opaque,
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -819,32 +814,33 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                       ),
 
                       // Distance Badge
-                      Positioned(
-                        bottom: 10,
-                        right: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: MarketColors.inverseSurface.withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.near_me_rounded, size: 11, color: MarketColors.inverseOnSurface),
-                              const SizedBox(width: 3),
-                              Text(
-                                _formatDistance(dist),
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w600,
-                                  color: MarketColors.inverseOnSurface,
+                      if (dist != null)
+                        Positioned(
+                          bottom: 10,
+                          right: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: MarketColors.inverseSurface.withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.near_me_rounded, size: 11, color: MarketColors.inverseOnSurface),
+                                const SizedBox(width: 3),
+                                Text(
+                                  _formatDistance(dist),
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: MarketColors.inverseOnSurface,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),

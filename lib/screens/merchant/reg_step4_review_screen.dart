@@ -169,7 +169,9 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
                         _buildRow('Hotline', '+63 ${_regController.contactPhone}'),
                         _buildRow('Operating Hours', _regController.hours),
                         _buildRow('Coordinates',
-                            '${_regController.lat.toStringAsFixed(5)}, ${_regController.lng.toStringAsFixed(5)}'),
+                            _regController.lat != null && _regController.lng != null
+                                ? '${_regController.lat!.toStringAsFixed(5)}, ${_regController.lng!.toStringAsFixed(5)}'
+                                : '—'),
                         _buildRow('Bio', _regController.bio),
                       ],
                     ),
@@ -349,7 +351,7 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              isUploaded ? 'Attached ✓' : 'Skipped for Demo',
+              isUploaded ? 'Attached ✓' : 'Not attached',
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w700,

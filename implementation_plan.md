@@ -298,3 +298,27 @@ lib/
   - `env.dart` is gitignored; `env.example.dart` is tracked; zero service-role keys anywhere in repository.
   - One-page demo presentation script and contingency playbook saved to `docs/demo_script.md`.
 - **CHECKPOINT:** Phase 6 Completed. App ready for Hackathon presentation.
+
+---
+
+### Phase 7A: Production Polish & Demo Decoupling
+**Goal:** Decouple codebase from demo shortcuts, remove sample data and fallback numbers, enforce real business ownership and live coordinates, retain OTP sheets and 10s auto-verify unconditionally, gate zone simulation behind `emergencySimulate`, delete `lib/spike/`.
+
+- **Key Tasks:**
+  1. Remove `demoMode` flag. Add `emergencySimulate = true` in `lib/core/config.dart`. Keep shopper and merchant OTP sheets (with "Demo code: 123456") and 10-second merchant auto-verification active without depending on any flag.
+  2. Remove "Demo Shopper" and "Demo Merchant (Kape Tahanan)" quick-login buttons from `LoginScreen`, along with demo sign-in methods in `AuthService` and demo credentials from `env.dart`/`env.example.dart`.
+  3. Keep long-press on "MARK" logo in Shopper Dashboard header, gated by `emergencySimulate`. Simulation sheet contains only "Simulate entering zone" and "Simulate leaving zone". If no active promo exists, display "No active promos to simulate".
+  4. Delete `lib/spike/`, `/spike` route in `main.dart`, and every link to it.
+  5. Merchant waiting screen: Keep 10-second timer. Remove manual bypass button and demo wording ("Demo: ...", "Demo Bypass").
+  6. Merchant side: Always use logged-in owner's business looked up by `owner_id`. Remove Kape Tahanan defaults, `demoShopLat`/`demoShopLng`, and prefilled category. Registration Step 2 starts empty. "Use my current location" requests permission; if denied/unavailable, displays error without silently falling back to fixed coordinates.
+  7. Remove all sample data, fallback funnel numbers, and "Sample data" badges. Show real counts. Zero displays 0 with empty state.
+  8. Remove `fallbackToTopPromoIfNoMatch` and any placeholder content shown as real data. Empty state for lists without data.
+  9. Shopper dashboard distances: Use real user location. If unavailable, display no distance badge. Remove demo-zone fallback coordinates.
+  10. Search `lib/` for "demo", "sample", "hackathon", "mock", "Kape", "Tahanan", report each hit and disposition.
+  11. Update tests that depended on removed demo behavior. Verify via `flutter analyze`, `flutter test`, and `flutter build apk --debug`.
+- **Status:** COMPLETED.
+  - `flutter analyze`: 0 issues found.
+  - `flutter test`: 39/39 tests passed.
+  - `flutter build apk --debug`: Built successfully (`build\app\outputs\flutter-apk\app-debug.apk`).
+- **CHECKPOINT:** Phase 7A Completed.
+

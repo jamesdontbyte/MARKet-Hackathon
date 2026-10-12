@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'core/config.dart';
 import 'core/supabase.dart';
 import 'core/theme.dart';
 import 'services/notification_service.dart';
@@ -28,7 +27,6 @@ import 'screens/shopper/promo_detail_screen.dart';
 import 'screens/shopper/register_screen.dart';
 import 'screens/shopper/roam_screen.dart';
 import 'screens/shopper/stash_screen.dart';
-import 'spike/geofence_spike_screen.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -95,7 +93,6 @@ class MarketApp extends StatelessWidget {
         '/merchant-analytics': (_) => const MerchantAnalyticsScreen(),
         '/merchant-scan': (_) => const MerchantScanScreen(),
         '/merchant-account': (_) => const MerchantAccountScreen(),
-        '/spike': (_) => demoMode ? const GeofenceSpikeScreen() : const SplashScreen(),
       },
     );
   }

@@ -192,49 +192,7 @@ class _ShopperHomeScreenState extends State<ShopperHomeScreen> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Hardware & Geofence Spike Action (shown only when demoMode is true)
-                    if (demoMode) ...[
-                      AppCard(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: const [
-                                Icon(Icons.radar_rounded, color: MarketColors.primary, size: 22),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Hardware & Geofence Verification',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: MarketColors.onSurface,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Access the device verification harness to test background location updates, lockscreen promo notifications, and simulated San Jose zone triggers.',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: MarketColors.onSurfaceVariant,
-                                height: 1.4,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            PrimaryButton(
-                              width: double.infinity,
-                              label: 'Open Geofence Spike Screen',
-                              icon: const Icon(Icons.explore_rounded, size: 18),
-                              onPressed: () {
-                                Navigator.of(context).pushNamed('/spike');
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+
 
                     // Log out
                     SecondaryButton(

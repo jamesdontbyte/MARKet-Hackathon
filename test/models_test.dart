@@ -4,6 +4,7 @@ import 'package:market_final/models/product.dart';
 import 'package:market_final/models/profile.dart';
 import 'package:market_final/models/promo.dart';
 import 'package:market_final/models/redemption.dart';
+import 'package:market_final/models/merchant_analytics.dart';
 
 void main() {
   group('Models Serialization & Deserialization', () {
@@ -137,6 +138,16 @@ void main() {
       );
       expect(redeemed.isRedeemed, isTrue);
       expect(redeemed.status, 'redeemed');
+    });
+
+    test('MerchantAnalyticsData.zero initializes all counts to 0 and empty state', () {
+      final data = MerchantAnalyticsData.zero();
+      expect(data.pingsSent.count, equals(0));
+      expect(data.deliveredAndOpened.count, equals(0));
+      expect(data.storeAndPromoViews.count, equals(0));
+      expect(data.claimsGenerated.count, equals(0));
+      expect(data.counterRedemptions.count, equals(0));
+      expect(data.hasActivity, isFalse);
     });
   });
 }
