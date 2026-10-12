@@ -132,7 +132,8 @@ void main() {
 
       final android = details.android;
       expect(android, isNotNull);
-      expect(android!.styleInformation, isA<BigPictureStyleInformation>());
+      expect(android!.icon, equals('@drawable/ic_stat_market'));
+      expect(android.styleInformation, isA<BigPictureStyleInformation>());
 
       final style = android.styleInformation as BigPictureStyleInformation;
       expect(style.contentTitle, equals('20% OFF Coffee'));
@@ -149,8 +150,9 @@ void main() {
 
       final android = details.android;
       expect(android, isNotNull);
+      expect(android!.icon, equals('@drawable/ic_stat_market'));
       // Fallback: styleInformation is null (standard text notification)
-      expect(android!.styleInformation, isNull);
+      expect(android.styleInformation, isNull);
     });
 
     test('5. Falls back to text notification when image download fails (fake downloader)', () async {

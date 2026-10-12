@@ -14,7 +14,7 @@ class NotificationService {
   Future<void> init({void Function(String? payload)? onTapped}) async {
     onNotificationTapped = onTapped;
 
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings('@drawable/ic_stat_market');
     await _plugin.initialize(
       const InitializationSettings(android: android),
       onDidReceiveNotificationResponse: (response) {
@@ -68,7 +68,7 @@ class NotificationService {
       channelDescription: 'Promotions from nearby businesses',
       importance: Importance.max,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: '@drawable/ic_stat_market',
       styleInformation: bigPictureStyle,
     );
 

@@ -552,7 +552,7 @@ lib/
 - **Tasks:**
   1. **Edge Function (supabase/functions/chat/index.ts):**
      - Update system prompt: plain text only (no markdown emphasis **, __, , no # headings, no tables).
-     - Bullet lines use • , numbered steps use 1., 2..
+     - Bullet lines use â€¢ , numbered steps use 1., 2..
      - Promos formatted as Business name (about 200 m away) - Promo title: value (distances in m under 1000, km above).
      - Never output IDs, UUIDs, function calls, or Propose Actions in reply text.
      - :::draft blocks strictly limited to user requests to write copy.
@@ -562,7 +562,7 @@ lib/
   2. **Data Models & Sanitizer (lib/models/chat.dart):**
      - Add SuggestedPromo model (id, title, businessName, value, distance).
      - Add suggestedPromos field to ChatMessage.
-     - Add client-side sanitizeAssistantReply(String text): strips **, __, , leading #, UUIDs, function calls, and Propose Actions; converts *  and -  to • ; collapses >2 blank lines; trims trailing spaces; protects draft block text while stripping emphasis characters.
+     - Add client-side sanitizeAssistantReply(String text): strips **, __, , leading #, UUIDs, function calls, and Propose Actions; converts *  and -  to â€¢ ; collapses >2 blank lines; trims trailing spaces; protects draft block text while stripping emphasis characters.
      - Automatically sanitize assistant chat message content.
   3. **Chat Service (lib/services/chat_service.dart):**
      - Parse suggested_promos and pass to ChatMessage.
@@ -572,8 +572,44 @@ lib/
      - Render compact tappable promo suggestion cards with business name, title, value, distance, navigating to PromoDetailScreen. Never expose IDs.
      - Action confirm cards display friendly titles and descriptions without IDs or function names.
      - Prevent RenderFlex overflow at 360x640 and 411x891 at 1.0 and 1.5 scales.
-  5. **Tests & Verification (	est/ai_assistant_test.dart):**
+  5. **Tests & Verification (test/ai_assistant_test.dart):**
      - Unit tests verifying sanitization rules, bullet conversions, draft preservation.
      - Widget tests verifying plain answers do not show Draft card, and promo suggestion cards do not show IDs.
      - Responsive tests for small screens and high text scales.
      - Full verification with flutter analyze, flutter test, and flutter build apk --debug.
+
+---
+
+### Phase 12: Replace Flutter Logo with MARKet Logo & App Branding
+
+**Goal:** Replace every default Flutter icon/logo with the official MARKet logo (assets/logos/logo_icon.png) across Android launcher icons (legacy, round, adaptive), notification status bar silhouettes, foreground location service notification, and verify app branding.
+
+- **Tasks:**
+  1. **Generate Logo & Notification Assets:**
+     - Save `assets/logos/logo_icon_transparent.png` (transparent background version of the logo).
+     - Save `assets/logos/logo_icon_foreground.png` (transparent 1024x1024 canvas, logo scaled to 60% of canvas, centered).
+     - Save `assets/logos/logo_icon_legacy.png` (1024x1024 solid white background `#FFFFFF` with 15% margin, centered).
+     - Generate white-on-transparent silhouette notification icons `ic_stat_market.png` across all drawable densities:
+       - `drawable-mdpi/ic_stat_market.png` (24x24 px)
+       - `drawable-hdpi/ic_stat_market.png` (36x36 px)
+       - `drawable-xhdpi/ic_stat_market.png` (48x48 px)
+       - `drawable-xxhdpi/ic_stat_market.png` (72x72 px)
+       - `drawable-xxxhdpi/ic_stat_market.png` (96x96 px)
+  2. **Launcher Icon Generation:**
+     - Add `flutter_launcher_icons: ^0.14.4` to `dev_dependencies` in `pubspec.yaml`.
+     - Configure `flutter_launcher_icons` with white adaptive background `#FFFFFF`, foreground image, and legacy image.
+     - Run `dart run flutter_launcher_icons` to replace all default Flutter icons in `res/mipmap-*` and generate adaptive XML and round icons.
+  3. **App Name & Manifest:**
+     - Verify `android:label="MARKet"` in `android/app/src/main/AndroidManifest.xml`.
+     - Ensure round icon `android:roundIcon="@mipmap/ic_launcher_round"` is declared.
+  4. **Notification Service & Geofence Service:**
+     - Update `lib/services/notification_service.dart` to use `@drawable/ic_stat_market` for initialization and promo notification details (`smallIcon`/`icon`).
+     - Update `lib/services/geofence_service.dart` `ForegroundNotificationConfig` to use `AndroidResource(name: 'ic_stat_market', defType: 'drawable')`.
+     - Verify big-picture promo notification continues to work.
+  5. **Leftover Branding Audit & Native Splash:**
+     - Inspect `android/`, `lib/`, `pubspec.yaml` for any leftover Flutter logos or `ic_launcher` references.
+     - Confirm native `launch_background.xml` has no default Flutter icons.
+  6. **Tests & Verification:**
+     - Verify file sizes and visual recognition of silhouette at 24px-96px.
+     - Unit test notification icon configuration.
+     - Execute `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.

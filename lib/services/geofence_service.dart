@@ -168,6 +168,10 @@ class GeofenceService {
       foregroundNotificationConfig: const ForegroundNotificationConfig(
         notificationTitle: 'Promo alerts are on',
         notificationText: 'Looking for deals near you',
+        notificationIcon: AndroidResource(
+          name: 'ic_stat_market',
+          defType: 'drawable',
+        ),
         enableWakeLock: true,
       ),
     );
