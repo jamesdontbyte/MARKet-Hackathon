@@ -56,8 +56,8 @@ class Business {
       verified: (json['verified'] as bool?) ?? false,
       coverUrl: json['cover_url'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
     );
   }
 
@@ -78,7 +78,7 @@ class Business {
       'rating': rating,
       'verified': verified,
       'cover_url': coverUrl,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 

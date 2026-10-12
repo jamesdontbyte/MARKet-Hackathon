@@ -47,31 +47,77 @@ class AuthService {
     return response;
   }
 
-  /// Sign up a new Merchant user and create their profile row
+  /// Sign up a new Merchant user and create/update their profile row
   Future<AuthResponse> signUpMerchant({
     required String email,
     required String password,
     String? fullName,
     String? phone,
   }) async {
-    final response = await _client.auth.signUp(
-      email: email.trim(),
-      password: password,
-      data: {
-        'role': 'merchant',
-        if (fullName != null) 'full_name': fullName.trim(),
-        if (phone != null) 'phone': phone.trim(),
-      },
-    );
+    AuthResponse response;
+    try {
+      response = await _client.auth.signUp(
+        email: email.trim(),
+        password: password,
+        data: {
+          'role': 'merchant',
+          if (fullName != null) 'full_name': fullName.trim(),
+          if (phone != null) 'phone': phone.trim(),
+        },
+      );
+    } on AuthException catch (e) {
+      if (e.message.toLowerCase().contains('already registered') ||
+          e.message.toLowerCase().contains('already exists')) {
+        response = await _client.auth.signInWithPassword(
+          email: email.trim(),
+          password: password,
+        );
+      } else {
+        rethrow;
+      }
+    }
 
-    final user = response.user;
+    // Ensure client has active session for RLS on public.profiles
+    if (response.session == null) {
+      try {
+        final signInRes = await _client.auth.signInWithPassword(
+          email: email.trim(),
+          password: password,
+        );
+        if (signInRes.session != null) {
+          response = signInRes;
+        }
+      } catch (_) {}
+    }
+
+    final user = response.user ?? _client.auth.currentUser;
     if (user != null) {
-      await _client.from('profiles').upsert({
+      final profilePayload = {
         'id': user.id,
         'role': 'merchant',
         'full_name': fullName?.trim(),
         'phone': phone?.trim(),
-      });
+        'interests': <String>[],
+        'prefs': {
+          'flash_promos': true,
+          'expiry_reminders': true,
+          'weekly_digest': false,
+        },
+      };
+
+      try {
+        await _client.from('profiles').upsert(
+          profilePayload,
+          onConflict: 'id',
+        );
+      } catch (upsertError) {
+        // If the profile row already exists or upsert fails, update it rather than failing
+        await _client.from('profiles').update({
+          'role': 'merchant',
+          'full_name': fullName?.trim(),
+          'phone': phone?.trim(),
+        }).eq('id', user.id);
+      }
     }
 
     return response;

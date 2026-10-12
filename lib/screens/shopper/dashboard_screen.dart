@@ -51,6 +51,10 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   double? _userLat;
   double? _userLng;
   bool _hasPermissions = true;
+  PermissionStatus _fgLocStatus = PermissionStatus.denied;
+  PermissionStatus _bgLocStatus = PermissionStatus.denied;
+  PermissionStatus _notifStatus = PermissionStatus.denied;
+  bool _isDebugExpanded = true;
 
   final List<Map<String, String>> _categories = const [
     {'slug': 'all', 'label': 'All Categories', 'icon': 'apps'},
@@ -70,10 +74,14 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
     WidgetsBinding.instance.addObserver(this);
     _checkPermissions();
     _loadDashboardData();
+    GeofenceService.instance.onPosition = (pos, inside, src) {
+      if (mounted) setState(() {});
+    };
   }
 
   @override
   void dispose() {
+    GeofenceService.instance.onPosition = null;
     WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     super.dispose();
@@ -88,12 +96,15 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
   Future<void> _checkPermissions() async {
     try {
-      final locInUse = await Permission.locationWhenInUse.isGranted;
-      final locAlways = await Permission.locationAlways.isGranted;
-      final notif = await Permission.notification.isGranted;
-      final granted = locInUse && locAlways && notif;
+      final fg = await Permission.locationWhenInUse.status;
+      final bg = await Permission.locationAlways.status;
+      final notif = await Permission.notification.status;
+      final granted = fg.isGranted && bg.isGranted && notif.isGranted;
       if (mounted) {
         setState(() {
+          _fgLocStatus = fg;
+          _bgLocStatus = bg;
+          _notifStatus = notif;
           _hasPermissions = granted;
         });
       }
@@ -485,6 +496,9 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Temporary Debug Panel (Phase 7B Diagnostics)
+                _buildDebugPanel(),
+
                 // 1. Missing Permissions Banner
                 _buildPermissionBanner(),
 
@@ -530,6 +544,305 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
           if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
         },
       ),
+    );
+  }
+
+  Widget _buildDebugPanel() {
+    final geo = GeofenceService.instance;
+    final isRunning = geo.isRunning;
+    final pos = geo.lastPosition;
+    final zones = geo.zones;
+    final interests = geo.shopperInterests;
+    final recentLogs = geo.recentDebugLogs;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(MarketSpacing.screenMargin, 12, MarketSpacing.screenMargin, 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isRunning ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+          width: 1.5,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isRunning ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'DEBUG PANEL (7B)',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              InkWell(
+                    onTap: () async {
+                      await _checkPermissions();
+                      await geo.refreshZones();
+                      try {
+                        final p = await Geolocator.getCurrentPosition(
+                          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+                        );
+                        geo.feedManualPosition(p);
+                      } catch (_) {}
+                      if (mounted) setState(() {});
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E293B),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.refresh_rounded, size: 12, color: Colors.cyanAccent),
+                          SizedBox(width: 4),
+                          Text('Poll GPS', style: TextStyle(color: Colors.cyanAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () => setState(() => _isDebugExpanded = !_isDebugExpanded),
+                    child: Icon(
+                      _isDebugExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                      color: Colors.white70,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ),
+          const SizedBox(height: 10),
+
+          // Row 1: Service Running & Businesses Loaded
+          Row(
+            children: [
+              Expanded(
+                child: _buildDebugItem(
+                  'Service Running',
+                  isRunning ? 'YES' : 'NO',
+                  isRunning ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                ),
+              ),
+              Expanded(
+                child: _buildDebugItem(
+                  'Businesses Loaded',
+                  '${zones.length}',
+                  zones.isNotEmpty ? Colors.cyanAccent : Colors.orangeAccent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // Row 2: Permission States
+          Row(
+            children: [
+              Expanded(
+                child: _buildDebugItem(
+                  'FG Location',
+                  _fgLocStatus.isGranted ? 'GRANTED' : _fgLocStatus.name.toUpperCase(),
+                  _fgLocStatus.isGranted ? const Color(0xFF10B981) : Colors.orangeAccent,
+                ),
+              ),
+              Expanded(
+                child: _buildDebugItem(
+                  'BG Location ("Always")',
+                  _bgLocStatus.isGranted ? 'GRANTED' : _bgLocStatus.name.toUpperCase(),
+                  _bgLocStatus.isGranted ? const Color(0xFF10B981) : Colors.orangeAccent,
+                ),
+              ),
+              Expanded(
+                child: _buildDebugItem(
+                  'Notifications',
+                  _notifStatus.isGranted ? 'GRANTED' : _notifStatus.name.toUpperCase(),
+                  _notifStatus.isGranted ? const Color(0xFF10B981) : Colors.orangeAccent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+
+          // Row 3: Current Location & Accuracy
+          _buildDebugItem(
+            'Current Location & Accuracy',
+            pos != null
+                ? '${pos.latitude.toStringAsFixed(6)}, ${pos.longitude.toStringAsFixed(6)} (±${pos.accuracy.toStringAsFixed(1)}m) [${geo.lastSource}]'
+                : 'No GPS fix yet (Fixes: ${geo.fixCount}, Provider: ${geo.activeProvider})',
+            pos != null ? Colors.white : Colors.amberAccent,
+          ),
+          const SizedBox(height: 6),
+
+          // Row 4: Shopper Interests
+          _buildDebugItem(
+            'Shopper Interests',
+            interests.isEmpty ? 'None selected (Matches ALL categories)' : interests.join(', '),
+            Colors.cyanAccent,
+          ),
+
+          if (_isDebugExpanded) ...[
+            const Divider(color: Color(0xFF334155), height: 16),
+            const Text(
+              'LOADED BUSINESSES IN RANGE ENGINE:',
+              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            if (zones.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Text('No verified businesses with active promos loaded yet.', style: TextStyle(color: Colors.orangeAccent, fontSize: 11)),
+              )
+            else
+              ...zones.map((zone) {
+                final dist = pos != null
+                    ? Geolocator.distanceBetween(zone.lat, zone.lng, pos.latitude, pos.longitude)
+                    : null;
+                final matchesInterest = interests.isEmpty || interests.contains(zone.category);
+                final cooldown = geo.getRemainingCooldown(zone.id);
+                final cooldownActive = cooldown != null && cooldown > Duration.zero;
+                final cooldownStr = cooldownActive ? '${cooldown.inMinutes}m ${cooldown.inSeconds % 60}s' : 'Ready (0s)';
+                final skipReason = geo.getLastSkipReason(zone.id) ?? (dist != null && dist > zone.radiusMeters ? 'Outside radius' : 'Evaluating');
+
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: dist != null && dist <= zone.radiusMeters
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF334155),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${zone.name} [${zone.category}]',
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                            ),
+                          ),
+                          Text(
+                            dist != null ? '${dist.toStringAsFixed(0)}m / ${zone.radiusMeters.toStringAsFixed(0)}m' : 'Radius: ${zone.radiusMeters.toStringAsFixed(0)}m',
+                            style: TextStyle(
+                              color: dist != null && dist <= zone.radiusMeters ? const Color(0xFF10B981) : Colors.amberAccent,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
+                        children: [
+                          Text(
+                            'Interest Match: ${matchesInterest ? "YES" : "NO"}',
+                            style: TextStyle(
+                              color: matchesInterest ? const Color(0xFF10B981) : Colors.redAccent,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Cooldown: $cooldownStr',
+                            style: TextStyle(
+                              color: cooldownActive ? Colors.orangeAccent : const Color(0xFF10B981),
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Promo: "${zone.promoBody}"',
+                        style: const TextStyle(color: Colors.cyanAccent, fontSize: 10),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Status / Skip Reason: $skipReason',
+                        style: TextStyle(
+                          color: skipReason.contains('Notification')
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFF94A3B8),
+                          fontSize: 10,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            const Divider(color: Color(0xFF334155), height: 16),
+            const Text(
+              'RECENT NOTIFICATION & GEOFENCE LOGS:',
+              style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 6),
+            Container(
+              height: 100,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF020617),
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFF1E293B)),
+              ),
+              child: recentLogs.isEmpty
+                  ? const Center(child: Text('Waiting for position updates or events...', style: TextStyle(color: Colors.white38, fontSize: 10)))
+                  : ListView.builder(
+                      itemCount: recentLogs.length,
+                      itemBuilder: (_, i) => Text(
+                        recentLogs[i],
+                        style: TextStyle(
+                          color: recentLogs[i].contains('NOTIF') || recentLogs[i].contains('ENTERED')
+                              ? const Color(0xFF10B981)
+                              : recentLogs[i].contains('SKIP')
+                                  ? Colors.amberAccent
+                                  : Colors.white70,
+                          fontSize: 10,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDebugItem(String label, String value, Color valueColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10), maxLines: 1, overflow: TextOverflow.ellipsis),
+        const SizedBox(height: 1),
+        Text(value, style: TextStyle(color: valueColor, fontSize: 11, fontWeight: FontWeight.w700), maxLines: 2, overflow: TextOverflow.ellipsis),
+      ],
     );
   }
 
@@ -1275,7 +1588,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                           const Icon(Icons.event_rounded, size: 12, color: MarketColors.outline),
                           const SizedBox(width: 4),
                           Text(
-                            'Valid until ${p.endsAt.month}/${p.endsAt.day}',
+                            'Valid until ${p.endsAt.toLocal().month}/${p.endsAt.toLocal().day}',
                             style: const TextStyle(fontSize: 11, color: MarketColors.secondary),
                           ),
                         ],

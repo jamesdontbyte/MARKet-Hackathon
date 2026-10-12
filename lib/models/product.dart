@@ -26,8 +26,8 @@ class Product {
       category: json['category'] as String?,
       description: json['description'] as String?,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
     );
   }
 
@@ -39,7 +39,7 @@ class Product {
       'price': price,
       'category': category,
       'description': description,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 

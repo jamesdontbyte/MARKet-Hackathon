@@ -41,8 +41,8 @@ class Profile {
             'weekly_digest': false,
           },
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
     );
   }
 
@@ -54,7 +54,7 @@ class Profile {
       'phone': phone,
       'interests': interests,
       'prefs': prefs,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 

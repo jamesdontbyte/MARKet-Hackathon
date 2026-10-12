@@ -56,7 +56,7 @@ class GeofenceService {
   AuthService get _effectiveAuthService => authService ?? AuthService();
 
   final void Function(String message)? onLog;
-  final void Function(Position position, Map<String, bool> inside, String source)? onPosition;
+  void Function(Position position, Map<String, bool> inside, String source)? onPosition;
   final void Function(GeofenceZone zone)? onZoneEntered;
   final void Function(String error)? onError;
 
@@ -94,6 +94,22 @@ class GeofenceService {
   DateTime? get lastFixTime => _lastAnyFixTime;
   String get lastSource => _lastSource;
   Position? get lastPosition => _lastPosition;
+  int get fixCount => _fixCount;
+
+  final Map<String, String> _lastSkipReasons = {};
+  String? getLastSkipReason(String zoneId) => _lastSkipReasons[zoneId];
+
+  final List<String> _recentDebugLogs = [];
+  List<String> get recentDebugLogs => List.unmodifiable(_recentDebugLogs);
+
+  void _recordLog(String msg) {
+    onLog?.call(msg);
+    final timestamp = DateTime.now().toIso8601String().substring(11, 19);
+    _recentDebugLogs.insert(0, '[$timestamp] $msg');
+    if (_recentDebugLogs.length > 40) {
+      _recentDebugLogs.removeLast();
+    }
+  }
 
   Duration? getRemainingCooldown(String zoneId) {
     final last = _lastNotified[zoneId];
@@ -270,10 +286,16 @@ class GeofenceService {
     _lastError = null;
     _lastPosition = p;
 
-    onLog?.call(
+    _recordLog(
       'FIX #${++_fixCount} [$source]: (${p.latitude.toStringAsFixed(6)}, ${p.longitude.toStringAsFixed(6)}) | acc: ${p.accuracy.toStringAsFixed(1)}m | mocked: ${p.isMocked} | provider: $_activeProvider',
     );
     for (final zone in zones) {
+      if (zone.promoId == null || zone.promoId!.isEmpty) {
+        _lastSkipReasons[zone.id] = 'No active promo';
+        _recordLog('SKIP ${zone.name}: no active promo');
+        continue;
+      }
+
       final distance = Geolocator.distanceBetween(
         zone.lat,
         zone.lng,
@@ -289,27 +311,39 @@ class GeofenceService {
 
       if (isInside && !wasInside) {
         _lastEntered[zone.id] = DateTime.now();
-        onLog?.call('ENTERED ${zone.name} (${distance.toStringAsFixed(0)} m)');
-        _notifyIfAllowed(zone);
+        _recordLog('ENTERED ${zone.name} (${distance.toStringAsFixed(0)} m)');
+        _notifyIfAllowed(zone, distance);
         onZoneEntered?.call(zone);
       } else if (!isInside && wasInside) {
-        onLog?.call('EXITED ${zone.name} (${distance.toStringAsFixed(0)} m)');
+        _lastSkipReasons[zone.id] = 'Exited (${distance.toStringAsFixed(0)}m > ${limit.toStringAsFixed(0)}m)';
+        _recordLog('EXITED ${zone.name} (${distance.toStringAsFixed(0)} m)');
+      } else if (!isInside) {
+        _lastSkipReasons[zone.id] = 'Outside radius (${distance.toStringAsFixed(0)}m > ${limit.toStringAsFixed(0)}m)';
+        _recordLog('SKIP ${zone.name}: outside radius (${distance.toStringAsFixed(0)}m > ${limit.toStringAsFixed(0)}m)');
       }
     }
     onPosition?.call(p, Map.of(_inside), source);
   }
 
-  void _notifyIfAllowed(GeofenceZone zone) {
+  void _notifyIfAllowed(GeofenceZone zone, [double? distance]) {
+    final distStr = distance != null ? ' (${distance.toStringAsFixed(0)}m)' : '';
     final last = _lastNotified[zone.id];
     if (last != null && DateTime.now().difference(last) < cooldown) {
-      onLog?.call('Skipped notification for ${zone.name} (cooldown active).');
+      final rem = cooldown - DateTime.now().difference(last);
+      final reason = 'Cooldown active (${rem.inSeconds}s left)';
+      _lastSkipReasons[zone.id] = reason;
+      _recordLog('SKIP ${zone.name}$distStr: cooldown active (${rem.inSeconds}s left)');
       return;
     }
     if (shopperInterests.isNotEmpty && !shopperInterests.contains(zone.category)) {
-      onLog?.call('Skipped notification for ${zone.name} (category ${zone.category} not in shopper interests).');
+      final reason = 'Interest mismatch: "${zone.category}" not in $shopperInterests';
+      _lastSkipReasons[zone.id] = reason;
+      _recordLog('SKIP ${zone.name}$distStr: interest mismatch (${zone.category} not in $shopperInterests)');
       return;
     }
     _lastNotified[zone.id] = DateTime.now();
+    _lastSkipReasons[zone.id] = 'Notification sent!';
+    _recordLog('NOTIFIED ${zone.name}$distStr: "${zone.promoTitle}" - "${zone.promoBody}"');
 
     NotificationService.instance.showPromo(
       id: zone.id.hashCode & 0x7fffffff,

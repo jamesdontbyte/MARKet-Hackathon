@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/config.dart';
 import '../../core/theme.dart';
+import '../../services/auth_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
 import 'merchant_reg_controller.dart';
@@ -11,10 +12,12 @@ import 'widgets/merchant_reg_stepper.dart';
 /// Matches Stitch frame: market_msme_registration_step_1_basics
 class RegStep1Screen extends StatefulWidget {
   final MerchantRegController? controller;
+  final AuthService? authService;
 
   const RegStep1Screen({
     super.key,
     this.controller,
+    this.authService,
   });
 
   @override
@@ -24,6 +27,7 @@ class RegStep1Screen extends StatefulWidget {
 class _RegStep1ScreenState extends State<RegStep1Screen> {
   final _formKey = GlobalKey<FormState>();
   late final MerchantRegController _regController;
+  late final AuthService _authService;
 
   late final TextEditingController _nameController;
   late final TextEditingController _dobController;
@@ -34,12 +38,14 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isSubmitting = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _regController = widget.controller ?? MerchantRegController();
+    _authService = widget.authService ?? AuthService();
 
     _nameController = TextEditingController(text: _regController.fullName);
     _dobController = TextEditingController(text: _regController.dob);
@@ -61,6 +67,12 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
   }
 
   void _triggerOtpVerification() {
+    setState(() {
+      _errorMessage = null;
+    });
+
+    if (!_formKey.currentState!.validate()) return;
+
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) {
       setState(() {
@@ -68,10 +80,6 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
       });
       return;
     }
-
-    setState(() {
-      _errorMessage = null;
-    });
 
     showModalBottomSheet(
       context: context,
@@ -81,12 +89,33 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
         return _MerchantOtpBottomSheet(
           phone: phone,
           onVerifySuccess: () async {
+            // Register merchant via Supabase Auth & create profiles row at Step 1,
+            // right after sign-up, the exact same way AuthService.signUpShopper does for shoppers.
+            await _authService.signUpMerchant(
+              email: _emailController.text.trim(),
+              password: _passwordController.text,
+              fullName: _nameController.text.trim(),
+              phone: '+63$phone',
+            );
+
             setState(() {
-              _regController.phone = phone;
+              _regController.fullName = _nameController.text.trim();
+              _regController.dob = _dobController.text.trim();
+              _regController.phone = '+63$phone';
+              _regController.email = _emailController.text.trim();
+              _regController.password = _passwordController.text;
               _regController.isOtpVerified = true;
             });
+
             if (modalContext.mounted) {
               Navigator.of(modalContext).pop();
+            }
+            if (mounted) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => RegStep2Screen(controller: _regController),
+                ),
+              );
             }
           },
         );
@@ -94,7 +123,7 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
     );
   }
 
-  void _onContinue() {
+  Future<void> _onContinue() async {
     setState(() {
       _errorMessage = null;
     });
@@ -106,18 +135,48 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
       return;
     }
 
+    // If OTP was already verified, ensure merchant auth user and profiles row exist
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await _authService.signUpMerchant(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        fullName: _nameController.text.trim(),
+        phone: '+63${_phoneController.text.trim()}',
+      );
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString().replaceAll('Exception:', '').trim();
+          _isSubmitting = false;
+        });
+      }
+      return; // Do NOT continue to next step if sign-up / profile creation fails!
+    }
+
+    if (mounted) {
+      setState(() {
+        _isSubmitting = false;
+      });
+    }
+
     // Save to controller
     _regController.fullName = _nameController.text.trim();
     _regController.dob = _dobController.text.trim();
-    _regController.phone = _phoneController.text.trim();
+    _regController.phone = '+63${_phoneController.text.trim()}';
     _regController.email = _emailController.text.trim();
     _regController.password = _passwordController.text;
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => RegStep2Screen(controller: _regController),
-      ),
-    );
+    if (mounted) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RegStep2Screen(controller: _regController),
+        ),
+      );
+    }
   }
 
   @override
@@ -542,8 +601,8 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                 width: double.infinity,
                 height: 52,
                 label: 'Continue to Business Information',
-                icon: const Icon(Icons.arrow_forward_rounded, size: 20),
-                onPressed: _onContinue,
+                isLoading: _isSubmitting,
+                onPressed: _isSubmitting ? null : _onContinue,
               ),
             ),
           ],

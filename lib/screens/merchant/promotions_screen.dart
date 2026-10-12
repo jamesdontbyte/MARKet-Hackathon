@@ -75,13 +75,13 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
   }
 
   List<Promo> get _filteredPromos {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     if (_selectedFilter == 'Active') {
-      return _promos.where((p) => p.active && now.isAfter(p.startsAt) && now.isBefore(p.endsAt)).toList();
+      return _promos.where((p) => p.active && (now.isAfter(p.startsAt) || now.isAtSameMomentAs(p.startsAt)) && now.isBefore(p.endsAt)).toList();
     } else if (_selectedFilter == 'Scheduled') {
       return _promos.where((p) => p.active && now.isBefore(p.startsAt)).toList();
     } else if (_selectedFilter == 'Expired') {
-      return _promos.where((p) => !p.active || now.isAfter(p.endsAt)).toList();
+      return _promos.where((p) => !p.active || now.isAfter(p.endsAt) || now.isAtSameMomentAs(p.endsAt)).toList();
     }
     return _promos;
   }
@@ -324,7 +324,18 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
                                     throw Exception('No business found. Please register your business.');
                                   }
                                   final limitVal = int.tryParse(limitCtrl.text.trim()) ?? 100;
-                                  final now = DateTime.now();
+                                  final localNow = DateTime.now();
+                                  final startsAt = DateTime.now().toUtc();
+                                  final localExpiryDate = localNow.add(Duration(days: durationDays));
+                                  final localEndsAt = DateTime(
+                                    localExpiryDate.year,
+                                    localExpiryDate.month,
+                                    localExpiryDate.day,
+                                    23,
+                                    59,
+                                    59,
+                                  );
+                                  final endsAt = localEndsAt.toUtc();
 
                                   final newPromo = Promo(
                                     id: '',
@@ -333,12 +344,12 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
                                     description: descCtrl.text.trim(),
                                     promoType: promoType,
                                     valueLabel: valueCtrl.text.trim(),
-                                    startsAt: now,
-                                    endsAt: now.add(Duration(days: durationDays)),
+                                    startsAt: startsAt,
+                                    endsAt: endsAt,
                                     redeemLimit: limitVal,
                                     redeemedCount: 0,
                                     active: true,
-                                    createdAt: now,
+                                    createdAt: startsAt,
                                   );
 
                                   await _dataService.createPromo(newPromo);
@@ -682,7 +693,7 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${promo.redeemedCount} / ${promo.redeemLimit} redeemed',
+                      '${promo.redeemedCount} / ${promo.redeemLimit} redeemed • Ends ${_formatDate(promo.endsAt)}',
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -762,5 +773,10 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime dt) {
+    final local = dt.toLocal();
+    return '${local.month}/${local.day}/${local.year}';
   }
 }

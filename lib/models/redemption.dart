@@ -28,10 +28,10 @@ class Redemption {
       code: ((json['code'] as String?) ?? '').toUpperCase().trim(),
       status: (json['status'] as String?) ?? 'issued',
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
       redeemedAt: json['redeemed_at'] != null
-          ? DateTime.parse(json['redeemed_at'] as String)
+          ? DateTime.parse(json['redeemed_at'] as String).toUtc()
           : null,
     );
   }
@@ -43,8 +43,8 @@ class Redemption {
       'user_id': userId,
       'code': code,
       'status': status,
-      'created_at': createdAt.toIso8601String(),
-      'redeemed_at': redeemedAt?.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
+      'redeemed_at': redeemedAt?.toUtc().toIso8601String(),
     };
   }
 

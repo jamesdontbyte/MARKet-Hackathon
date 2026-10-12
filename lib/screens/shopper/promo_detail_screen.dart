@@ -343,6 +343,7 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
   }
 
   String _formatDate(DateTime dt) {
-    return '${dt.month}/${dt.day}/${dt.year}';
+    final local = dt.toLocal();
+    return '${local.month}/${local.day}/${local.year}';
   }
 }

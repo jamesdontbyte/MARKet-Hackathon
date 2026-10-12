@@ -372,7 +372,7 @@ class DataService {
   Future<Map<String, int>> fetchMerchantAnalytics(String businessId) async {
     try {
       final sevenDaysAgo =
-          DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
+          DateTime.now().toUtc().subtract(const Duration(days: 7)).toIso8601String();
 
       final data = await _client
           .from('geofence_events')
@@ -411,7 +411,7 @@ class DataService {
   Future<MerchantAnalyticsData> fetchMerchantFunnel(String businessId) async {
     try {
       final sevenDaysAgo =
-          DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
+          DateTime.now().toUtc().subtract(const Duration(days: 7)).toIso8601String();
 
       final data = await _client
           .from('geofence_events')

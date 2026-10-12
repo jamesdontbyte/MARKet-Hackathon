@@ -149,5 +149,51 @@ void main() {
       expect(data.counterRedemptions.count, equals(0));
       expect(data.hasActivity, isFalse);
     });
+
+    test('Promo created at local time has starts_at <= now UTC and ends_at after it, ending in Z', () {
+      final localNow = DateTime.now();
+      final startsAt = DateTime.now().toUtc();
+      final localExpiryDate = localNow.add(const Duration(days: 7));
+      final localEndsAt = DateTime(
+        localExpiryDate.year,
+        localExpiryDate.month,
+        localExpiryDate.day,
+        23,
+        59,
+        59,
+      );
+      final endsAt = localEndsAt.toUtc();
+
+      final promo = Promo(
+        id: 'promo-local-time-test',
+        businessId: 'biz-123',
+        title: 'Flash Coffee Discount',
+        promoType: 'percent',
+        valueLabel: '20% OFF',
+        startsAt: startsAt,
+        endsAt: endsAt,
+        redeemLimit: 100,
+        redeemedCount: 0,
+        active: true,
+        createdAt: startsAt,
+      );
+
+      final nowUtc = DateTime.now().toUtc();
+      expect(promo.startsAt.isBefore(nowUtc) || promo.startsAt.isAtSameMomentAs(nowUtc), isTrue);
+      expect(promo.endsAt.isAfter(nowUtc), isTrue);
+      expect(promo.isCurrentlyValid, isTrue);
+
+      final json = promo.toJson();
+      expect(json['starts_at'], endsWith('Z'));
+      expect(json['ends_at'], endsWith('Z'));
+      expect(json['created_at'], endsWith('Z'));
+
+      final roundTrip = Promo.fromJson(json);
+      expect(roundTrip.startsAt.isUtc, isTrue);
+      expect(roundTrip.endsAt.isUtc, isTrue);
+      expect(roundTrip.startsAt.isBefore(DateTime.now().toUtc()) || roundTrip.startsAt.isAtSameMomentAs(DateTime.now().toUtc()), isTrue);
+      expect(roundTrip.endsAt.isAfter(DateTime.now().toUtc()), isTrue);
+      expect(roundTrip.isCurrentlyValid, isTrue);
+    });
   });
 }

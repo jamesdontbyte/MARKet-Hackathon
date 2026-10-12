@@ -29,9 +29,9 @@ class Promo {
 
   /// Evaluates whether the promo is currently redeemable
   bool get isCurrentlyValid {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     return active &&
-        now.isAfter(startsAt) &&
+        (now.isAfter(startsAt) || now.isAtSameMomentAs(startsAt)) &&
         now.isBefore(endsAt) &&
         redeemedCount < redeemLimit;
   }
@@ -51,17 +51,17 @@ class Promo {
       promoType: (json['promo_type'] as String?) ?? 'percent',
       valueLabel: json['value_label'] as String?,
       startsAt: json['starts_at'] != null
-          ? DateTime.parse(json['starts_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['starts_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
       endsAt: json['ends_at'] != null
-          ? DateTime.parse(json['ends_at'] as String)
-          : DateTime.now().add(const Duration(days: 7)),
+          ? DateTime.parse(json['ends_at'] as String).toUtc()
+          : DateTime.now().toUtc().add(const Duration(days: 7)),
       redeemLimit: (json['redeem_limit'] as num?)?.toInt() ?? 100,
       redeemedCount: (json['redeemed_count'] as num?)?.toInt() ?? 0,
       active: (json['active'] as bool?) ?? true,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : DateTime.now(),
+          ? DateTime.parse(json['created_at'] as String).toUtc()
+          : DateTime.now().toUtc(),
     );
   }
 
@@ -73,12 +73,12 @@ class Promo {
       'description': description,
       'promo_type': promoType,
       'value_label': valueLabel,
-      'starts_at': startsAt.toIso8601String(),
-      'ends_at': endsAt.toIso8601String(),
+      'starts_at': startsAt.toUtc().toIso8601String(),
+      'ends_at': endsAt.toUtc().toIso8601String(),
       'redeem_limit': redeemLimit,
       'redeemed_count': redeemedCount,
       'active': active,
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
 

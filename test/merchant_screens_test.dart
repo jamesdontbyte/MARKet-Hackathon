@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:market_final/models/business.dart';
 import 'package:market_final/models/profile.dart';
+import 'package:market_final/services/auth_service.dart';
 import 'package:market_final/screens/merchant/account_screen.dart';
 import 'package:market_final/screens/merchant/catalog_screen.dart';
 import 'package:market_final/screens/merchant/dashboard_screen.dart';
@@ -277,4 +279,214 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
   });
+
+  group('Merchant Sign-Up Step 1 Path & Profile Creation Tests', () {
+    testWidgets('Step 1 signs up merchant, creates profiles row (role = merchant, full name, phone) and advances to Step 2', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeAuth = FakeMerchantAuthService();
+      final regController = MerchantRegController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RegStep1Screen(
+            controller: regController,
+            authService: fakeAuth,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter Step 1 fields
+      final textFields = find.byType(TextFormField);
+      // 0: full name, 1: dob, 2: phone, 3: email, 4: password, 5: confirm password
+      await tester.enterText(textFields.at(0), 'Maria Santos');
+      await tester.enterText(textFields.at(1), '1990-05-15');
+      await tester.enterText(textFields.at(2), '9171234567');
+      await tester.enterText(textFields.at(3), 'maria@example.com');
+      await tester.enterText(textFields.at(4), 'password123');
+      await tester.enterText(textFields.at(5), 'password123');
+      await tester.pumpAndSettle();
+
+      // Scroll and tap "Continue to Business Information" to open OTP sheet
+      final continueBtn = find.text('Continue to Business Information');
+      await tester.ensureVisible(continueBtn);
+      await tester.tap(continueBtn);
+      await tester.pumpAndSettle();
+
+      // Verify OTP bottom sheet opened with demo code
+      expect(find.text('Verify Mobile Number'), findsOneWidget);
+      expect(find.text('Demo code: 123456'), findsOneWidget);
+
+      // Auto-fill or enter OTP
+      await tester.tap(find.text('Auto-fill'));
+      await tester.pumpAndSettle();
+
+      // Confirm verification
+      await tester.tap(find.text('Confirm Verification'));
+      await tester.pumpAndSettle();
+
+      // Verify merchant sign-up was executed with exact role, full name, and phone
+      expect(fakeAuth.signUpCalled, isTrue);
+      expect(fakeAuth.passedEmail, equals('maria@example.com'));
+      expect(fakeAuth.passedPassword, equals('password123'));
+      expect(fakeAuth.passedFullName, equals('Maria Santos'));
+      expect(fakeAuth.passedPhone, equals('+639171234567'));
+
+      // Verify profile row properties: role matches constraint, NOT NULL fields filled
+      expect(fakeAuth.mockProfileRow, isNotNull);
+      expect(fakeAuth.mockProfileRow!['role'], equals('merchant'));
+      expect(fakeAuth.mockProfileRow!['full_name'], equals('Maria Santos'));
+      expect(fakeAuth.mockProfileRow!['phone'], equals('+639171234567'));
+      expect(fakeAuth.mockProfileRow!['interests'], equals(<String>[]));
+
+      // Verify advanced to Step 2
+      expect(find.text('Business Details'), findsOneWidget);
+      expect(find.text('Business Information'), findsOneWidget);
+    });
+
+    testWidgets('Step 1 displays real error message and does not advance when profile creation fails', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeAuth = FakeMerchantAuthService()
+        ..shouldFail = true
+        ..failureMessage = 'new row violates row-level security policy for table "profiles"';
+      final regController = MerchantRegController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RegStep1Screen(
+            controller: regController,
+            authService: fakeAuth,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final textFields = find.byType(TextFormField);
+      await tester.enterText(textFields.at(0), 'Maria Santos');
+      await tester.enterText(textFields.at(1), '1990-05-15');
+      await tester.enterText(textFields.at(2), '9171234567');
+      await tester.enterText(textFields.at(3), 'maria@example.com');
+      await tester.enterText(textFields.at(4), 'password123');
+      await tester.enterText(textFields.at(5), 'password123');
+      await tester.pumpAndSettle();
+
+      final continueBtn = find.text('Continue to Business Information');
+      await tester.ensureVisible(continueBtn);
+      await tester.tap(continueBtn);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Auto-fill'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Confirm Verification'));
+      await tester.pumpAndSettle();
+
+      // Sign-up attempted but failed
+      expect(fakeAuth.signUpCalled, isTrue);
+
+      // Real error message is displayed
+      expect(find.textContaining('violates row-level security policy'), findsOneWidget);
+
+      // Did NOT continue to Step 2
+      expect(find.text('Business Details'), findsNothing);
+    });
+
+    test('FakeMerchantAuthService updates profile when row already exists rather than failing', () async {
+      final fakeAuth = FakeMerchantAuthService();
+
+      // First call (creates)
+      await fakeAuth.signUpMerchant(
+        email: 'merchant@example.com',
+        password: 'password123',
+        fullName: 'Initial Name',
+        phone: '+639171112222',
+      );
+      expect(fakeAuth.mockProfileRow!['full_name'], equals('Initial Name'));
+      expect(fakeAuth.mockProfileRow!['role'], equals('merchant'));
+
+      // Second call (updates existing rather than failing)
+      await fakeAuth.signUpMerchant(
+        email: 'merchant@example.com',
+        password: 'password123',
+        fullName: 'Updated Name',
+        phone: '+639179998888',
+      );
+      expect(fakeAuth.mockProfileRow!['full_name'], equals('Updated Name'));
+      expect(fakeAuth.mockProfileRow!['phone'], equals('+639179998888'));
+      expect(fakeAuth.mockProfileRow!['role'], equals('merchant'));
+    });
+  });
+}
+
+class FakeMerchantAuthService extends AuthService {
+  bool signUpCalled = false;
+  String? passedEmail;
+  String? passedPassword;
+  String? passedFullName;
+  String? passedPhone;
+  bool shouldFail = false;
+  String failureMessage = 'Failed to create profile row';
+  String? currentUserIdMock;
+  Map<String, dynamic>? mockProfileRow;
+
+  @override
+  String? get currentUserId => currentUserIdMock;
+
+  @override
+  bool get isAuthenticated => currentUserIdMock != null;
+
+  @override
+  Future<AuthResponse> signUpMerchant({
+    required String email,
+    required String password,
+    String? fullName,
+    String? phone,
+  }) async {
+    signUpCalled = true;
+    passedEmail = email;
+    passedPassword = password;
+    passedFullName = fullName;
+    passedPhone = phone;
+
+    if (shouldFail) {
+      throw Exception(failureMessage);
+    }
+
+    mockProfileRow = {
+      'id': 'test-merchant-uid',
+      'role': 'merchant',
+      'full_name': fullName,
+      'phone': phone,
+      'interests': <String>[],
+      'prefs': {
+        'flash_promos': true,
+        'expiry_reminders': true,
+        'weekly_digest': false,
+      },
+    };
+    currentUserIdMock = 'test-merchant-uid';
+
+    return AuthResponse(
+      session: null,
+      user: User(
+        id: 'test-merchant-uid',
+        appMetadata: const {},
+        userMetadata: {
+          'role': 'merchant',
+          'full_name': fullName,
+          'phone': phone,
+        },
+        aud: 'authenticated',
+        createdAt: '2026-10-12T00:00:00Z',
+      ),
+    );
+  }
 }

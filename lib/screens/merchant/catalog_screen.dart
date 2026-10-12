@@ -235,7 +235,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                       price: priceVal,
                                       category: catCtrl.text.trim(),
                                       description: descCtrl.text.trim(),
-                                      createdAt: DateTime.now(),
+                                      createdAt: DateTime.now().toUtc(),
                                     );
                                     await _dataService.createProduct(newProd);
                                   }

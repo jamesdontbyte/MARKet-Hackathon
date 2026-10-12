@@ -252,7 +252,7 @@ class MerchantRegController extends ChangeNotifier {
         rating: 5.0,
         verified: false, // Explicitly false per spec until Waiting auto-verifies
         coverUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24',
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toUtc(),
       );
 
       final created = await dataService.createBusiness(newBusiness);

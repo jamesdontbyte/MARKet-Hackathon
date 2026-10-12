@@ -77,7 +77,7 @@ class _StashScreenState extends State<StashScreen> {
   }
 
   List<Promo> get _filteredPromos {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     switch (_activeTab) {
       case 'active':
         return _allStash.where((p) => p.isCurrentlyValid).toList();
@@ -155,7 +155,7 @@ class _StashScreenState extends State<StashScreen> {
                   _buildTabChip(
                     'expiring',
                     'Expiring Soon',
-                    _allStash.where((p) => p.isCurrentlyValid && p.endsAt.difference(DateTime.now()).inDays <= 2).length,
+                    _allStash.where((p) => p.isCurrentlyValid && p.endsAt.difference(DateTime.now().toUtc()).inDays <= 2).length,
                   ),
                   const SizedBox(width: 8),
                   _buildTabChip(
@@ -390,6 +390,7 @@ class _StashScreenState extends State<StashScreen> {
   }
 
   String _formatDate(DateTime dt) {
-    return '${dt.month}/${dt.day}/${dt.year}';
+    final local = dt.toLocal();
+    return '${local.month}/${local.day}/${local.year}';
   }
 }
