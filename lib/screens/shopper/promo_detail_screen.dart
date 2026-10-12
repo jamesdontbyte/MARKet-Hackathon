@@ -6,7 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
-import 'voucher_screen.dart';
+import 'redeem_store_screen.dart';
 
 /// PromoDetailScreen displays full promotion terms and voucher action.
 /// Logs 'viewed' for in-app views; logs 'opened' ONLY when opened from notification tap.
@@ -125,13 +125,12 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
     }
   }
 
-  void _openVoucher() {
+  void _openRedeemStore() {
     if (_promo == null) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => VoucherScreen(
+        builder: (_) => RedeemStoreScreen(
           promo: _promo!,
-          businessName: _business?.name,
         ),
       ),
     );
@@ -317,9 +316,9 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
                         PrimaryButton(
                           width: double.infinity,
                           height: 52,
-                          label: 'Get Voucher',
-                          icon: const Icon(Icons.qr_code_rounded, size: 20),
-                          onPressed: _openVoucher,
+                          label: 'Redeem at store',
+                          icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
+                          onPressed: _openRedeemStore,
                         ),
                         const SizedBox(height: 12),
 

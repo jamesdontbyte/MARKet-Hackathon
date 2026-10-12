@@ -6,6 +6,7 @@ import 'package:market_final/models/promo.dart';
 import 'package:market_final/screens/merchant/analytics_screen.dart';
 import 'package:market_final/screens/merchant/store_qr_screen.dart';
 import 'package:market_final/screens/shopper/redeem_store_screen.dart';
+import 'package:market_final/screens/shopper/stash_screen.dart';
 import 'package:market_final/services/data_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -75,7 +76,7 @@ void main() {
   );
 
   group('Merchant StoreQrScreen Tests', () {
-    testWidgets('StoreQrScreen renders QR code, 60s countdown, and today counter',
+    testWidgets('StoreQrScreen renders static QR code, permanent code, Copy code, Reset QR, and today counter',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
@@ -100,12 +101,14 @@ void main() {
       expect(find.text('BOGO'), findsOneWidget);
       expect(find.text('Buy 1 Take 1 Muscovado Cold Brew'), findsOneWidget);
 
-      // 60-second countdown
-      expect(find.textContaining('Refreshes in'), findsOneWidget);
-
-      // Store Code Section
-      expect(find.text('STORE CODE (60-SECOND WINDOW)'), findsOneWidget);
+      // Verify static code and NO countdown timer
+      expect(find.textContaining('Refreshes in'), findsNothing);
+      expect(find.text('STORE CODE (STATIC)'), findsOneWidget);
       expect(find.text('00000000'), findsOneWidget);
+
+      // Buttons
+      expect(find.text('Copy code'), findsOneWidget);
+      expect(find.text('Reset QR'), findsOneWidget);
 
       // Live Redeemed Today counter
       expect(find.text('Redeemed Today'), findsOneWidget);
@@ -141,37 +144,38 @@ void main() {
       await tester.pump();
 
       expect(find.text('Redeem at Store'), findsOneWidget);
-      expect(find.text('Upload QR from Gallery'), findsOneWidget);
-      expect(find.text('Type 8-Character Code'), findsOneWidget);
+      expect(find.text('Scan Camera'), findsOneWidget);
+      expect(find.text('Upload QR'), findsOneWidget);
+      expect(find.text('Type Code'), findsOneWidget);
 
       // Switch to manual mode
-      await tester.tap(find.text('Type 8-Character Code'));
+      await tester.tap(find.text('Type Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Enter Store Code'), findsOneWidget);
+      expect(find.text('Enter 8-Character Code'), findsOneWidget);
 
       // Attempt submit with empty code
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
-      expect(find.text('Please enter a valid 8-character code'), findsOneWidget);
+      expect(find.text('Please enter a valid 8-character store code'), findsOneWidget);
 
       // Enter valid code
-      await tester.enterText(
-          find.byType(TextFormField).first, 'kt8x29q1');
+      await tester.enterText(find.byType(TextFormField).first, 'kt8x29q1');
       await tester.pumpAndSettle();
 
       fakeClient.rpcResult = 'ok';
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      // Verify RPC was called with trimmed code
+      // Verify RPC was called with trimmed uppercase code
       expect(fakeClient.capturedFunction, equals('redeem_at_store'));
-      expect(fakeClient.capturedParams, equals({'p_code': 'kt8x29q1'}));
+      expect(fakeClient.capturedParams, equals({'p_code': 'KT8X29Q1'}));
 
       // Verify success result card
-      expect(find.text('Voucher Redeemed!'), findsOneWidget);
-      expect(find.text('Code: KT8X29Q1'), findsOneWidget);
-      expect(find.text('View Redeemed Voucher'), findsOneWidget);
+      expect(find.text('Promotion Redeemed!'), findsOneWidget);
+      expect(find.text('Code: '), findsOneWidget);
+      expect(find.text('KT8X29Q1'), findsOneWidget);
+      expect(find.text('Done'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -195,48 +199,15 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Type 8-Character Code'));
+      await tester.tap(find.text('Type Code'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-          find.byType(TextFormField).first, 'ALREADY1');
+      await tester.enterText(find.byType(TextFormField).first, 'ALREADY1');
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
       expect(find.text('Already Redeemed'), findsOneWidget);
       expect(find.text('Try Again'), findsOneWidget);
-
-      await tester.pumpWidget(const SizedBox());
-    });
-
-    testWidgets('Renders distinct result card for expired_code',
-        (tester) async {
-      tester.view.physicalSize = const Size(1080, 2400);
-      tester.view.devicePixelRatio = 2.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-
-      fakeClient.rpcResult = 'expired_code';
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: RedeemStoreScreen(
-            promo: testPromo,
-            dataService: dataService,
-          ),
-        ),
-      );
-      await tester.pump();
-
-      await tester.tap(find.text('Type 8-Character Code'));
-      await tester.pumpAndSettle();
-
-      await tester.enterText(
-          find.byType(TextFormField).first, 'EXPCODE1');
-      await tester.tap(find.text('Redeem Code'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Store Code Expired'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -259,11 +230,10 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Type 8-Character Code'));
+      await tester.tap(find.text('Type Code'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-          find.byType(TextFormField).first, 'EXPIRED1');
+      await tester.enterText(find.byType(TextFormField).first, 'EXPIRED1');
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
@@ -291,11 +261,10 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Type 8-Character Code'));
+      await tester.tap(find.text('Type Code'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-          find.byType(TextFormField).first, 'MAXQUOTA');
+      await tester.enterText(find.byType(TextFormField).first, 'MAXQUOTA');
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
@@ -323,11 +292,10 @@ void main() {
       );
       await tester.pump();
 
-      await tester.tap(find.text('Type 8-Character Code'));
+      await tester.tap(find.text('Type Code'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(
-          find.byType(TextFormField).first, 'BADCODE1');
+      await tester.enterText(find.byType(TextFormField).first, 'BADCODE1');
       await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
@@ -335,6 +303,80 @@ void main() {
 
       await tester.pumpWidget(const SizedBox());
     });
+  });
+
+  group('Layout Responsiveness & RenderFlex Overflow Tests', () {
+    final viewports = [
+      {'name': '360x640 Portrait', 'size': const Size(360, 640)},
+      {'name': '360x640 Landscape', 'size': const Size(640, 360)},
+      {'name': '411x891 Portrait', 'size': const Size(411, 891)},
+      {'name': '411x891 Landscape', 'size': const Size(891, 411)},
+    ];
+    const textScales = [1.0, 1.5];
+
+    for (final vp in viewports) {
+      for (final scale in textScales) {
+        testWidgets('StashScreen card no RenderFlex overflow at ${vp['name']} (scale $scale)',
+            (tester) async {
+          final size = vp['size'] as Size;
+          tester.view.physicalSize = Size(size.width * 2.0, size.height * 2.0);
+          tester.view.devicePixelRatio = 2.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: MediaQueryData(
+                size: size,
+                textScaler: TextScaler.linear(scale),
+              ),
+              child: MaterialApp(
+                home: StashScreen(initialStash: [testPromo]),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('Redeem at store'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+
+          await tester.pumpWidget(const SizedBox());
+        });
+
+        testWidgets('RedeemStoreScreen no RenderFlex overflow at ${vp['name']} (scale $scale)',
+            (tester) async {
+          final size = vp['size'] as Size;
+          tester.view.physicalSize = Size(size.width * 2.0, size.height * 2.0);
+          tester.view.devicePixelRatio = 2.0;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+
+          final fakeClient = FakeSupabaseClient();
+          final dataService = DataService(client: fakeClient);
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: MediaQueryData(
+                size: size,
+                textScaler: TextScaler.linear(scale),
+              ),
+              child: MaterialApp(
+                home: RedeemStoreScreen(
+                  promo: testPromo,
+                  dataService: dataService,
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(find.text('Redeem at Store'), findsOneWidget);
+          expect(tester.takeException(), isNull);
+
+          await tester.pumpWidget(const SizedBox());
+        });
+      }
+    }
   });
 
   group('MerchantAnalyticsScreen Widget Tests', () {

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -11,19 +10,24 @@ import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
 
-/// StoreQrScreen allows MSME merchants to display a dynamic, rotating QR code
-/// and 8-character fallback code that refreshes every 60 seconds with a countdown timer.
-/// Includes promo selector when multiple promos are active and a live "Redeemed today" counter.
+/// StoreQrScreen displays a static merchant QR code and 8-character code for counter checkout.
+/// Shoppers scan or type this code to atomically redeem the promotion in MARKet.
+/// Features:
+/// - Static QR code + permanent 8-character store code
+/// - Promo selector when several promotions are active
+/// - "Copy code" button
+/// - Live "redeemed today" counter
+/// - "Reset QR" button with confirmation calling reset_store_code
 class StoreQrScreen extends StatefulWidget {
   final Business? business;
-  final DataService? dataService;
   final Promo? initialPromo;
+  final DataService? dataService;
 
   const StoreQrScreen({
     super.key,
     this.business,
-    this.dataService,
     this.initialPromo,
+    this.dataService,
   });
 
   @override
@@ -40,13 +44,11 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
 
   String? _storeCode;
   String? _qrPayload;
-  int _secondsRemaining = 60;
   int _redeemedTodayCount = 0;
 
   bool _isLoading = true;
+  bool _isResetting = false;
   String? _errorMessage;
-
-  Timer? _countdownTimer;
 
   @override
   void initState() {
@@ -59,7 +61,6 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
 
   @override
   void dispose() {
-    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -82,7 +83,10 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
           final allPromos = await _dataService.fetchPromosForBusiness(_business!.id);
           final now = DateTime.now().toUtc();
           _activePromos = allPromos
-              .where((p) => p.active && (now.isAfter(p.startsAt) || now.isAtSameMomentAs(p.startsAt)) && now.isBefore(p.endsAt))
+              .where((p) =>
+                  p.active &&
+                  (now.isAfter(p.startsAt) || now.isAtSameMomentAs(p.startsAt)) &&
+                  now.isBefore(p.endsAt))
               .toList();
         } catch (_) {}
 
@@ -105,7 +109,6 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
 
       if (_selectedPromo != null) {
         await _fetchStoreCode();
-        _startTimer();
       }
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception:', '').trim();
@@ -141,41 +144,109 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
         setState(() {
           _storeCode = codeData['code'] as String?;
           _qrPayload = codeData['qr_payload'] as String? ?? _storeCode;
-          final sec = codeData['seconds_remaining'];
-          _secondsRemaining = (sec is int) ? sec : 60;
         });
       }
     } catch (_) {
-      // Retain fallback code if already present
-      if (_storeCode == null && _selectedPromo != null) {
+      if (mounted && _selectedPromo != null) {
         final fallback = _selectedPromo!.id.replaceAll('-', '').substring(0, 8).toUpperCase();
         setState(() {
           _storeCode = fallback;
           _qrPayload = fallback;
-          _secondsRemaining = 60;
         });
       }
     }
   }
 
-  void _startTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_secondsRemaining > 1) {
-        setState(() {
-          _secondsRemaining--;
-        });
-      } else {
-        // Window expired, regenerate new rotating code and update today's count
-        _secondsRemaining = 60;
-        _fetchStoreCode();
-        _fetchTodayCount();
-      }
+  Future<void> _confirmAndResetCode() async {
+    if (_selectedPromo == null || _isResetting) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.refresh_rounded, color: MarketColors.primary),
+            SizedBox(width: 8),
+            Text('Reset Store QR?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          ],
+        ),
+        content: Text(
+          'Generate a new static QR code for "${_selectedPromo!.title}"?\n\nThe previous code will be invalidated immediately.',
+          style: const TextStyle(fontSize: 14, color: MarketColors.onSurfaceVariant, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel', style: TextStyle(color: MarketColors.secondary)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: MarketColors.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Reset Code'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      _isResetting = true;
     });
+
+    try {
+      final res = await _dataService.resetStoreCode(_selectedPromo!.id);
+      if (mounted) {
+        setState(() {
+          _storeCode = res['code'] as String?;
+          _qrPayload = res['qr_payload'] as String? ?? _storeCode;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('New store QR code generated successfully!'),
+            backgroundColor: Color(0xFF16A34A),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to reset code: $e'),
+            backgroundColor: MarketColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isResetting = false;
+        });
+      }
+    }
+  }
+
+  void _copyCodeToClipboard() {
+    final code = _storeCode ?? '';
+    if (code.isEmpty) return;
+    Clipboard.setData(ClipboardData(text: code));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 8),
+            Text('Code "$code" copied to clipboard!'),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _onPromoSelected(Promo promo) {
@@ -225,7 +296,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded, color: MarketColors.primary),
-            tooltip: 'Refresh Store Code',
+            tooltip: 'Refresh',
             onPressed: () {
               _fetchStoreCode();
               _fetchTodayCount();
@@ -369,7 +440,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
             const SizedBox(height: 16),
           ],
 
-          // Main QR Card
+          // Main Static QR Card
           AppCardElevated(
             child: Column(
               children: [
@@ -406,47 +477,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
                   const SizedBox(height: 16),
                 ],
 
-                // Visible Countdown Timer
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _secondsRemaining <= 10
-                        ? MarketColors.error.withValues(alpha: 0.1)
-                        : const Color(0xFFEFF8FF),
-                    borderRadius: BorderRadius.circular(MarketRadii.pill),
-                    border: Border.all(
-                      color: _secondsRemaining <= 10
-                          ? MarketColors.error.withValues(alpha: 0.3)
-                          : const Color(0xFFBAE6FD),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.timer_outlined,
-                        size: 16,
-                        color: _secondsRemaining <= 10
-                            ? MarketColors.error
-                            : const Color(0xFF0284C7),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Refreshes in ${_secondsRemaining}s',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: _secondsRemaining <= 10
-                              ? MarketColors.error
-                              : const Color(0xFF0369A1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-
-                // Large QR Image
+                // Static QR Code
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -474,7 +505,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
 
                 // 8-character Code
                 const Text(
-                  'STORE CODE (60-SECOND WINDOW)',
+                  'STORE CODE (STATIC)',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -483,41 +514,66 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                InkWell(
-                  borderRadius: BorderRadius.circular(12),
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: codeDisplay));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Store code copied to clipboard')),
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: MarketColors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: MarketColors.outlineVariant.withValues(alpha: 0.5),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          codeDisplay,
-                          style: const TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 4.0,
-                            fontFamily: 'monospace',
-                            color: MarketColors.onSurface,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        const Icon(Icons.copy_rounded, size: 18, color: MarketColors.primary),
-                      ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: MarketColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: MarketColors.outlineVariant.withValues(alpha: 0.5),
                     ),
                   ),
+                  child: Text(
+                    codeDisplay,
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 4.0,
+                      fontFamily: 'monospace',
+                      color: MarketColors.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                // Copy Code & Reset QR Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        side: BorderSide(color: MarketColors.primary.withValues(alpha: 0.5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                      icon: const Icon(Icons.copy_rounded, size: 16, color: MarketColors.primary),
+                      label: const Text(
+                        'Copy code',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: MarketColors.primary),
+                      ),
+                      onPressed: _copyCodeToClipboard,
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        side: BorderSide(color: MarketColors.outlineVariant.withValues(alpha: 0.6)),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                      ),
+                      icon: _isResetting
+                          ? const SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.refresh_rounded, size: 16, color: MarketColors.secondary),
+                      label: const Text(
+                        'Reset QR',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: MarketColors.secondary),
+                      ),
+                      onPressed: _isResetting ? null : _confirmAndResetCode,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 14),
 
@@ -525,7 +581,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    'Customer can scan this QR code or type the 8-character code in the MARKet app to claim their discount.',
+                    'Customer can scan this static QR code or type the 8-character code in the MARKet app to claim their discount.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,

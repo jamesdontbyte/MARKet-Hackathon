@@ -6,12 +6,16 @@ import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/shopper_bottom_nav.dart';
 import 'redeem_store_screen.dart';
-import 'voucher_screen.dart';
 
 /// StashScreen displays saved promotions organized by status tabs:
 /// All, Active, Expiring Soon, and Expired.
 class StashScreen extends StatefulWidget {
-  const StashScreen({super.key});
+  final List<Promo>? initialStash;
+
+  const StashScreen({
+    super.key,
+    this.initialStash,
+  });
 
   @override
   State<StashScreen> createState() => _StashScreenState();
@@ -29,7 +33,12 @@ class _StashScreenState extends State<StashScreen> {
   @override
   void initState() {
     super.initState();
-    _loadStash();
+    if (widget.initialStash != null) {
+      _allStash = List.from(widget.initialStash!);
+      _isLoading = false;
+    } else {
+      _loadStash();
+    }
   }
 
   Future<void> _loadStash() async {
@@ -103,34 +112,38 @@ class _StashScreenState extends State<StashScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Row(
-          children: const [
-            Text(
-              'MARK',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.primaryContainer,
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Row(
+            children: const [
+              Text(
+                'MARK',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                  color: MarketColors.primaryContainer,
+                ),
               ),
-            ),
-            Text(
-              'et',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.onSurface,
+              Text(
+                'et',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                  color: MarketColors.onSurface,
+                ),
               ),
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Stash',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: MarketColors.outline,
+              SizedBox(width: 8),
+              Text(
+                'Stash',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: MarketColors.outline,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           IconButton(
@@ -370,57 +383,38 @@ class _StashScreenState extends State<StashScreen> {
           const SizedBox(height: 14),
           Divider(color: const Color(0xFFF1F5F9), height: 1),
           const SizedBox(height: 12),
+          // Validity text on its own line with ellipsis
           Row(
             children: [
+              const Icon(Icons.schedule_rounded, size: 14, color: MarketColors.outline),
+              const SizedBox(width: 6),
               Expanded(
-                child: Row(
-                  children: [
-                    const Icon(Icons.schedule_rounded, size: 14, color: MarketColors.outline),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Valid until ${_formatDate(p.endsAt)}',
-                      style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
-                    ),
-                  ],
+                child: Text(
+                  'Valid until ${_formatDate(p.endsAt)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
                 ),
-              ),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 42),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  side: BorderSide(color: MarketColors.primaryContainer.withValues(alpha: 0.6)),
-                ),
-                icon: const Icon(Icons.qr_code_scanner_rounded, size: 16, color: MarketColors.primary),
-                label: const Text(
-                  'Redeem',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: MarketColors.primary),
-                ),
-                onPressed: () async {
-                  final res = await Navigator.of(context).push<bool>(
-                    MaterialPageRoute(
-                      builder: (_) => RedeemStoreScreen(promo: p),
-                    ),
-                  );
-                  if (res == true) {
-                    _loadStash();
-                  }
-                },
-              ),
-              const SizedBox(width: 8),
-              PrimaryButton(
-                height: 42,
-                label: 'Voucher',
-                icon: const Icon(Icons.qr_code_rounded, size: 16),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => VoucherScreen(promo: p),
-                    ),
-                  );
-                },
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          // Single full-width Redeem button
+          PrimaryButton(
+            width: double.infinity,
+            height: 44,
+            label: 'Redeem at store',
+            icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
+            onPressed: () async {
+              final res = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => RedeemStoreScreen(promo: p),
+                ),
+              );
+              if (res == true) {
+                _loadStash();
+              }
+            },
           ),
         ],
       ),

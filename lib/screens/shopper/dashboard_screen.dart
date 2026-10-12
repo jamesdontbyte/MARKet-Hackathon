@@ -13,8 +13,8 @@ import '../../widgets/app_buttons.dart';
 import '../../widgets/shopper_bottom_nav.dart';
 import '../shared/permission_explainer_screen.dart';
 import 'promo_detail_screen.dart';
+import 'redeem_store_screen.dart';
 import 'storefront_screen.dart';
-import 'voucher_screen.dart';
 
 /// DashboardScreen is the primary shopper landing screen.
 /// Features:
@@ -1599,10 +1599,10 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                           Expanded(
                             child: PrimaryButton(
                               height: 38,
-                              label: 'Get Voucher',
+                              label: 'Redeem at store',
                               onPressed: () {
                                 Navigator.of(context).push(
-                                  MaterialPageRoute(builder: (_) => VoucherScreen(promo: p)),
+                                  MaterialPageRoute(builder: (_) => RedeemStoreScreen(promo: p)),
                                 );
                               },
                             ),

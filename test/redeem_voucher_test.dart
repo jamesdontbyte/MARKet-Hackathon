@@ -96,8 +96,6 @@ void main() {
         'code': 'KT8924B1',
         'qr_payload': '{"app":"market","code":"KT8924B1"}',
         'promo_id': 'promo-123',
-        'seconds_remaining': 54,
-        'window': 12345,
       };
 
       final res = await dataService.getStoreCode('promo-123');
@@ -105,7 +103,20 @@ void main() {
       expect(fakeClient.capturedFunction, 'get_store_code');
       expect(fakeClient.capturedParams, {'p_promo_id': 'promo-123'});
       expect(res['code'], 'KT8924B1');
-      expect(res['seconds_remaining'], 54);
+    });
+
+    test('resetStoreCode invokes rpc("reset_store_code") with promo id', () async {
+      fakeClient.rpcResult = {
+        'code': 'NEWCODE1',
+        'qr_payload': '{"app":"market","code":"NEWCODE1"}',
+        'promo_id': 'promo-123',
+      };
+
+      final res = await dataService.resetStoreCode('promo-123');
+
+      expect(fakeClient.capturedFunction, 'reset_store_code');
+      expect(fakeClient.capturedParams, {'p_promo_id': 'promo-123'});
+      expect(res['code'], 'NEWCODE1');
     });
 
     test('redeemAtStore invokes rpc("redeem_at_store") with trimmed p_code', () async {
@@ -118,11 +129,10 @@ void main() {
       expect(res, 'ok');
     });
 
-    test('redeemAtStore handles all specified reverse flow status codes', () async {
+    test('redeemAtStore handles all specified static reverse flow status codes', () async {
       const statusCodes = [
         'ok',
         'invalid',
-        'expired_code',
         'already_redeemed',
         'expired',
         'limit_reached',

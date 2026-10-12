@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:market_final/models/promo.dart';
-import 'package:market_final/models/redemption.dart';
 import 'package:market_final/screens/shared/login_screen.dart';
 import 'package:market_final/screens/shared/permission_explainer_screen.dart';
 import 'package:market_final/screens/shared/role_selection_screen.dart';
@@ -10,7 +9,6 @@ import 'package:market_final/screens/shopper/dashboard_screen.dart';
 import 'package:market_final/screens/shopper/interests_screen.dart';
 import 'package:market_final/screens/shopper/promo_detail_screen.dart';
 import 'package:market_final/screens/shopper/register_screen.dart';
-import 'package:market_final/screens/shopper/voucher_screen.dart';
 
 void main() {
   testWidgets('SplashScreen displays brand assets and routes after delay', (tester) async {
@@ -249,52 +247,8 @@ void main() {
     expect(find.text('Buy 1 Get 1 Free Barako Latte'), findsOneWidget);
     expect(find.text('Promotion Details'), findsOneWidget);
     expect(find.text('Exclusive afternoon special for Kape Tahanan patrons.'), findsOneWidget);
-    expect(find.text('Get Voucher'), findsOneWidget);
-    expect(find.text('Save to Stash'), findsOneWidget);
-  });
-
-  testWidgets('VoucherScreen renders QR code, voucher code, and redemption instructions', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 2.0;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-
-    final mockPromo = Promo(
-      id: 'promo-mock-1',
-      businessId: 'biz-1',
-      title: '20% Off Artisan Handwoven Crafts',
-      promoType: 'percent',
-      valueLabel: '20% OFF',
-      startsAt: DateTime.now().subtract(const Duration(days: 1)),
-      endsAt: DateTime.now().add(const Duration(days: 5)),
-      createdAt: DateTime.now(),
-    );
-
-    final mockRedemption = Redemption(
-      id: 'red-1',
-      promoId: 'promo-mock-1',
-      userId: 'user-1',
-      code: 'KAPE2026',
-      status: 'issued',
-      createdAt: DateTime.now(),
-    );
-
-    await tester.pumpWidget(
-      MaterialApp(
-        home: VoucherScreen(
-          promo: mockPromo,
-          initialRedemption: mockRedemption,
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
-
-    expect(find.text('KAPE2026'), findsOneWidget);
-    expect(find.text('20% Off Artisan Handwoven Crafts'), findsOneWidget);
-    expect(find.text('Active • Valid'), findsOneWidget);
-    expect(find.textContaining('Present at store counter'), findsOneWidget);
     expect(find.text('Redeem at store'), findsOneWidget);
+    expect(find.text('Save to Stash'), findsOneWidget);
   });
 
   testWidgets('DashboardScreen renders brand header, search bar, categories, and bottom nav', (tester) async {

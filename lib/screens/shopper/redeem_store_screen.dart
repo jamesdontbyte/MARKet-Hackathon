@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,10 +13,15 @@ import '../../widgets/app_text_field.dart';
 enum StoreRedemptionStatus {
   ok,
   invalid,
-  expiredCode,
   alreadyRedeemed,
   expired,
   limitReached,
+}
+
+enum RedeemInputOption {
+  camera,
+  upload,
+  typeCode,
 }
 
 class StoreRedemptionResult {
@@ -49,26 +55,13 @@ class StoreRedemptionResult {
           status: StoreRedemptionStatus.ok,
           code: clean,
           rawStatus: status,
-          title: 'Voucher Redeemed!',
+          title: 'Promotion Redeemed!',
           message:
               'Promotion successfully redeemed at the counter! The merchant discount has been verified and applied.',
           icon: Icons.check_circle_rounded,
           color: const Color(0xFF16A34A),
           bgColor: const Color(0xFFDCFCE7),
           borderColor: const Color(0xFF86EFAC),
-        );
-      case 'expired_code':
-        return StoreRedemptionResult(
-          status: StoreRedemptionStatus.expiredCode,
-          code: clean,
-          rawStatus: status,
-          title: 'Store Code Expired',
-          message:
-              'The dynamic store QR code has rotated past its 60-second window. Ask the cashier to show their current QR code.',
-          icon: Icons.update_disabled_rounded,
-          color: const Color(0xFFEA580C),
-          bgColor: const Color(0xFFFFEDD5),
-          borderColor: const Color(0xFFFDBA74),
         );
       case 'already_redeemed':
         return StoreRedemptionResult(
@@ -77,7 +70,7 @@ class StoreRedemptionResult {
           rawStatus: status,
           title: 'Already Redeemed',
           message:
-              'You have already redeemed your voucher for this promotional offer. Each voucher can only be used once.',
+              'You have already redeemed your voucher for this promotional offer. Each customer can only redeem once.',
           icon: Icons.history_rounded,
           color: const Color(0xFFD97706),
           bgColor: const Color(0xFFFEF3C7),
@@ -117,7 +110,7 @@ class StoreRedemptionResult {
           rawStatus: status,
           title: 'Invalid Store Code',
           message:
-              'No active store promotion matched this code. Please check the screen or try scanning again.',
+              'No active store promotion matched this code. Please check the merchant screen or try scanning again.',
           icon: Icons.cancel_rounded,
           color: const Color(0xFFDC2626),
           bgColor: const Color(0xFFFEE2E2),
@@ -127,8 +120,12 @@ class StoreRedemptionResult {
   }
 }
 
-/// RedeemStoreScreen allows shoppers to redeem a promo at the merchant counter
-/// using three options: (a) live camera scan, (b) gallery QR image upload, (c) 8-char manual typing.
+/// RedeemStoreScreen allows shoppers to redeem a promo at the merchant counter.
+/// Responsive and overflow-proof across 360x640, 411x891, text scale 1.0/1.5, portrait & landscape.
+/// Three clearly separated options:
+/// (a) Live camera scanner with LayoutBuilder dynamic viewfinder
+/// (b) Gallery image upload with file_picker + mobile_scanner analyzeImage
+/// (c) Manual typing of 8-character store code
 class RedeemStoreScreen extends StatefulWidget {
   final Promo? promo;
   final DataService? dataService;
@@ -149,7 +146,7 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
   final TextEditingController _codeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  bool _isManualMode = false;
+  RedeemInputOption _currentOption = RedeemInputOption.camera;
   bool _isProcessing = false;
   bool _cameraPermissionDenied = false;
   bool _torchOn = false;
@@ -180,7 +177,7 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     final now = DateTime.now();
     if (_lastScanTime != null &&
         now.difference(_lastScanTime!).inMilliseconds < 1500) {
-      return; // Debounce
+      return; // Debounce 1.5s
     }
 
     final barcodes = capture.barcodes;
@@ -196,26 +193,28 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
   Future<void> _redeem(String rawCode) async {
     if (_isProcessing) return;
 
+    final cleanCode = rawCode.trim().toUpperCase();
+    if (cleanCode.isEmpty) return;
+
     setState(() {
       _isProcessing = true;
       _errorMessage = null;
     });
 
     try {
-      final status = await _dataService.redeemAtStore(rawCode);
-      if (mounted) {
-        setState(() {
-          _result = StoreRedemptionResult.fromStatus(rawCode, status);
-          _isProcessing = false;
-        });
-      }
+      final status = await _dataService.redeemAtStore(cleanCode);
+      if (!mounted) return;
+
+      setState(() {
+        _isProcessing = false;
+        _result = StoreRedemptionResult.fromStatus(cleanCode, status);
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isProcessing = false;
-          _errorMessage = e.toString().replaceAll('Exception:', '').trim();
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = e.toString().replaceAll('Exception:', '').trim();
+      });
     }
   }
 
@@ -224,57 +223,72 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
 
     setState(() {
       _errorMessage = null;
+      _isProcessing = true;
     });
 
     try {
-      final pickerResult = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
+        allowMultiple: false,
       );
 
-      if (pickerResult == null ||
-          pickerResult.files.isEmpty ||
-          pickerResult.files.single.path == null) {
+      if (result == null || result.files.isEmpty) {
+        setState(() => _isProcessing = false);
         return;
       }
 
-      setState(() {
-        _isProcessing = true;
-      });
-
-      final filePath = pickerResult.files.single.path!;
-      final capture = await _scannerController.analyzeImage(filePath);
-
-      if (capture == null ||
-          capture.barcodes.isEmpty ||
-          capture.barcodes.first.rawValue == null ||
-          capture.barcodes.first.rawValue!.trim().isEmpty) {
-        if (mounted) {
-          setState(() {
-            _isProcessing = false;
-            _errorMessage = 'No QR code found, try again';
-          });
-        }
-        return;
-      }
-
-      final detectedCode = capture.barcodes.first.rawValue!;
-      await _redeem(detectedCode);
-    } catch (_) {
-      if (mounted) {
+      final path = result.files.single.path;
+      if (path == null) {
         setState(() {
+          _errorMessage = 'Unable to read the selected image file.';
           _isProcessing = false;
-          _errorMessage = 'No QR code found, try again';
         });
+        return;
       }
+
+      final capture = await _scannerController.analyzeImage(path);
+      if (!mounted) return;
+
+      if (capture == null || capture.barcodes.isEmpty) {
+        setState(() {
+          _errorMessage = 'No QR code found, try again.';
+          _isProcessing = false;
+        });
+        return;
+      }
+
+      final code = capture.barcodes.first.rawValue;
+      if (code == null || code.trim().isEmpty) {
+        setState(() {
+          _errorMessage = 'No QR code found, try again.';
+          _isProcessing = false;
+        });
+        return;
+      }
+
+      await _redeem(code);
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = 'Failed to analyze image. Please try again or type the code.';
+        _isProcessing = false;
+      });
     }
   }
 
   void _onManualSubmit() {
-    if (!_formKey.currentState!.validate()) return;
-    _redeem(_codeController.text.trim());
+    if (_isProcessing) return;
+    final code = _codeController.text.trim();
+    if (code.length < 6) {
+      setState(() {
+        _errorMessage = 'Please enter a valid 8-character store code';
+      });
+      return;
+    }
+    _redeem(code);
   }
 
-  void _resetScan() {
+  void _resetFlow() {
     setState(() {
       _result = null;
       _errorMessage = null;
@@ -287,6 +301,7 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -302,48 +317,208 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
             color: MarketColors.onSurface,
           ),
         ),
-        actions: [
-          TextButton.icon(
-            icon: Icon(
-              _isManualMode ? Icons.qr_code_scanner_rounded : Icons.keyboard_outlined,
-              size: 18,
-              color: MarketColors.primary,
-            ),
-            label: Text(
-              _isManualMode ? 'Scanner' : 'Type Code',
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: MarketColors.primary,
-              ),
-            ),
-            onPressed: () {
-              setState(() {
-                _isManualMode = !_isManualMode;
-                _errorMessage = null;
-              });
-            },
-          ),
-        ],
       ),
       body: SafeArea(
-        child: _result != null
-            ? _buildResultCard(_result!)
-            : _isManualMode
-                ? _buildManualInputView()
-                : _buildScannerView(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MarketSpacing.screenMargin,
+                vertical: 12,
+              ),
+              child: _result != null
+                  ? _buildResultCard(_result!)
+                  : _buildMainContent(constraints),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildScannerView() {
+  Widget _buildMainContent(BoxConstraints constraints) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Targeted Promo Banner (if passed)
+        if (widget.promo != null) _buildPromoHeader(widget.promo!),
+
+        // Option Selector Segment Tabs
+        _buildOptionSelector(),
+        const SizedBox(height: 16),
+
+        if (_errorMessage != null) ...[
+          _buildErrorBanner(_errorMessage!),
+          const SizedBox(height: 16),
+        ],
+
+        // Active Option Content
+        if (_currentOption == RedeemInputOption.camera)
+          _buildCameraView(constraints)
+        else if (_currentOption == RedeemInputOption.upload)
+          _buildUploadView()
+        else
+          _buildManualInputView(),
+
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildPromoHeader(Promo promo) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF8FF),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFBAE6FD)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: MarketColors.primary,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              promo.valueLabel ?? promo.promoType.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  promo.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: MarketColors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Valid until ${promo.endsAt.toLocal().month}/${promo.endsAt.toLocal().day}/${promo.endsAt.toLocal().year}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: MarketColors.secondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionSelector() {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          _buildOptionTab(
+            option: RedeemInputOption.camera,
+            icon: Icons.camera_alt_rounded,
+            label: 'Scan Camera',
+          ),
+          _buildOptionTab(
+            option: RedeemInputOption.upload,
+            icon: Icons.photo_library_rounded,
+            label: 'Upload QR',
+          ),
+          _buildOptionTab(
+            option: RedeemInputOption.typeCode,
+            icon: Icons.keyboard_rounded,
+            label: 'Type Code',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionTab({
+    required RedeemInputOption option,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _currentOption == option;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _currentOption = option;
+            _errorMessage = null;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected ? MarketElevation.level1 : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? MarketColors.primary : MarketColors.secondary,
+              ),
+              const SizedBox(height: 4),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? MarketColors.primary : MarketColors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCameraView(BoxConstraints constraints) {
+    if (_cameraPermissionDenied) {
+      return _buildCameraPermissionFallback();
+    }
+
+    // Dynamic sizing from LayoutBuilder: smaller of 80% width and 45% height
+    final availWidth = constraints.maxWidth;
+    final availHeight = constraints.maxHeight.isFinite ? constraints.maxHeight : 600.0;
+    final viewfinderSize = math.min(availWidth * 0.8, availHeight * 0.45).clamp(160.0, 320.0);
+
     return Column(
       children: [
-        // Camera Viewport or Permission Fallback
-        Expanded(
-          flex: 5,
+        Center(
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: MarketSpacing.screenMargin),
+            width: viewfinderSize,
+            height: viewfinderSize,
             decoration: BoxDecoration(
               color: Colors.black,
               borderRadius: BorderRadius.circular(24),
@@ -353,94 +528,64 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                if (!_cameraPermissionDenied)
-                  MobileScanner(
-                    controller: _scannerController,
-                    onDetect: _onDetect,
-                    errorBuilder: (ctx, error, child) {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted && !_cameraPermissionDenied) {
-                          setState(() {
-                            _cameraPermissionDenied = true;
-                          });
-                        }
-                      });
-                      return _buildCameraFallback();
-                    },
-                  )
-                else
-                  _buildCameraFallback(),
+                MobileScanner(
+                  controller: _scannerController,
+                  onDetect: _onDetect,
+                  errorBuilder: (ctx, error, child) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted && !_cameraPermissionDenied) {
+                        setState(() {
+                          _cameraPermissionDenied = true;
+                        });
+                      }
+                    });
+                    return _buildCameraPermissionFallback();
+                  },
+                ),
 
-                // Viewfinder Target Overlay
-                if (!_cameraPermissionDenied)
-                  Center(
-                    child: Container(
-                      width: 220,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            child: Container(width: 24, height: 4, color: MarketColors.primaryContainer),
-                          ),
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(width: 24, height: 4, color: MarketColors.primaryContainer),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            child: Container(width: 24, height: 4, color: MarketColors.primaryContainer),
-                          ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(width: 24, height: 4, color: MarketColors.primaryContainer),
-                          ),
-                        ],
-                      ),
+                // Corner view-target marks
+                Center(
+                  child: Container(
+                    width: viewfinderSize * 0.72,
+                    height: viewfinderSize * 0.72,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 2),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+                ),
 
-                // Torch & Flip Action Buttons
-                if (!_cameraPermissionDenied)
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: Row(
-                      children: [
-                        IconButton(
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withValues(alpha: 0.5),
-                          ),
-                          icon: Icon(
-                            _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            _scannerController.toggleTorch();
-                            setState(() {
-                              _torchOn = !_torchOn;
-                            });
-                          },
+                // Top Controls (Torch & Flip)
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Row(
+                    children: [
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withValues(alpha: 0.5),
                         ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.black.withValues(alpha: 0.5),
-                          ),
-                          icon: const Icon(Icons.flip_camera_ios_rounded, color: Colors.white),
-                          onPressed: () => _scannerController.switchCamera(),
+                        icon: Icon(
+                          _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
+                          color: Colors.white,
+                          size: 18,
                         ),
-                      ],
-                    ),
+                        onPressed: () {
+                          _scannerController.toggleTorch();
+                          setState(() => _torchOn = !_torchOn);
+                        },
+                      ),
+                      const SizedBox(width: 6),
+                      IconButton(
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withValues(alpha: 0.5),
+                        ),
+                        icon: const Icon(Icons.flip_camera_ios_rounded, color: Colors.white, size: 18),
+                        onPressed: () => _scannerController.switchCamera(),
+                      ),
+                    ],
                   ),
+                ),
 
                 if (_isProcessing)
                   Container(
@@ -453,130 +598,196 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
             ),
           ),
         ),
-
-        const SizedBox(height: 16),
-
-        if (_errorMessage != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: MarketSpacing.screenMargin),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: MarketColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: MarketColors.error.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.error_outline_rounded, color: MarketColors.error, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: MarketColors.error,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-        const SizedBox(height: 12),
-
-        // Bottom Action Controls
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: MarketSpacing.screenMargin),
-          child: Column(
-            children: [
-              // Option (b): Upload from gallery button
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  side: BorderSide(color: MarketColors.primaryContainer.withValues(alpha: 0.6)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(MarketRadii.button)),
-                ),
-                icon: const Icon(Icons.photo_library_outlined, size: 20, color: MarketColors.primary),
-                label: const Text(
-                  'Upload QR from Gallery',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: MarketColors.primary,
-                  ),
-                ),
-                onPressed: _pickImageAndScan,
-              ),
-              const SizedBox(height: 10),
-
-              // Option (c): Type manual code button
-              SecondaryButton(
-                width: double.infinity,
-                height: 50,
-                icon: const Icon(Icons.keyboard_outlined, size: 20),
-                label: 'Type 8-Character Code',
-                onPressed: () {
-                  setState(() {
-                    _isManualMode = true;
-                    _errorMessage = null;
-                  });
-                },
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'Hold camera steady in front of the merchant\'s store QR code',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: MarketColors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
+        const SizedBox(height: 14),
+        const Text(
+          'Point camera at merchant\'s static store QR code',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: MarketColors.onSurfaceVariant,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildCameraFallback() {
+  Widget _buildCameraPermissionFallback() {
     return Container(
-      color: MarketColors.surfaceContainerLow,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: MarketColors.cardBorder),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFEE2E2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.no_photography_outlined, color: MarketColors.error, size: 28),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Camera Access Unavailable',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: MarketColors.onSurface),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Camera access is denied or not supported. You can still upload a QR photo or type the code below.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12, color: MarketColors.onSurfaceVariant, height: 1.4),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: const Icon(Icons.photo_library_outlined, size: 16),
+                  label: const Text('Upload QR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  onPressed: () {
+                    setState(() {
+                      _currentOption = RedeemInputOption.upload;
+                      _errorMessage = null;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: PrimaryButton(
+                  height: 42,
+                  label: 'Type Code',
+                  icon: const Icon(Icons.keyboard_outlined, size: 16),
+                  onPressed: () {
+                    setState(() {
+                      _currentOption = RedeemInputOption.typeCode;
+                      _errorMessage = null;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadView() {
+    return Container(
       padding: const EdgeInsets.all(24),
-      child: Center(
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: MarketColors.cardBorder),
+        boxShadow: MarketElevation.level1,
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFF8FF),
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFBAE6FD)),
+            ),
+            child: const Icon(Icons.add_photo_alternate_outlined, color: MarketColors.primary, size: 32),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'Upload QR Code Image',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: MarketColors.onSurface),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'Select a screenshot or photo of the merchant\'s store QR code from your device gallery.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: MarketColors.onSurfaceVariant, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+          PrimaryButton(
+            width: double.infinity,
+            height: 48,
+            label: 'Choose Image from Gallery',
+            icon: const Icon(Icons.folder_open_rounded, size: 18),
+            isLoading: _isProcessing,
+            onPressed: _pickImageAndScan,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildManualInputView() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: MarketColors.cardBorder),
+        boxShadow: MarketElevation.level1,
+      ),
+      child: Form(
+        key: _formKey,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFEE2E2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.camera_alt_outlined, color: MarketColors.error, size: 28),
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: MarketColors.surfaceContainerLow,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.keyboard_outlined, color: MarketColors.primary, size: 22),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Enter 8-Character Code',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: MarketColors.onSurface),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
             const Text(
-              'Camera Not Available',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: MarketColors.onSurface,
-              ),
+              'Enter the static 8-character code shown below the merchant\'s store QR code.',
+              style: TextStyle(fontSize: 13, color: MarketColors.onSurfaceVariant, height: 1.4),
             ),
-            const SizedBox(height: 6),
-            const Text(
-              'Camera access was denied or is unavailable. You can still upload a QR image from your gallery or type the code below.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                color: MarketColors.onSurfaceVariant,
-                height: 1.4,
-              ),
+            const SizedBox(height: 18),
+            AppTextField(
+              controller: _codeController,
+              label: 'Store Code',
+              hintText: 'e.g. KT8924B1',
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
+                LengthLimitingTextInputFormatter(8),
+              ],
+              validator: (v) {
+                if (v == null || v.trim().length < 6) {
+                  return 'Please enter a valid 8-character code';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 18),
+            PrimaryButton(
+              width: double.infinity,
+              height: 48,
+              label: 'Redeem Code',
+              isLoading: _isProcessing,
+              onPressed: _onManualSubmit,
             ),
           ],
         ),
@@ -584,128 +795,30 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     );
   }
 
-  Widget _buildManualInputView() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(MarketSpacing.screenMargin),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: MarketColors.surfaceContainerLowest,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: MarketColors.cardBorder),
-                boxShadow: MarketElevation.level1,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: MarketColors.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.keyboard_outlined,
-                          color: MarketColors.primary,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Text(
-                        'Enter Store Code',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: MarketColors.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Ask the store cashier for the 8-character code displayed under their store QR code.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: MarketColors.onSurfaceVariant,
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  AppTextField(
-                    controller: _codeController,
-                    label: '8-Character Store Code',
-                    hintText: 'e.g. KT8924B1',
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-                      LengthLimitingTextInputFormatter(8),
-                    ],
-                    validator: (v) {
-                      if (v == null || v.trim().length < 6) {
-                        return 'Please enter a valid 8-character code';
-                      }
-                      return null;
-                    },
-                  ),
-
-                  if (_errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: MarketColors.error,
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: 20),
-
-                  PrimaryButton(
-                    width: double.infinity,
-                    height: 52,
-                    label: 'Redeem Code',
-                    isLoading: _isProcessing,
-                    onPressed: _onManualSubmit,
-                  ),
-                ],
+  Widget _buildErrorBanner(String message) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: MarketColors.error.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: MarketColors.error.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline_rounded, color: MarketColors.error, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              softWrap: true,
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: MarketColors.error,
               ),
             ),
-            const SizedBox(height: 16),
-
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-                side: BorderSide(color: MarketColors.primaryContainer.withValues(alpha: 0.6)),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(MarketRadii.button)),
-              ),
-              icon: const Icon(Icons.qr_code_scanner_rounded, size: 20, color: MarketColors.primary),
-              label: const Text(
-                'Switch Back to Camera Scanner',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: MarketColors.primary,
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  _isManualMode = false;
-                  _errorMessage = null;
-                });
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -713,104 +826,106 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
   Widget _buildResultCard(StoreRedemptionResult result) {
     final isSuccess = result.status == StoreRedemptionStatus.ok;
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(MarketSpacing.screenMargin),
-        child: Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: result.bgColor,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: result.borderColor, width: 2),
-            boxShadow: MarketElevation.level2,
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: result.bgColor,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: result.borderColor, width: 2),
+        boxShadow: MarketElevation.level2,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: result.borderColor, width: 2),
+              ),
+              child: Icon(result.icon, size: 36, color: result.color),
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: result.borderColor, width: 2),
+          const SizedBox(height: 16),
+          Text(
+            result.title,
+            textAlign: TextAlign.center,
+            softWrap: true,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: result.color,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            result.message,
+            textAlign: TextAlign.center,
+            softWrap: true,
+            style: const TextStyle(
+              fontSize: 14,
+              color: MarketColors.onSurface,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: result.borderColor),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Code: ',
+                  style: TextStyle(fontSize: 13, color: MarketColors.secondary, fontWeight: FontWeight.w600),
                 ),
-                child: Icon(result.icon, size: 36, color: result.color),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                result.title,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  color: result.color,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                result.message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: MarketColors.onSurface,
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Code Display Pill
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: result.borderColor),
-                ),
-                child: Text(
-                  'Code: ${result.code}',
+                Text(
+                  result.code,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 1.5,
+                    letterSpacing: 2.0,
+                    fontFamily: 'monospace',
                     color: MarketColors.onSurface,
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-
-              if (isSuccess) ...[
-                PrimaryButton(
-                  width: double.infinity,
-                  height: 48,
-                  label: 'View Redeemed Voucher',
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                ),
-              ] else ...[
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          if (isSuccess)
+            PrimaryButton(
+              width: double.infinity,
+              height: 48,
+              label: 'Done',
+              icon: const Icon(Icons.check_circle_rounded, size: 20),
+              onPressed: () => Navigator.of(context).pop(true),
+            )
+          else
+            Column(
+              children: [
                 PrimaryButton(
                   width: double.infinity,
                   height: 48,
                   label: 'Try Again',
-                  onPressed: _resetScan,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  onPressed: _resetFlow,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text(
-                    'Cancel / Back',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: MarketColors.secondary,
-                    ),
-                  ),
+                  child: const Text('Back to Promos', style: TextStyle(color: MarketColors.secondary)),
                 ),
               ],
-            ],
-          ),
-        ),
+            ),
+        ],
       ),
     );
   }
