@@ -500,3 +500,80 @@ lib/
   6. **Tests & Delivery:**
      - Unit & widget tests for promo photo validation, >2MB rejection, BigPicture notification construction and download fallback.
      - Run `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.
+
+---
+
+### Phase 11: In-App AI Assistant for Shoppers and MSME Owners (Google Gemini)
+**Goal:** Add an agentic in-app AI assistant for shoppers and MSME merchants using the Google Gemini API (free tier) via a Supabase Edge Function (`supabase/functions/chat/index.ts`). The model proposes actions, but the app executes them only after explicit user confirmation.
+
+- **Tasks:**
+  1. [x] **Database Schema Patch (`db/schema_patch_ai.sql`):**
+     - Created table `ai_usage(id bigserial primary key, user_id uuid references auth.users(id), created_at timestamptz default now())`.
+     - Enabled RLS with policies for insert and select where `user_id = auth.uid()`.
+     - Added index on `(user_id, created_at desc)`.
+     - Preserved unapplied: left for manual application in Supabase SQL editor.
+  2. [x] **Supabase Edge Function (`supabase/functions/chat/index.ts`):**
+     - Validates caller JWT via `supabase.auth.getUser()`, rejects anonymous requests.
+     - Reads role securely from `public.profiles` using caller's Authorization header.
+     - Constant `GEMINI_MODEL = "gemini-3.8-flash"` configured at top.
+     - Communicates with Google Generative AI REST API with secret `GEMINI_API_KEY` in `x-goog-api-key` header.
+     - Hourly rate limit (20 requests/user/hour) tracked in `public.ai_usage`.
+     - Defensive error handling: safety blocks/missing candidates -> friendly message, 429 -> "busy, try again in a minute", 5xx -> generic error.
+     - Shopper context: up to 15 valid promos, interests, stashed IDs, device distances (never coordinates). Tools: `open_promo`, `open_store`, `propose_save_to_stash`.
+     - Merchant context: business profile (no phone/owner), products, promos, 7-day funnel counts, verification status. Tools: `propose_promo`, `propose_product`, `pause_promo`.
+     - Server-side tool validation: title <= 60 chars, description <= 200 chars, promo_type in ('bogo','percent','amount_off'), duration <= 90 days, limit 1..1000, price >= 0, caller owns verified business.
+  3. [x] **Flutter Models & Chat Service:**
+     - `lib/models/chat.dart`: `ChatMessage`, `AssistantAction`, `MessageSegment`, and `parseDraftBlocks`.
+     - `lib/services/chat_service.dart`: Edge Function invocation, device distance calculation, error mapping, and injectable `FunctionInvoker`.
+  4. [x] **Chat UI & Actions (`lib/screens/shared/assistant_screen.dart`):**
+     - AppHeader(subtitle: 'Assistant', showBack: true).
+     - Message bubbles, typing indicator, error retry bar, "New chat" action.
+     - Suggestion chips for Shopper & Merchant empty states.
+     - Draft cards with 1-tap Copy action.
+     - Action confirmation cards: explicit user tap required; pre-fills existing promo/product modals or confirms stash/pause.
+  5. [x] **Entry Points & Catalog Integration:**
+     - Assistant FAB on Shopper Dashboard (`dashboard_screen.dart`) elevated above AppBottomNav.
+     - Assistant FAB on Merchant Dashboard (`dashboard_screen.dart`) elevated above AppBottomNav.
+     - Help & Assistant row on Merchant Account Screen (`account_screen.dart`).
+     - Added `PromoDraft`, `ProductDraft`, prefilling, and "Use My Shop Photo" option to `MerchantCatalogScreen`.
+  6. [x] **Documentation & Tests:**
+     - `docs/ai_assistant_setup.md` manual checklist and test cases.
+     - Created `test/ai_assistant_test.dart` (20 tests passed) covering ChatService, error mapping, action parsing, draft parsing, explicit confirmation, and zero overflow at 360x640 and 411x891 across 1.0 and 1.5 font scales.
+     - `flutter analyze`: 0 issues found.
+     - `flutter test`: 123/123 tests passed across all 7 test suites.
+     - `flutter build apk --debug`: Built `build\app\outputs\flutter-apk\app-debug.apk` in 22.8s.
+     - `flutter install --debug -d RFCY327KCFN`: Target device RFCY327KCFN disconnected/not detected.
+
+---
+
+### Phase 11 Refinement: AI Assistant Reply Polishing & Clean Presentation
+**Goal:** Eliminate raw markdown, internal UUIDs, leaking tool calls, and unexpected draft card wrappings from AI assistant replies. Add compact tappable promo suggestion cards, friendly action confirmation cards, and comprehensive client-side and server-side text sanitization.
+
+- **Tasks:**
+  1. **Edge Function (supabase/functions/chat/index.ts):**
+     - Update system prompt: plain text only (no markdown emphasis **, __, , no # headings, no tables).
+     - Bullet lines use • , numbered steps use 1., 2..
+     - Promos formatted as Business name (about 200 m away) - Promo title: value (distances in m under 1000, km above).
+     - Never output IDs, UUIDs, function calls, or Propose Actions in reply text.
+     - :::draft blocks strictly limited to user requests to write copy.
+     - Server-side clean-up: strip markdown characters, strip UUIDs, remove lines matching function call syntax or Propose Actions.
+     - Enrich action with human-friendly metadata (title, business_name, value_label).
+     - Return suggested_promos array containing structured promo metadata.
+  2. **Data Models & Sanitizer (lib/models/chat.dart):**
+     - Add SuggestedPromo model (id, title, businessName, value, distance).
+     - Add suggestedPromos field to ChatMessage.
+     - Add client-side sanitizeAssistantReply(String text): strips **, __, , leading #, UUIDs, function calls, and Propose Actions; converts *  and -  to • ; collapses >2 blank lines; trims trailing spaces; protects draft block text while stripping emphasis characters.
+     - Automatically sanitize assistant chat message content.
+  3. **Chat Service (lib/services/chat_service.dart):**
+     - Parse suggested_promos and pass to ChatMessage.
+  4. **Chat UI (lib/screens/shared/assistant_screen.dart):**
+     - Normal answers rendered via SelectableText with paragraph spacing, never wrapped in Drafted Content cards.
+     - Only genuine :::draft ... ::: blocks render _buildDraftCard.
+     - Render compact tappable promo suggestion cards with business name, title, value, distance, navigating to PromoDetailScreen. Never expose IDs.
+     - Action confirm cards display friendly titles and descriptions without IDs or function names.
+     - Prevent RenderFlex overflow at 360x640 and 411x891 at 1.0 and 1.5 scales.
+  5. **Tests & Verification (	est/ai_assistant_test.dart):**
+     - Unit tests verifying sanitization rules, bullet conversions, draft preservation.
+     - Widget tests verifying plain answers do not show Draft card, and promo suggestion cards do not show IDs.
+     - Responsive tests for small screens and high text scales.
+     - Full verification with flutter analyze, flutter test, and flutter build apk --debug.

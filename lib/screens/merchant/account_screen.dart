@@ -7,6 +7,7 @@ import '../../services/data_service.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/country_selector.dart';
+import '../shared/assistant_screen.dart';
 import 'analytics_screen.dart';
 import 'catalog_screen.dart';
 import 'dashboard_screen.dart';
@@ -402,6 +403,81 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                             style: const TextStyle(fontSize: 12, color: MarketColors.outline),
                           ),
                         ],
+                      ),
+                    ),
+                    // 5. Help & Assistant Row
+                    Container(
+                      decoration: BoxDecoration(
+                        color: MarketColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: MarketColors.outlineVariant.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(18),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => AssistantScreen(
+                                  role: 'merchant',
+                                  business: _business,
+                                ),
+                              ),
+                            );
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: MarketColors.primaryContainer.withValues(alpha: 0.25),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.auto_awesome,
+                                    size: 18,
+                                    color: MarketColors.primary,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'AI Assistant & Help',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: MarketColors.onSurface,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2),
+                                      Text(
+                                        'Get guidance on promos, funnel analytics, and store setup',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: MarketColors.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  size: 20,
+                                  color: MarketColors.outline,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

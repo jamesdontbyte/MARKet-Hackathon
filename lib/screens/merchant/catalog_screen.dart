@@ -18,16 +18,54 @@ import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
 import 'store_qr_screen.dart';
 
+class PromoDraft {
+  final String title;
+  final String description;
+  final String promoType;
+  final String? valueLabel;
+  final DateTime startsAt;
+  final DateTime endsAt;
+  final int redeemLimit;
+
+  const PromoDraft({
+    required this.title,
+    required this.description,
+    required this.promoType,
+    this.valueLabel,
+    required this.startsAt,
+    required this.endsAt,
+    required this.redeemLimit,
+  });
+}
+
+class ProductDraft {
+  final String name;
+  final double price;
+  final String category;
+  final String description;
+
+  const ProductDraft({
+    required this.name,
+    required this.price,
+    required this.category,
+    required this.description,
+  });
+}
+
 /// MSME Merchant Catalog Screen (Products & Services and Promotions)
 /// Conforms to specs 11, 12, 13, 14, 15, 16.
 class MerchantCatalogScreen extends StatefulWidget {
   final Business? business;
   final int initialTab;
+  final PromoDraft? initialPromoDraft;
+  final ProductDraft? initialProductDraft;
 
   const MerchantCatalogScreen({
     super.key,
     this.business,
     this.initialTab = 0,
+    this.initialPromoDraft,
+    this.initialProductDraft,
   });
 
   @override
@@ -73,6 +111,22 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
             _promos = prms;
             _isLoading = false;
           });
+
+          if (widget.initialPromoDraft != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => _selectedSegment = 1);
+                _openAddOrEditPromoModal(null, widget.initialPromoDraft);
+              }
+            });
+          } else if (widget.initialProductDraft != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() => _selectedSegment = 0);
+                _openAddOrEditItemModal(null, widget.initialProductDraft);
+              }
+            });
+          }
         }
       }
     } catch (e) {
@@ -199,14 +253,16 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     }
   }
 
-  void _openAddOrEditItemModal([Product? existingProduct]) {
+  void _openAddOrEditItemModal([Product? existingProduct, ProductDraft? productDraft]) {
     final isEditing = existingProduct != null;
-    final nameCtrl = TextEditingController(text: existingProduct?.name ?? '');
+    final nameCtrl = TextEditingController(text: existingProduct?.name ?? productDraft?.name ?? '');
     final priceCtrl = TextEditingController(
-      text: existingProduct != null ? existingProduct.price.toStringAsFixed(0) : '',
+      text: existingProduct != null
+          ? existingProduct.price.toStringAsFixed(0)
+          : (productDraft != null ? productDraft.price.toStringAsFixed(0) : ''),
     );
-    final catCtrl = TextEditingController(text: existingProduct?.category ?? '');
-    final descCtrl = TextEditingController(text: existingProduct?.description ?? '');
+    final catCtrl = TextEditingController(text: existingProduct?.category ?? productDraft?.category ?? '');
+    final descCtrl = TextEditingController(text: existingProduct?.description ?? productDraft?.description ?? '');
     final formKey = GlobalKey<FormState>();
 
     bool isBestSeller = existingProduct?.isBestSeller ?? false;
@@ -604,20 +660,22 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     }
   }
 
-  void _openAddOrEditPromoModal([Promo? existingPromo]) {
+  void _openAddOrEditPromoModal([Promo? existingPromo, PromoDraft? promoDraft]) {
     final isEditing = existingPromo != null;
-    final titleCtrl = TextEditingController(text: existingPromo?.title ?? '');
-    final descCtrl = TextEditingController(text: existingPromo?.description ?? '');
-    final valueCtrl = TextEditingController(text: existingPromo?.valueLabel ?? '');
+    final titleCtrl = TextEditingController(text: existingPromo?.title ?? promoDraft?.title ?? '');
+    final descCtrl = TextEditingController(text: existingPromo?.description ?? promoDraft?.description ?? '');
+    final valueCtrl = TextEditingController(text: existingPromo?.valueLabel ?? promoDraft?.valueLabel ?? '');
     final limitCtrl = TextEditingController(
-      text: existingPromo != null ? existingPromo.redeemLimit.toString() : '100',
+      text: existingPromo != null
+          ? existingPromo.redeemLimit.toString()
+          : (promoDraft != null ? promoDraft.redeemLimit.toString() : '100'),
     );
     final formKey = GlobalKey<FormState>();
 
-    String selectedType = existingPromo?.promoType ?? 'percent';
+    String selectedType = existingPromo?.promoType ?? promoDraft?.promoType ?? 'percent';
     String? selectedProductId = existingPromo?.productId;
-    DateTime startsAt = existingPromo?.startsAt.toLocal() ?? DateTime.now();
-    DateTime endsAt = existingPromo?.endsAt.toLocal() ?? DateTime.now().add(const Duration(days: 7));
+    DateTime startsAt = existingPromo?.startsAt.toLocal() ?? promoDraft?.startsAt.toLocal() ?? DateTime.now();
+    DateTime endsAt = existingPromo?.endsAt.toLocal() ?? promoDraft?.endsAt.toLocal() ?? DateTime.now().add(const Duration(days: 7));
     bool isSaving = false;
     String? modalError;
     Uint8List? pickedPromoBytes;
@@ -843,6 +901,42 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                               ),
                             ),
                           ),
+                        if (_business?.coverUrl != null &&
+                            _business!.coverUrl!.isNotEmpty &&
+                            pickedPromoBytes == null &&
+                            (currentPromoImageUrl == null || currentPromoImageUrl!.isEmpty)) ...[
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 44),
+                              side: const BorderSide(color: MarketColors.primary),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(
+                              Icons.storefront_outlined,
+                              size: 18,
+                              color: MarketColors.primary,
+                            ),
+                            label: const Text(
+                              'Use My Shop Photo',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: MarketColors.primary,
+                              ),
+                            ),
+                            onPressed: () {
+                              setModalState(() {
+                                currentPromoImageUrl = _business!.coverUrl;
+                                pickedPromoBytes = null;
+                                pickedPromoFileName = null;
+                                modalError = null;
+                              });
+                            },
+                          ),
+                        ],
                         const SizedBox(height: 12),
 
                         // Title

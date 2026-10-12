@@ -13,6 +13,7 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/promo_photo_view.dart';
+import '../shared/assistant_screen.dart';
 import '../shared/permission_explainer_screen.dart';
 import 'promo_detail_screen.dart';
 import 'redeem_store_screen.dart';
@@ -536,6 +537,27 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
             if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
           },
+        ),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: FloatingActionButton.extended(
+            heroTag: 'shopper_assistant_fab',
+            backgroundColor: MarketColors.primary,
+            foregroundColor: MarketColors.onPrimary,
+            elevation: 3,
+            icon: const Icon(Icons.auto_awesome, size: 20),
+            label: const Text(
+              'Assistant',
+              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+            ),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const AssistantScreen(role: 'shopper'),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

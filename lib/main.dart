@@ -16,6 +16,7 @@ import 'screens/merchant/reg_step4_review_screen.dart';
 import 'screens/merchant/store_qr_screen.dart';
 import 'screens/merchant/verified_screen.dart';
 import 'screens/merchant/waiting_screen.dart';
+import 'screens/shared/assistant_screen.dart';
 import 'screens/shared/login_screen.dart';
 import 'screens/shared/permission_explainer_screen.dart';
 import 'screens/shared/role_selection_screen.dart';
@@ -94,6 +95,7 @@ class MarketApp extends StatelessWidget {
         '/merchant-scan': (_) => const StoreQrScreen(),
         '/merchant-store-qr': (_) => const StoreQrScreen(),
         '/merchant-account': (_) => const MerchantAccountScreen(),
+        '/assistant': (_) => const AssistantScreen(role: 'shopper'),
       },
     );
   }
