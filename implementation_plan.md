@@ -175,21 +175,28 @@ lib/
   - `flutter analyze` passes.
   - Unit tests verify models correctly serialize/deserialize database payloads.
   - Unit tests verify `DataService.redeemVoucher` invokes `rpc('redeem_voucher')` and handles all status codes (`ok`, `invalid`, `not_your_promo`, `already_redeemed`, `expired`, `limit_reached`).
-- **CHECKPOINT:** Stop after Phase 2 and wait for user review before proceeding.
+- **CHECKPOINT:** Phase 2 Passed.
 
 ---
 
-### Phase 3: Shared Authentication, Onboarding & Explainer
-**Goal:** Implement Splash, Role Selection, Login (with demo shortcuts), and Permission Explainer screens.
-- **Files to create:**
-  - `lib/screens/shared/splash_screen.dart` — 2s splash, checks session -> routes to Shopper Dashboard, Merchant Dashboard (if verified), Merchant Waiting (if unverified), Merchant Reg Step 2 (if profile exists but no business), or Role Selection.
-  - `lib/screens/shared/role_selection_screen.dart` — Matches `market_role_selection` frame.
-  - `lib/screens/shared/login_screen.dart` — Email/password login + one-tap "Demo Shopper" and "Demo Merchant" buttons (shown when `demoMode = true`).
-  - `lib/screens/shared/permission_explainer_screen.dart` — 3-point explainer before requesting location & notification permissions.
+### Phase 3: Shared Authentication, Role Selection, Login & Shopper Onboarding
+**Goal:** Implement Splash, Role Selection, Login (with demo shortcuts), Shopper Registration (with demo OTP modal), and Interest Selection.
+- **Files to create/modify:**
+  - `lib/screens/shared/splash_screen.dart` — 2s splash, checks Supabase session -> routes to Shopper destination (or Interests if empty), Merchant destination (Dashboard if verified, Waiting if unverified, Reg if no business), or Role Selection.
+  - `lib/screens/shared/role_selection_screen.dart` — Matches `market_role_selection` frame. Selectable cards for Merchant & Shopper.
+  - `lib/screens/shared/login_screen.dart` — Email/password login with loading/error states + one-tap "Demo Shopper" and "Demo Merchant (Kape Tahanan)" quick login buttons (shown when `demoMode == true`).
+  - `lib/screens/shopper/register_screen.dart` — Matches `market_consumer_registration`. Step 1 basic profile with validation. "Create Account & Continue" opens OTP modal bottom sheet ("Demo code: 123456") which creates auth user + `profiles` row (`role: shopper`) via `AuthService.signUpShopper`.
+  - `lib/screens/shopper/interests_screen.dart` — Matches `market_consumer_interest_selection_mobile`. 8 canonical category cards with multi-select counter, saves to `profiles.interests` via `AuthService.updateInterests`, "Skip for now" option.
+  - `lib/main.dart` — Configured named routes and startup routing starting at `SplashScreen`. Retains `/spike` route for geofence verification.
 - **Acceptance Checks:**
   - Splash routes correctly based on user role and business registration state.
   - Demo login buttons instantly log into pre-seeded accounts.
-  - `flutter analyze` passes.
+  - Registration opens OTP bottom sheet with "Demo code: 123456", creates account upon entering demo code.
+  - Interest selection saves chosen slugs to profile.
+  - `flutter analyze` passes with 0 warnings.
+  - `flutter test` passes.
+  - `flutter build apk --debug` succeeds.
+- **CHECKPOINT:** Stop after Phase 3 and wait for user review before proceeding.
 
 ---
 

@@ -13,4 +13,16 @@ Future<void> initSupabase() async {
   }
 }
 
-SupabaseClient get supabase => Supabase.instance.client;
+SupabaseClient? _fallbackClient;
+
+SupabaseClient get supabase {
+  try {
+    return Supabase.instance.client;
+  } catch (_) {
+    return _fallbackClient ??= SupabaseClient(
+      'https://mock.supabase.co',
+      'mock-key',
+      authOptions: const AuthClientOptions(autoRefreshToken: false),
+    );
+  }
+}

@@ -1,16 +1,15 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:market_final/main.dart';
 
 void main() {
-  testWidgets('MarketApp smoke test', (WidgetTester tester) async {
+  testWidgets('MarketApp smoke test launches SplashScreen and navigates', (WidgetTester tester) async {
     await tester.pumpWidget(const MarketApp());
-    expect(find.text('Phase 0.5: Geofence Spike'), findsOneWidget);
+    expect(find.text('MARK'), findsOneWidget);
+    expect(find.text('et'), findsOneWidget);
+    expect(find.text('Connecting MSMEs to Potential Customers'), findsOneWidget);
+
+    // Allow splash timer to complete and route
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 }
