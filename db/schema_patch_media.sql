@@ -47,3 +47,5 @@ alter table products add column if not exists available boolean not null default
 alter table promos add column if not exists product_id uuid references products(id) on delete set null;
 
 
+-- 6. Add promo image column to promos table (nullable text, existing promos remain valid)
+alter table promos add column if not exists image_url text;

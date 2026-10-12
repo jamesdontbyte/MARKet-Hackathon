@@ -463,3 +463,40 @@ lib/
      - [x] `flutter test`: 97/97 tests passed across all 6 test suites.
      - [x] `flutter analyze`: 0 issues found (clean static analysis).
      - [x] `flutter build apk --debug`: Built `build\app\outputs\flutter-apk\app-debug.apk` in 22.9s.
+
+---
+
+### Phase 10: Promo Photos — Database, Merchant Catalog, Shopper Screens & Big-Picture Notifications
+**Goal:** Add required promo photo to promotions, display promo photos across merchant and shopper surfaces with graceful fallbacks, and attach promo photos to geofence notifications using `flutter_local_notifications` BigPictureStyle with resilient background caching.
+
+- **Tasks:**
+  1. **Database Schema Patch (`db/schema_patch_media.sql`):**
+     - Add `alter table promos add column if not exists image_url text;`.
+     - Confirm storage policy `(storage.foldername(name))[1] = auth.uid()::text` permits owner upload, update, and delete in `business-media/<uid>/promos/`.
+     - Do NOT apply automatically.
+  2. **Model & Service Updates:**
+     - Update `Promo` model with `imageUrl`, `fromJson`, `toJson`, `copyWith`.
+     - In `DataService`: add `uploadPromoImage` uploading to `business-media/<uid>/promos/` with public URL. Pass `promoImageUrl` in `fetchGeofenceZones()`.
+     - Update `GeofenceZone` to hold `promoImageUrl`.
+  3. **Promo Image Cache & Notification Service:**
+     - Add `path_provider` for app cache directory.
+     - Create `PromoImageCacheService` using `dart:io HttpClient` (5s timeout, 2MB size cap, cache by `promoId`, pre-download on zone refresh, prune stale promo images).
+     - Update `NotificationService.instance.showPromo` to support `imagePath`, constructing `BigPictureStyleInformation(FilePathAndroidBitmap(imagePath), contentTitle: title, summaryText: body, hideExpandedLargeIcon: true)` with text fallback.
+  4. **Merchant Side:**
+     - In `MerchantCatalogScreen._openAddOrEditPromoModal`:
+       - Add required "Promo photo" field above title.
+       - Pick using `file_picker` (jpg/png/webp, max 2MB validation error).
+       - Preview with "Replace" and "Remove" actions.
+       - Form state persistence for picked bytes.
+       - Block save with "Add a photo for this promo" if missing.
+       - Upload to `business-media/<uid>/promos/` with progress and retry.
+     - Promo cards in `catalog_screen.dart` and `dashboard_screen.dart` show photo with fallback to business cover, then category placeholder.
+  5. **Shopper Side:**
+     - Promo cards on dashboard (`dashboard_screen.dart`).
+     - Promo detail header image (`promo_detail_screen.dart`).
+     - Stash cards (`stash_screen.dart`).
+     - Redeem store result card (`redeem_store_screen.dart`).
+     - Fallback chain: promo image -> business cover -> category placeholder asset. Loading and error placeholders.
+  6. **Tests & Delivery:**
+     - Unit & widget tests for promo photo validation, >2MB rejection, BigPicture notification construction and download fallback.
+     - Run `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.

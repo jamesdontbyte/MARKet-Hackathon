@@ -4,6 +4,7 @@ class Promo {
   final String? productId;
   final String title;
   final String? description;
+  final String? imageUrl;
   final String promoType; // 'bogo', 'percent', 'amount_off', 'freebie'
   final String? valueLabel; // 'BOGO', '20% OFF', '₱100 OFF', 'Free Item'
   final DateTime startsAt;
@@ -19,6 +20,7 @@ class Promo {
     this.productId,
     required this.title,
     this.description,
+    this.imageUrl,
     this.promoType = 'percent',
     this.valueLabel,
     required this.startsAt,
@@ -63,6 +65,7 @@ class Promo {
       productId: json['product_id'] as String?,
       title: (json['title'] as String?) ?? '',
       description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
       promoType: (json['promo_type'] as String?) ?? 'percent',
       valueLabel: json['value_label'] as String?,
       startsAt: json['starts_at'] != null
@@ -87,6 +90,7 @@ class Promo {
       'product_id': productId,
       'title': title,
       'description': description,
+      'image_url': imageUrl,
       'promo_type': promoType,
       'value_label': valueLabel,
       'starts_at': startsAt.toUtc().toIso8601String(),
@@ -104,6 +108,7 @@ class Promo {
     String? productId,
     String? title,
     String? description,
+    String? imageUrl,
     String? promoType,
     String? valueLabel,
     DateTime? startsAt,
@@ -119,6 +124,7 @@ class Promo {
       productId: productId ?? this.productId,
       title: title ?? this.title,
       description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
       promoType: promoType ?? this.promoType,
       valueLabel: valueLabel ?? this.valueLabel,
       startsAt: startsAt ?? this.startsAt,

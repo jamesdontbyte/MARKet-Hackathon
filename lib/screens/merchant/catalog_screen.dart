@@ -12,6 +12,7 @@ import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/promo_photo_view.dart';
 import 'account_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
@@ -619,6 +620,10 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     DateTime endsAt = existingPromo?.endsAt.toLocal() ?? DateTime.now().add(const Duration(days: 7));
     bool isSaving = false;
     String? modalError;
+    Uint8List? pickedPromoBytes;
+    String? pickedPromoFileName;
+    String? currentPromoImageUrl = existingPromo?.imageUrl;
+    bool isUploading = false;
 
     showModalBottomSheet(
       context: context,
@@ -682,6 +687,163 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                           ),
                           const SizedBox(height: 12),
                         ],
+
+                        // Promo Photo Field (Required)
+                        const Text(
+                          'Promo Photo *',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 6),
+                        if (pickedPromoBytes != null || (currentPromoImageUrl != null && currentPromoImageUrl!.isNotEmpty))
+                          Container(
+                            decoration: BoxDecoration(
+                              color: MarketColors.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: MarketColors.cardBorder),
+                            ),
+                            child: Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                                  child: SizedBox(
+                                    height: 140,
+                                    width: double.infinity,
+                                    child: pickedPromoBytes != null
+                                        ? Image.memory(
+                                            pickedPromoBytes!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.network(
+                                            currentPromoImageUrl!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) => const Center(
+                                              child: Icon(Icons.broken_image_rounded, color: MarketColors.outline),
+                                            ),
+                                          ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  child: Row(
+                                    children: [
+                                      TextButton.icon(
+                                        icon: const Icon(Icons.sync_rounded, size: 16),
+                                        label: const Text('Replace', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                                        onPressed: () async {
+                                          final res = await FilePicker.platform.pickFiles(
+                                            type: FileType.custom,
+                                            allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                                            withData: true,
+                                          );
+                                          if (res != null && res.files.isNotEmpty) {
+                                            final f = res.files.first;
+                                            final ext = f.extension?.toLowerCase() ?? '';
+                                            if (!['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
+                                              setModalState(() {
+                                                modalError = 'Only JPG, PNG, and WebP images are allowed.';
+                                              });
+                                              return;
+                                            }
+                                            if (f.size > 2 * 1024 * 1024) {
+                                              setModalState(() {
+                                                modalError = 'Photo exceeds 2 MB limit. Please select an image under 2 MB.';
+                                              });
+                                              return;
+                                            }
+                                            if (f.bytes == null) {
+                                              setModalState(() {
+                                                modalError = 'Could not read image file.';
+                                              });
+                                              return;
+                                            }
+                                            setModalState(() {
+                                              modalError = null;
+                                              pickedPromoBytes = f.bytes;
+                                              pickedPromoFileName = f.name;
+                                            });
+                                          }
+                                        },
+                                      ),
+                                      const Spacer(),
+                                      TextButton.icon(
+                                        icon: const Icon(Icons.delete_outline_rounded, size: 16, color: MarketColors.error),
+                                        label: const Text('Remove', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: MarketColors.error)),
+                                        onPressed: () {
+                                          setModalState(() {
+                                            pickedPromoBytes = null;
+                                            pickedPromoFileName = null;
+                                            currentPromoImageUrl = null;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else
+                          GestureDetector(
+                            onTap: () async {
+                              final res = await FilePicker.platform.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
+                                withData: true,
+                              );
+                              if (res != null && res.files.isNotEmpty) {
+                                final f = res.files.first;
+                                final ext = f.extension?.toLowerCase() ?? '';
+                                if (!['jpg', 'jpeg', 'png', 'webp'].contains(ext)) {
+                                  setModalState(() {
+                                    modalError = 'Only JPG, PNG, and WebP images are allowed.';
+                                  });
+                                  return;
+                                }
+                                if (f.size > 2 * 1024 * 1024) {
+                                  setModalState(() {
+                                    modalError = 'Photo exceeds 2 MB limit. Please select an image under 2 MB.';
+                                  });
+                                  return;
+                                }
+                                if (f.bytes == null) {
+                                  setModalState(() {
+                                    modalError = 'Could not read image file.';
+                                  });
+                                  return;
+                                }
+                                setModalState(() {
+                                  modalError = null;
+                                  pickedPromoBytes = f.bytes;
+                                  pickedPromoFileName = f.name;
+                                });
+                              }
+                            },
+                            child: Container(
+                              height: 100,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: MarketColors.surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(color: MarketColors.cardBorder),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(Icons.add_a_photo_outlined, color: MarketColors.primary, size: 24),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Select Promo Photo (JPG, PNG, WebP up to 2 MB) *',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: MarketColors.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 12),
 
                         // Title
                         AppTextField(
@@ -869,13 +1031,19 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                           width: double.infinity,
                           height: 48,
                           label: isSaving
-                              ? 'Saving Promo...'
+                              ? (isUploading ? 'Uploading Photo...' : 'Saving Promo...')
                               : (isEditing ? 'Update Promo' : 'Publish Promo'),
                           isLoading: isSaving,
                           onPressed: isSaving
                               ? null
                               : () async {
                                   if (!formKey.currentState!.validate()) return;
+                                  if (pickedPromoBytes == null && (currentPromoImageUrl == null || currentPromoImageUrl!.isEmpty)) {
+                                    setModalState(() {
+                                      modalError = 'Add a photo for this promo';
+                                    });
+                                    return;
+                                  }
                                   if (!endsAt.isAfter(startsAt)) {
                                     setModalState(() {
                                       modalError = 'End date-time must be after start date-time.';
@@ -886,6 +1054,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                   setModalState(() {
                                     isSaving = true;
                                     modalError = null;
+                                    isUploading = (pickedPromoBytes != null);
                                   });
 
                                   try {
@@ -894,12 +1063,28 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                       throw Exception('No registered business found.');
                                     }
 
+                                    String? finalImageUrl = currentPromoImageUrl;
+                                    if (pickedPromoBytes != null && pickedPromoFileName != null) {
+                                      final uid = _authService.currentUserId ?? _business?.ownerId ?? 'merchant';
+                                      final ext = (pickedPromoFileName!.split('.').lastOrNull ?? 'jpg').toLowerCase();
+                                      final mimeType = ext == 'png' ? 'image/png' : (ext == 'webp' ? 'image/webp' : 'image/jpeg');
+                                      final safeFileName = '${DateTime.now().millisecondsSinceEpoch}_${pickedPromoFileName!.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')}';
+
+                                      finalImageUrl = await _dataService.uploadPromoImage(
+                                        ownerId: uid,
+                                        fileName: safeFileName,
+                                        fileBytes: pickedPromoBytes!,
+                                        contentType: mimeType,
+                                      );
+                                    }
+
                                     final limitVal = int.tryParse(limitCtrl.text.trim()) ?? 100;
 
                                     if (isEditing) {
                                       final updated = existingPromo.copyWith(
                                         title: titleCtrl.text.trim(),
                                         description: descCtrl.text.trim(),
+                                        imageUrl: finalImageUrl,
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
                                         productId: selectedProductId,
@@ -919,6 +1104,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         productId: selectedProductId,
                                         title: titleCtrl.text.trim(),
                                         description: descCtrl.text.trim(),
+                                        imageUrl: finalImageUrl,
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
                                         startsAt: startsAt.toUtc(),
@@ -940,7 +1126,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                   } catch (e) {
                                     setModalState(() {
                                       isSaving = false;
-                                      modalError = e.toString().replaceAll('Exception:', '').trim();
+                                      isUploading = false;
+                                      modalError = 'Upload or save failed: ${e.toString().replaceAll('Exception:', '').trim()}. Tap Save to retry.';
                                     });
                                   }
                                 },
@@ -1538,59 +1725,85 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row: Badge & Value Label & Actions
+          // Top Row: Photo Thumbnail + Details
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: MarketColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  p.promoType.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: MarketColors.onPrimaryContainer,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 76,
+                  height: 76,
+                  child: PromoPhotoView(
+                    promoImageUrl: p.imageUrl,
+                    businessCoverUrl: _business?.coverUrl,
+                    category: _business?.category,
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  p.valueLabel ?? p.promoType.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    color: MarketColors.primary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Badge & Value Label
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: MarketColors.primaryContainer,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            p.promoType.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: MarketColors.onPrimaryContainer,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            p.valueLabel ?? p.promoType.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: MarketColors.primary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      p.title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: MarketColors.onSurface,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (p.description != null && p.description!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        p.description!,
+                        style: const TextStyle(fontSize: 11, color: MarketColors.secondary),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-
-          // Title & Description
-          Text(
-            p.title,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: MarketColors.onSurface,
-            ),
-          ),
-          if (p.description != null && p.description!.isNotEmpty) ...[
-            const SizedBox(height: 3),
-            Text(
-              p.description!,
-              style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
           const SizedBox(height: 8),
 
           // Validity date

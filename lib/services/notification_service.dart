@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -45,22 +46,47 @@ class NotificationService {
     } catch (_) {}
   }
 
+  /// Constructs notification details, attaching BigPictureStyleInformation if image exists
+  static NotificationDetails buildPromoNotificationDetails({
+    required String title,
+    required String body,
+    String? imagePath,
+  }) {
+    BigPictureStyleInformation? bigPictureStyle;
+    if (imagePath != null && File(imagePath).existsSync()) {
+      bigPictureStyle = BigPictureStyleInformation(
+        FilePathAndroidBitmap(imagePath),
+        contentTitle: title,
+        summaryText: body,
+        hideExpandedLargeIcon: true,
+      );
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      'promo_channel',
+      'Business Promotions',
+      channelDescription: 'Promotions from nearby businesses',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+      styleInformation: bigPictureStyle,
+    );
+
+    return NotificationDetails(android: androidDetails);
+  }
+
   Future<void> showPromo({
     required int id,
     required String title,
     required String body,
     String? payload,
+    String? imagePath,
   }) async {
     try {
-      const details = NotificationDetails(
-        android: AndroidNotificationDetails(
-          'promo_channel',
-          'Business Promotions',
-          channelDescription: 'Promotions from nearby businesses',
-          importance: Importance.max,
-          priority: Priority.high,
-          icon: '@mipmap/ic_launcher',
-        ),
+      final details = buildPromoNotificationDetails(
+        title: title,
+        body: body,
+        imagePath: imagePath,
       );
       await _plugin.show(id, title, body, details, payload: payload);
     } catch (_) {}

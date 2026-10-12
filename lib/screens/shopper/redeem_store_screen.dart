@@ -10,6 +10,7 @@ import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/promo_photo_view.dart';
 
 enum StoreRedemptionStatus {
   ok,
@@ -366,6 +367,17 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
       ),
       child: Row(
         children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child: PromoPhotoView(
+                promoImageUrl: promo.imageUrl,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
@@ -827,6 +839,19 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (widget.promo != null) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: SizedBox(
+                height: 120,
+                width: double.infinity,
+                child: PromoPhotoView(
+                  promoImageUrl: widget.promo!.imageUrl,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
           Center(
             child: Container(
               width: 64,

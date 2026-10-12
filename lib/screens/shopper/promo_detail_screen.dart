@@ -7,6 +7,7 @@ import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/promo_photo_view.dart';
 import 'redeem_store_screen.dart';
 
 /// PromoDetailScreen displays full promotion terms and voucher action.
@@ -174,6 +175,21 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Promo Photo Header Image
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(18),
+                          child: SizedBox(
+                            height: 180,
+                            width: double.infinity,
+                            child: PromoPhotoView(
+                              promoImageUrl: _promo!.imageUrl,
+                              businessCoverUrl: _business?.coverUrl,
+                              category: _business?.category,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+
                         // Promo Tag & Business Header
                         Container(
                           padding: const EdgeInsets.symmetric(

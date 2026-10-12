@@ -6,6 +6,7 @@ import '../../services/data_service.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/promo_photo_view.dart';
 import 'redeem_store_screen.dart';
 
 /// StashScreen displays saved promotions organized by status tabs:
@@ -310,42 +311,72 @@ class _StashScreenState extends State<StashScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: MarketColors.primaryContainer.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  p.valueLabel ?? p.promoType.toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: MarketColors.primary,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 76,
+                  height: 76,
+                  child: PromoPhotoView(
+                    promoImageUrl: p.imageUrl,
                   ),
                 ),
               ),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.bookmark_remove_outlined, size: 20, color: MarketColors.outline),
-                tooltip: 'Remove',
-                onPressed: () => _removePromo(p),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: MarketColors.primaryContainer.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            p.valueLabel ?? p.promoType.toUpperCase(),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: MarketColors.primary,
+                            ),
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.bookmark_remove_outlined, size: 20, color: MarketColors.outline),
+                          tooltip: 'Remove',
+                          onPressed: () => _removePromo(p),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      p.title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: MarketColors.onSurface,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (p.description != null && p.description!.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        p.description!,
+                        style: const TextStyle(fontSize: 12, color: MarketColors.onSurfaceVariant),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            p.title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: MarketColors.onSurface,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            p.description ?? '',
-            style: const TextStyle(fontSize: 13, color: MarketColors.onSurfaceVariant),
           ),
           const SizedBox(height: 14),
           Divider(color: const Color(0xFFF1F5F9), height: 1),

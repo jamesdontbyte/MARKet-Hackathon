@@ -5,6 +5,7 @@ import '../core/config.dart';
 import 'auth_service.dart';
 import 'data_service.dart';
 import 'notification_service.dart';
+import 'promo_image_cache_service.dart';
 
 class GeofenceZone {
   final String id;
@@ -16,6 +17,7 @@ class GeofenceZone {
   final String promoTitle;
   final String promoBody;
   final String? promoId;
+  final String? promoImageUrl;
 
   const GeofenceZone({
     required this.id,
@@ -27,6 +29,7 @@ class GeofenceZone {
     required this.promoTitle,
     required this.promoBody,
     this.promoId,
+    this.promoImageUrl,
   });
 }
 
@@ -133,6 +136,15 @@ class GeofenceService {
       } catch (_) {}
 
       onLog?.call('Loaded ${zones.length} verified business geofence zone(s). Interests: $shopperInterests');
+
+      // Pre-download promo photos for loaded zones and delete obsolete images
+      final activePromosToSync = zones
+          .where((z) => z.promoId != null)
+          .map((z) => (promoId: z.promoId!, imageUrl: z.promoImageUrl))
+          .toList();
+      unawaited(PromoImageCacheService.instance.syncLoadedPromos(
+        activePromos: activePromosToSync,
+      ));
     } catch (e) {
       onLog?.call('Failed to refresh geofence zones: $e');
     }
@@ -345,12 +357,23 @@ class GeofenceService {
     _lastSkipReasons[zone.id] = 'Notification sent!';
     _recordLog('NOTIFIED ${zone.name}$distStr: "${zone.promoTitle}" - "${zone.promoBody}"');
 
-    NotificationService.instance.showPromo(
-      id: zone.id.hashCode & 0x7fffffff,
-      title: '${zone.name} has a promo near you',
-      body: zone.promoBody,
-      payload: zone.promoId ?? zone.id,
-    );
+    unawaited(() async {
+      String? imagePath;
+      if (zone.promoId != null && zone.promoImageUrl != null) {
+        imagePath = await PromoImageCacheService.instance.getOrDownloadPromoImage(
+          promoId: zone.promoId!,
+          imageUrl: zone.promoImageUrl,
+        );
+      }
+
+      await NotificationService.instance.showPromo(
+        id: zone.id.hashCode & 0x7fffffff,
+        title: '${zone.name} has a promo near you',
+        body: zone.promoBody,
+        payload: zone.promoId ?? zone.id,
+        imagePath: imagePath,
+      );
+    }());
   }
 
   GeofenceZone? getNearestZone([Position? currentPos]) {

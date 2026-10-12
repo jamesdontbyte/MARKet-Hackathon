@@ -12,6 +12,7 @@ import '../../services/geofence_service.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
+import '../../widgets/promo_photo_view.dart';
 import '../shared/permission_explainer_screen.dart';
 import 'promo_detail_screen.dart';
 import 'redeem_store_screen.dart';
@@ -1499,6 +1500,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
   Widget _buildPromoCarouselCard(Promo p) {
     final isSaved = _savedPromoIds.contains(p.id);
+    final business = _verifiedBusinesses.where((b) => b.id == p.businessId).firstOrNull;
 
     return Container(
       width: 260,
@@ -1524,15 +1526,17 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Promo badge header
-                Container(
-                  height: 100,
+                // Promo photo header
+                SizedBox(
+                  height: 110,
                   width: double.infinity,
-                  color: const Color(0xFFE0F2FE),
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Center(
-                        child: Icon(Icons.local_offer_rounded, size: 40, color: MarketColors.primary.withValues(alpha: 0.3)),
+                      PromoPhotoView(
+                        promoImageUrl: p.imageUrl,
+                        businessCoverUrl: business?.coverUrl,
+                        category: business?.category,
                       ),
                       Positioned(
                         top: 10,

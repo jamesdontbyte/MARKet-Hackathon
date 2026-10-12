@@ -619,6 +619,27 @@ class DataService {
     return _client.storage.from('business-media').getPublicUrl(filePath);
   }
 
+  /// Upload promo photo to 'business-media' bucket under `<ownerId>/promos/<fileName>`
+  Future<String> uploadPromoImage({
+    required String ownerId,
+    required String fileName,
+    required Uint8List fileBytes,
+    String? contentType,
+  }) async {
+    final sanitizedName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    final filePath = '$ownerId/promos/$sanitizedName';
+
+    await _client.storage.from('business-media').uploadBinary(
+          filePath,
+          fileBytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: contentType ?? 'image/jpeg',
+          ),
+        );
+
+    return _client.storage.from('business-media').getPublicUrl(filePath);
+  }
 
   // -------------------------------------------------------------
   // Geofence Zones
@@ -657,6 +678,7 @@ class DataService {
         promoTitle: '${biz.name} has a promo near you',
         promoBody: bestPromo.title,
         promoId: bestPromo.id,
+        promoImageUrl: bestPromo.imageUrl,
       ));
     }
     return zones;
