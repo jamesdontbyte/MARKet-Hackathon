@@ -79,6 +79,8 @@ class MerchantAnalyticsData {
     );
   }
 
+  int get redemptionsCount => counterRedemptions.count;
+
   bool get hasActivity =>
       pingsSent.count > 0 ||
       deliveredAndOpened.count > 0 ||

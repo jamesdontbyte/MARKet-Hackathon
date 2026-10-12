@@ -3,6 +3,7 @@ import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import 'merchant_reg_controller.dart';
 import 'reg_step4_review_screen.dart';
 import 'widgets/merchant_reg_stepper.dart';
@@ -54,21 +55,9 @@ class _RegStep3ScreenState extends State<RegStep3Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Permits & Verification',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: const AppHeader(
+        showBack: true,
+        subtitle: 'Registration',
       ),
       body: SafeArea(
         child: Column(

@@ -387,4 +387,79 @@ lib/
      - Update `docs/demo_script.md` for reverse redemption flow.
      - Run `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.
 
+---
 
+### Phase 8: UI Polish A — Merchant Registration & Dashboard
+**Goal:** Align merchant multi-step registration and dashboard header with Stitch design frames (`market_msme_registration_step_2_business_information`, `market_tab_1_dashboard_immersive_scroll_header`), establish static media bucket and schema, ensure zero hardcoded fake content, and eliminate layout overflows across all screen sizes and text scaling factors.
+
+- **Tasks:**
+  1. **Database Schema Patch (`db/schema_patch_media.sql`):**
+     - Add nullable `businesses.logo_url` and `businesses.interior_urls (text[])`.
+     - Add nullable business hours columns (`open_days text[]`, `opens_at text`, `closes_at text`).
+     - Create public-read storage bucket `business-media` with owner-only mutation RLS policies (`(storage.foldername(name))[1] = auth.uid()::text`). Keep `merchant-docs` private.
+     - Document patch; do NOT apply to database.
+  2. **Model & Service Updates:**
+     - Update `Business` model with `logoUrl`, `interiorUrls`, `openDays`, `opensAt`, `closesAt`, JSON serialization, and dynamic `isOpenNow` / `openStatusText` helpers.
+     - In `DataService`: add `uploadBusinessMedia` uploading to `business-media/<uid>/` returning public URL, and `updateBusinessDetails`.
+  3. **Merchant Registration Controller & Steps:**
+     - In `MerchantRegController`: manage picked images (`logoBytes`, `coverBytes`, `interiorImages`), upload state, and hours configuration. Ensure initial business fields start empty with zero hardcoded defaults.
+     - In `RegStep2Screen`:
+       - Match Stitch frame: business name, category chips (8 canonical slugs), shop bio with live `X / 250` counter.
+       - Municipality dropdown, street address & barangay.
+       - Hotline with reusable `CountrySelectorButton` (+63 default, stored as `+<code><number>` without leading 0).
+       - Operating hours: day chips (M-S toggle), "Same hours daily" toggle, opens_at / closes_at with `showTimePicker`.
+       - Store Photos & Branding: Logo (square), Exterior (16:9, required), Interior (up to 3, optional). File picker max 5MB validation.
+     - In `RegStep4ReviewScreen`: Display logo, exterior photo, all business info, and full international phone number.
+  4. **Merchant Dashboard:**
+     - Immersive hero: business exterior photo (`coverUrl`) with dark bottom gradient, logo (`logoUrl`) as rounded avatar, business name, category, computed Open/Closed status pill. Category placeholder asset fallback (`assets/categories/{category}.png`).
+     - Edit button opening business editing modal (name, bio, hours, photos, hotline).
+     - Display only real data from `geofence_events` (views, claims, redemptions; 0 with short empty state).
+     - Hide Best Sellers until products with best-seller flag exist; hide reviews card entirely.
+     - "About Our Business" shows real bio and real hours.
+  5. **Shopper Storefront & Roam:**
+     - Storefront and Roam cards display the real logo and exterior photo with category asset fallback.
+  6. **Layout Robustness & Overflow Verification:**
+     - Eliminate fixed heights on text rows; use `Expanded`, `Flexible`, `Wrap`, and `softWrap: true`.
+     - Ensure min 48x48 tap targets.
+     - Widget tests verifying no `RenderFlex` overflow at 360x640 and 411x891 at font scales 1.0 and 1.5 in portrait and landscape.
+  7. **Build & Device Verification:**
+     - [x] Run `flutter analyze` (0 issues).
+     - [x] Run `flutter test` (all 97 tests passed).
+     - [x] Run `flutter build apk --debug` (built `build\app\outputs\flutter-apk\app-debug.apk` in 26.2s).
+     - [x] Device install attempted: `flutter install --debug -d RFCY327KCFN` (device disconnected; builds verified).
+
+---
+
+### Phase 9: UI Polish B — Header & Nav Unification, Single Logo, Catalog Enhancements & Responsiveness
+**Goal:** Establish unified `AppHeader` and `AppBottomNav`, single logo asset (`assets/logos/logo_icon.png`), merchant catalog products & promotions segmented tabs with category chips, availability/best-seller toggles, product image upload, relocate shopper debug panel to a long-press simulation sheet, and guarantee zero `RenderFlex` overflows at 360x640 and 411x891 at font scales 1.0 and 1.5.
+
+- **Completed Tasks:**
+  1. **Unified Header (`AppHeader`):**
+     - Single logo icon (`assets/logos/logo_icon.png`, 28x28dp).
+     - Dual-tone wordmark "MARK" (`primaryContainer`) + "et" (`onSurface`) with long-press gesture detector on "MARK".
+     - Fixed height of 56dp, bounded safe area, and `MediaQuery.withClampedTextScaling(maxScaleFactor: 1.2)` protecting against header overflow on 360px wide devices at 1.5 text scale.
+     - Subtitle slot with vertical divider (e.g., "Catalog", "Stash", "Analytics", "Store QR").
+     - Right-side notification bell and optional trailing action button.
+     - Optional back arrow button for detail screens.
+  2. **Unified Bottom Navigation (`AppBottomNav`):**
+     - Floating pill navigation bar for Shopper and Merchant roles with active tinting and safe-area padding.
+  3. **Merchant Catalog Screen Enhancements (`catalog_screen.dart`):**
+     - Products & Promotions segmented tabs displaying real count badges.
+     - Dynamic category chips (`All Items` + merchant categories).
+     - "Add Item" modal with photo picker, title, category, price, description, Best Seller toggle, and Available to Shoppers toggle.
+     - Product image upload directly targeting `business-media/<uid>/products/`.
+     - "New Promo" modal with promo type chips (BOGO, Percentage, Fixed Off, Free Item), title, terms, date pickers, and redeem limit.
+     - Resilient loading state initializing `_isLoading = false` with graceful offline fallback.
+  4. **Store QR & Scan Alignment (`store_qr_screen.dart`):**
+     - Display merchant business identity name and storefront icon in checkout content.
+     - Resilient initial load initializing promo details synchronously in `initState`.
+  5. **Shopper Dashboard Simulation Sheet:**
+     - Removed on-screen debug launcher; relocated simulation panel to a clean bottom sheet triggered by long-pressing "MARK".
+  6. **Zero Overflow Verification:**
+     - `StatusPill`: wrapped text in `Flexible` with `TextOverflow.ellipsis`, eliminating horizontal overflow in constrained containers.
+     - `MerchantDashboardScreen`: wrapped store name and category in `Wrap`, eliminating 75px and 24px overflows at 1.5 scale.
+     - All 36 responsive layout and overflow test configurations passed cleanly across 360x640, 411x891, 640x360, 891x411 at scales 1.0 and 1.5.
+  7. **Build & Test Verification:**
+     - [x] `flutter test`: 97/97 tests passed across all 6 test suites.
+     - [x] `flutter analyze`: 0 issues found (clean static analysis).
+     - [x] `flutter build apk --debug`: Built `build\app\outputs\flutter-apk\app-debug.apk` in 22.9s.

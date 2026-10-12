@@ -9,6 +9,7 @@ import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_header.dart';
 
 /// StoreQrScreen displays a static merchant QR code and 8-character code for counter checkout.
 /// Shoppers scan or type this code to atomically redeem the promotion in MARKet.
@@ -46,7 +47,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
   String? _qrPayload;
   int _redeemedTodayCount = 0;
 
-  bool _isLoading = true;
+  bool _isLoading = false;
   bool _isResetting = false;
   String? _errorMessage;
 
@@ -56,6 +57,14 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
     _dataService = widget.dataService ?? DataService();
     _business = widget.business;
     _selectedPromo = widget.initialPromo;
+    if (_selectedPromo != null) {
+      _activePromos = [_selectedPromo!];
+      final fallback = _selectedPromo!.id.replaceAll('-', '').substring(0, 8).toUpperCase();
+      _storeCode = fallback;
+      _qrPayload = fallback;
+      _redeemedTodayCount = _selectedPromo!.redeemedCount;
+    }
+    _isLoading = _business == null && _selectedPromo == null;
     _initializeStore();
   }
 
@@ -65,10 +74,12 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
   }
 
   Future<void> _initializeStore() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+    if (_business == null && _selectedPromo == null) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = null;
+      });
+    }
 
     try {
       if (_business == null) {
@@ -264,45 +275,17 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
+      appBar: AppHeader(
+        showBack: true,
+        subtitle: 'Store QR',
+        trailing: IconButton(
+          icon: const Icon(Icons.refresh_rounded, color: MarketColors.primary, size: 22),
+          tooltip: 'Refresh',
+          onPressed: () {
+            _fetchStoreCode();
+            _fetchTodayCount();
+          },
         ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Store Checkout QR',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: MarketColors.onSurface,
-              ),
-            ),
-            if (_business != null)
-              Text(
-                _business!.name,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: MarketColors.secondary,
-                ),
-              ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: MarketColors.primary),
-            tooltip: 'Refresh',
-            onPressed: () {
-              _fetchStoreCode();
-              _fetchTodayCount();
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: _isLoading
@@ -396,6 +379,31 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Store Identity
+          if (_business != null) ...[
+            Row(
+              children: [
+                const Icon(
+                  Icons.storefront_rounded,
+                  size: 20,
+                  color: MarketColors.primary,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _business!.name,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: MarketColors.onSurface,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // Promo Selector (when multiple promos are active)
           if (_activePromos.length > 1) ...[
             const Text(

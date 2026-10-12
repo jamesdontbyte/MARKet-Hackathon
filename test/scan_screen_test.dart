@@ -8,6 +8,7 @@ import 'package:market_final/screens/merchant/store_qr_screen.dart';
 import 'package:market_final/screens/shopper/redeem_store_screen.dart';
 import 'package:market_final/screens/shopper/stash_screen.dart';
 import 'package:market_final/services/data_service.dart';
+import 'package:market_final/widgets/app_header.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Hand-written fake for PostgrestFilterBuilder completing with custom RPC response
@@ -94,7 +95,7 @@ void main() {
       await tester.pump();
 
       // Screen Header
-      expect(find.text('Store Checkout QR'), findsOneWidget);
+      expect(find.text('Store QR'), findsOneWidget);
       expect(find.text('Kape Tahanan'), findsOneWidget);
 
       // Promo info
@@ -143,7 +144,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.text('Redeem at Store'), findsOneWidget);
+      expect(find.text('Redeem'), findsOneWidget);
       expect(find.text('Scan Camera'), findsOneWidget);
       expect(find.text('Upload QR'), findsOneWidget);
       expect(find.text('Type Code'), findsOneWidget);
@@ -370,7 +371,7 @@ void main() {
           );
           await tester.pumpAndSettle();
 
-          expect(find.text('Redeem at Store'), findsOneWidget);
+          expect(find.text('Redeem'), findsOneWidget);
           expect(tester.takeException(), isNull);
 
           await tester.pumpWidget(const SizedBox());
@@ -396,12 +397,9 @@ void main() {
       await tester.pump();
 
       // Brand and store name
-      expect(
-        find.byWidgetPredicate(
-          (w) => w is RichText && w.text.toPlainText().contains('MARKet'),
-        ),
-        findsWidgets,
-      );
+      expect(find.byType(AppHeader), findsOneWidget);
+      expect(find.text('MARK'), findsOneWidget);
+      expect(find.text('et'), findsOneWidget);
       expect(find.text('Kape Tahanan'), findsWidgets);
       expect(find.text('San Jose de Buenavista'), findsOneWidget);
 

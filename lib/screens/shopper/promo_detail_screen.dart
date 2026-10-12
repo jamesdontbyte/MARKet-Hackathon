@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_header.dart';
 import 'redeem_store_screen.dart';
 
 /// PromoDetailScreen displays full promotion terms and voucher action.
@@ -140,24 +141,20 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          if (_promo != null)
-            IconButton(
-              icon: Icon(
-                _isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-                color: _isSaved ? MarketColors.primary : MarketColors.outline,
-              ),
-              tooltip: _isSaved ? 'Remove from Stash' : 'Save to Stash',
-              onPressed: _isSaving ? null : _toggleStash,
-            ),
-        ],
+      appBar: AppHeader(
+        showBack: true,
+        subtitle: 'Promotion',
+        trailing: _promo != null
+            ? IconButton(
+                icon: Icon(
+                  _isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                  color: _isSaved ? MarketColors.primary : MarketColors.outline,
+                  size: 22,
+                ),
+                tooltip: _isSaved ? 'Remove from Stash' : 'Save to Stash',
+                onPressed: _isSaving ? null : _toggleStash,
+              )
+            : null,
       ),
       body: SafeArea(
         child: _isLoading

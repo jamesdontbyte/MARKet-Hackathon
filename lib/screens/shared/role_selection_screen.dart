@@ -45,7 +45,14 @@ class _RoleSelectionScreenState extends State<RoleSelectionScreen> {
                   children: [
                     const SizedBox(height: 12),
 
-                    // Title Header with Dual-Tone Wordmark
+                    // Title Header with Logo and Dual-Tone Wordmark
+                    Image.asset(
+                      'assets/logos/logo_icon.png',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 16),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,

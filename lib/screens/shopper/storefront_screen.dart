@@ -5,6 +5,7 @@ import '../../models/business.dart';
 import '../../models/product.dart';
 import '../../models/promo.dart';
 import '../../services/data_service.dart';
+import '../../widgets/app_header.dart';
 import 'promo_detail_screen.dart';
 
 /// StorefrontScreen presents the MSME merchant's public profile,
@@ -65,26 +66,28 @@ class _StorefrontScreenState extends State<StorefrontScreen> {
 
     return Scaffold(
       backgroundColor: MarketColors.surface,
+      appBar: AppHeader(
+        showBack: true,
+        subtitle: widget.business.name,
+      ),
       body: CustomScrollView(
         slivers: [
-          // Collapsible Image Header
-          SliverAppBar(
-            expandedHeight: 200,
-            pinned: true,
-            backgroundColor: MarketColors.surface,
-            leading: IconButton(
-              icon: Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface, size: 20),
+          // Storefront Exterior Showcase Card
+          SliverToBoxAdapter(
+            child: Container(
+              height: 180,
+              margin: const EdgeInsets.fromLTRB(
+                MarketSpacing.screenMargin,
+                12,
+                MarketSpacing.screenMargin,
+                0,
               ),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: MarketElevation.level1,
+              ),
+              child: Stack(
                 fit: StackFit.expand,
                 children: [
                   widget.business.coverUrl != null && widget.business.coverUrl!.isNotEmpty
@@ -115,10 +118,31 @@ class _StorefrontScreenState extends State<StorefrontScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title & Verification Pill
+                  // Title, Logo Avatar & Verification Pill
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: MarketColors.surfaceContainerLowest,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: MarketColors.outlineVariant.withValues(alpha: 0.3),
+                          ),
+                          boxShadow: MarketElevation.level1,
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: widget.business.logoUrl != null && widget.business.logoUrl!.isNotEmpty
+                            ? Image.network(
+                                widget.business.logoUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => _buildCategoryAvatar(widget.business.category),
+                              )
+                            : _buildCategoryAvatar(widget.business.category),
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -126,16 +150,16 @@ class _StorefrontScreenState extends State<StorefrontScreen> {
                             Text(
                               widget.business.name,
                               style: const TextStyle(
-                                fontSize: 24,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w800,
                                 color: MarketColors.onSurface,
                               ),
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 2),
                             Text(
                               categoryLabel,
                               style: const TextStyle(
-                                fontSize: 14,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 color: MarketColors.primary,
                               ),
@@ -166,6 +190,47 @@ class _StorefrontScreenState extends State<StorefrontScreen> {
                             ],
                           ),
                         ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Open / Closed Pill from real hours
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: MarketColors.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: MarketColors.outlineVariant.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: BoxDecoration(
+                                color: widget.business.isOpenNow
+                                    ? const Color(0xFF10B981)
+                                    : Colors.amber,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              widget.business.openStatusText,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: MarketColors.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
@@ -327,6 +392,20 @@ class _StorefrontScreenState extends State<StorefrontScreen> {
         color: MarketColors.surfaceContainerHigh,
         child: const Center(
           child: Icon(Icons.storefront_rounded, size: 54, color: MarketColors.primary),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryAvatar(String category) {
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: Image.asset(
+        'assets/categories/$category.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => const Icon(
+          Icons.storefront_rounded,
+          color: MarketColors.primary,
         ),
       ),
     );

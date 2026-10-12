@@ -4,7 +4,8 @@ import '../../models/business.dart';
 import '../../models/profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
-import '../../widgets/merchant_bottom_nav.dart';
+import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/country_selector.dart';
 import 'analytics_screen.dart';
 import 'catalog_screen.dart';
@@ -97,34 +98,27 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
     final email = _authService.currentUser?.email ?? 'No email set';
     final phone = _profile?.phone ?? biz?.phone ?? 'No phone set';
 
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        _onBottomNavTapped(0);
+      },
+      child: Scaffold(
         backgroundColor: MarketColors.surface,
-        elevation: 0,
-        title: Row(
-          children: const [
-            Icon(Icons.shield_outlined, color: MarketColors.primary, size: 20),
-            SizedBox(width: 8),
-            Text(
-              'MSME Trust & Legal Hub',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: MarketColors.onSurfaceVariant,
-              ),
-            ),
-          ],
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Account',
         ),
-      ),
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: MarketSpacing.screenMargin,
-                  vertical: 8,
-                ),
+        body: SafeArea(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    MarketSpacing.screenMargin,
+                    16,
+                    MarketSpacing.screenMargin,
+                    88,
+                  ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -434,12 +428,14 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                 ),
               ),
       ),
-      bottomNavigationBar: MerchantBottomNav(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
+        role: AppNavRole.merchant,
         onTap: _onBottomNavTapped,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildDetailRow({
     required IconData icon,

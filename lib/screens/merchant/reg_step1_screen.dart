@@ -3,6 +3,7 @@ import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/country_selector.dart';
 import 'merchant_reg_controller.dart';
@@ -189,21 +190,9 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Merchant Registration',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: const AppHeader(
+        showBack: true,
+        subtitle: 'Registration',
       ),
       body: SafeArea(
         child: Column(
@@ -222,6 +211,15 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                       // 4-Step Stepper
                       const MerchantRegStepper(currentStep: 1),
                       const SizedBox(height: 20),
+
+                      // Exact Logo Icon
+                      Image.asset(
+                        'assets/logos/logo_icon.png',
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.contain,
+                      ),
+                      const SizedBox(height: 16),
 
                       // Section Title
                       const Text(

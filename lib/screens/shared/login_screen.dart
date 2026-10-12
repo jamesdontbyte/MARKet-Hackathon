@@ -128,6 +128,13 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Logo & Title
+              Image.asset(
+                'assets/logos/logo_icon.png',
+                width: 44,
+                height: 44,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 16),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,

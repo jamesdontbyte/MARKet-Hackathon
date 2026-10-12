@@ -34,7 +34,7 @@ void main() {
       expect(outJson['interests'], contains('food'));
     });
 
-    test('Business round-trip with cover_url', () {
+    test('Business round-trip with media and operating hours', () {
       final json = {
         'id': '22222222-2222-2222-2222-222222222222',
         'owner_id': '33333333-3333-3333-3333-333333333333',
@@ -51,6 +51,11 @@ void main() {
         'rating': 4.8,
         'verified': true,
         'cover_url': 'https://example.com/cover.jpg',
+        'logo_url': 'https://example.com/logo.jpg',
+        'interior_urls': ['https://example.com/int1.jpg', 'https://example.com/int2.jpg'],
+        'open_days': ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        'opens_at': '08:00',
+        'closes_at': '18:00',
         'created_at': '2026-10-12T00:00:00.000Z',
       };
 
@@ -61,10 +66,60 @@ void main() {
       expect(biz.lat, closeTo(10.7547, 0.001));
       expect(biz.verified, isTrue);
       expect(biz.coverUrl, 'https://example.com/cover.jpg');
+      expect(biz.logoUrl, 'https://example.com/logo.jpg');
+      expect(biz.interiorUrls, hasLength(2));
+      expect(biz.openDays, contains('Mon'));
+      expect(biz.opensAt, '08:00');
+      expect(biz.closesAt, '18:00');
 
       final outJson = biz.toJson();
       expect(outJson['name'], 'Kape Tahanan');
       expect(outJson['cover_url'], 'https://example.com/cover.jpg');
+      expect(outJson['logo_url'], 'https://example.com/logo.jpg');
+      expect(outJson['interior_urls'], hasLength(2));
+      expect(outJson['open_days'], contains('Mon'));
+      expect(outJson['opens_at'], '08:00');
+      expect(outJson['closes_at'], '18:00');
+    });
+
+    test('Business isOpenNow and openStatusText computation', () {
+      final openBiz = Business(
+        id: 'open-biz',
+        name: 'Always Open',
+        category: 'retail',
+        bio: 'Open shop',
+        address: 'San Jose',
+        phone: '9171234567',
+        hours: 'Daily',
+        lat: 10.7,
+        lng: 121.9,
+        verified: true,
+        openDays: const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        opensAt: '00:00',
+        closesAt: '23:59',
+        createdAt: DateTime.now(),
+      );
+      expect(openBiz.isOpenNow, isTrue);
+      expect(openBiz.openStatusText, startsWith('Open'));
+
+      final closedBiz = Business(
+        id: 'closed-biz',
+        name: 'Closed Biz',
+        category: 'retail',
+        bio: 'Closed shop',
+        address: 'San Jose',
+        phone: '9171234567',
+        hours: 'Never',
+        lat: 10.7,
+        lng: 121.9,
+        verified: true,
+        openDays: const [],
+        opensAt: '00:00',
+        closesAt: '00:01',
+        createdAt: DateTime.now(),
+      );
+      expect(closedBiz.isOpenNow, isFalse);
+      expect(closedBiz.openStatusText, startsWith('Closed'));
     });
 
     test('Product round-trip', () {

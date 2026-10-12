@@ -59,68 +59,75 @@ class MerchantRegStepper extends StatelessWidget {
               ),
               // 4 Step Nodes
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(4, (index) {
                   final stepNum = index + 1;
                   final isCompleted = stepNum < currentStep;
                   final isCurrent = stepNum == currentStep;
 
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isCompleted
-                              ? MarketColors.primary
-                              : isCurrent
-                                  ? MarketColors.primaryContainer
-                                  : MarketColors.surfaceContainer,
-                          boxShadow: isCurrent
-                              ? [
-                                  BoxShadow(
-                                    color: MarketColors.primaryContainer.withValues(alpha: 0.35),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
+                  return Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 30,
+                          height: 30,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isCompleted
+                                ? MarketColors.primary
+                                : isCurrent
+                                    ? MarketColors.primaryContainer
+                                    : MarketColors.surfaceContainer,
+                            boxShadow: isCurrent
+                                ? [
+                                    BoxShadow(
+                                      color: MarketColors.primaryContainer.withValues(alpha: 0.35),
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Center(
+                            child: isCompleted
+                                ? const Icon(
+                                    Icons.check_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : Text(
+                                    '$stepNum',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                                      color: isCurrent
+                                          ? MarketColors.onSurface
+                                          : MarketColors.outline,
+                                    ),
                                   ),
-                                ]
-                              : null,
+                          ),
                         ),
-                        child: Center(
-                          child: isCompleted
-                              ? const Icon(
-                                  Icons.check_rounded,
-                                  size: 16,
-                                  color: Colors.white,
-                                )
-                              : Text(
-                                  '$stepNum',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                                    color: isCurrent
+                        const SizedBox(height: 6),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              stepLabels[index],
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                                color: isCurrent
+                                    ? MarketColors.primary
+                                    : isCompleted
                                         ? MarketColors.onSurface
                                         : MarketColors.outline,
-                                  ),
-                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        stepLabels[index],
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-                          color: isCurrent
-                              ? MarketColors.primary
-                              : isCompleted
-                                  ? MarketColors.onSurface
-                                  : MarketColors.outline,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   );
                 }),
               ),

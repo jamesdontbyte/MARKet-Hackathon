@@ -4,6 +4,7 @@ import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/country_selector.dart';
 import 'merchant_reg_controller.dart';
 import 'waiting_screen.dart';
@@ -57,21 +58,9 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
 
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Review & Confirm',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: const AppHeader(
+        showBack: true,
+        subtitle: 'Review',
       ),
       body: SafeArea(
         child: Column(
@@ -145,13 +134,116 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
                       },
                     ),
 
+                    // Store Photos & Branding Preview Card
+                    Container(
+                      decoration: BoxDecoration(
+                        color: MarketColors.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: MarketColors.outlineVariant.withValues(alpha: 0.3),
+                        ),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x0A0F172A),
+                            offset: Offset(0, 4),
+                            blurRadius: 16,
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_regController.coverBytes != null)
+                            AspectRatio(
+                              aspectRatio: 16 / 9,
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.memory(_regController.coverBytes!, fit: BoxFit.cover),
+                                  const DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                        colors: [Colors.transparent, Color(0x99000000)],
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    bottom: 12,
+                                    left: 14,
+                                    right: 14,
+                                    child: Row(
+                                      children: [
+                                        if (_regController.logoBytes != null)
+                                          Container(
+                                            width: 44,
+                                            height: 44,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(color: Colors.white, width: 2),
+                                            ),
+                                            clipBehavior: Clip.antiAlias,
+                                            child: Image.memory(
+                                              _regController.logoBytes!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            _regController.businessName.isNotEmpty
+                                                ? _regController.businessName
+                                                : 'Your Business',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.white,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.storefront_rounded,
+                                      size: 32, color: MarketColors.primary),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _regController.businessName,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        color: MarketColors.onSurface,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
                     // 1. Owner Profile Card
                     _buildSummaryCard(
                       title: 'Owner Information',
                       icon: Icons.person_rounded,
                       rows: [
                         _buildRow('Full Name', _regController.fullName),
-                        _buildRow('Date of Birth', _regController.dob),
+                        _buildRow('Date of Birth', _regController.dob.isNotEmpty ? _regController.dob : '—'),
                         _buildRow(
                           'Mobile Number',
                           '${formatPhoneDisplay(_regController.phone)} (Verified)',
@@ -170,13 +262,13 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
                         _buildRow('Category', catLabel),
                         _buildRow('Municipality', _regController.municipality),
                         _buildRow('Street Address', _regController.address),
-                        _buildRow('Hotline', '+63 ${_regController.contactPhone}'),
-                        _buildRow('Operating Hours', _regController.hours),
+                        _buildRow('Hotline', formatPhoneDisplay(_regController.contactPhone)),
+                        _buildRow('Operating Hours', _regController.hours.isNotEmpty ? _regController.hours : '—'),
                         _buildRow('Coordinates',
                             _regController.lat != null && _regController.lng != null
                                 ? '${_regController.lat!.toStringAsFixed(5)}, ${_regController.lng!.toStringAsFixed(5)}'
                                 : '—'),
-                        _buildRow('Bio', _regController.bio),
+                        _buildRow('Bio', _regController.bio.isNotEmpty ? _regController.bio : '—'),
                       ],
                     ),
                     const SizedBox(height: 16),

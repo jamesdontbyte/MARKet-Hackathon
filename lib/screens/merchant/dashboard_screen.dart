@@ -6,7 +6,9 @@ import '../../models/merchant_analytics.dart';
 import '../../models/promo.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
-import '../../widgets/merchant_bottom_nav.dart';
+import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_header.dart';
+import '../../widgets/country_selector.dart';
 import '../../widgets/status_pill.dart';
 import 'account_screen.dart';
 import 'analytics_screen.dart';
@@ -96,154 +98,449 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
     }
   }
 
+  Future<void> _openEditBusinessModal(Business? biz) async {
+    if (biz == null) return;
+
+    final nameCtrl = TextEditingController(text: biz.name);
+    final bioCtrl = TextEditingController(text: biz.bio ?? '');
+    final addressCtrl = TextEditingController(text: biz.address ?? '');
+    final phoneCtrl = TextEditingController(text: biz.phone ?? '');
+    final hoursCtrl = TextEditingController(text: biz.hours ?? '');
+    String selectedCategory = biz.category;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (modalCtx, setModalState) {
+            return Container(
+              height: MediaQuery.of(modalCtx).size.height * 0.85,
+              decoration: const BoxDecoration(
+                color: MarketColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: EdgeInsets.only(
+                left: MarketSpacing.screenMargin,
+                right: MarketSpacing.screenMargin,
+                top: 16,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: MarketColors.outlineVariant.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Edit Business Details',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: MarketColors.onSurface,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => Navigator.of(modalCtx).pop(),
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Business Name',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: nameCtrl,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: MarketColors.surfaceContainerLowest,
+                              contentPadding: EdgeInsets.all(12),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Category',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: canonicalCategories.map((slug) {
+                              final isSelected = selectedCategory == slug;
+                              return ChoiceChip(
+                                label: Text(categoryLabels[slug] ?? slug),
+                                selected: isSelected,
+                                onSelected: (sel) {
+                                  if (sel) {
+                                    setModalState(() {
+                                      selectedCategory = slug;
+                                    });
+                                  }
+                                },
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Shop Bio',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: bioCtrl,
+                            maxLines: 3,
+                            maxLength: 250,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: MarketColors.surfaceContainerLowest,
+                              contentPadding: EdgeInsets.all(12),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Street Address & Barangay',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: addressCtrl,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: MarketColors.surfaceContainerLowest,
+                              contentPadding: EdgeInsets.all(12),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Hotline / Mobile',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: phoneCtrl,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: MarketColors.surfaceContainerLowest,
+                              contentPadding: EdgeInsets.all(12),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Operating Hours',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                          ),
+                          const SizedBox(height: 6),
+                          TextFormField(
+                            controller: hoursCtrl,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: MarketColors.surfaceContainerLowest,
+                              contentPadding: EdgeInsets.all(12),
+                              border: OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: MarketColors.primaryContainer,
+                        foregroundColor: MarketColors.onSurface,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final updated = biz.copyWith(
+                          name: nameCtrl.text.trim(),
+                          category: selectedCategory,
+                          bio: bioCtrl.text.trim(),
+                          address: addressCtrl.text.trim(),
+                          phone: phoneCtrl.text.trim(),
+                          hours: hoursCtrl.text.trim(),
+                        );
+                        try {
+                          await _dataService.updateBusiness(updated);
+                          if (mounted) {
+                            setState(() {
+                              _business = updated;
+                            });
+                          }
+                          if (modalCtx.mounted) {
+                            Navigator.of(modalCtx).pop();
+                          }
+                        } catch (e) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Failed to update: $e')),
+                            );
+                          }
+                        }
+                      },
+                      child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.w700)),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final biz = _business;
-    final coverImage = biz?.coverUrl ??
-        'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80';
-    final categoryText = categoryLabels[biz?.category] ?? biz?.category ?? 'Café & Pastries';
 
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null && biz == null
-              ? _buildErrorView()
-              : RefreshIndicator(
-                  onRefresh: _loadDashboardData,
-                  child: CustomScrollView(
-                    slivers: [
-                      // Immersive Collapsible Hero Header
-                      SliverAppBar(
-                        expandedHeight: 240,
-                        pinned: true,
-                        backgroundColor: MarketColors.surface,
-                        elevation: 0,
-                        flexibleSpace: FlexibleSpaceBar(
-                          background: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.network(
-                                coverImage,
-                                fit: BoxFit.cover,
-                                errorBuilder: (ctx, err, stack) => Container(
-                                  color: MarketColors.surfaceContainerHigh,
-                                  child: const Center(
-                                    child: Icon(Icons.storefront_rounded,
-                                        size: 48, color: MarketColors.primary),
-                                  ),
-                                ),
-                              ),
-                              // Dark bottom gradient overlay
-                              Container(
-                                decoration: const BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.transparent,
-                                      Color(0x60000000),
-                                      Color(0xD00F172A),
-                                    ],
-                                    stops: [0.3, 0.65, 1.0],
-                                  ),
-                                ),
-                              ),
-                              // Store identity text
-                              Positioned(
-                                left: MarketSpacing.screenMargin,
-                                right: MarketSpacing.screenMargin,
-                                bottom: 16,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        StatusPill.verifiedMsme(),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black45,
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(color: Colors.white24),
-                                          ),
-                                          child: Text(
-                                            categoryText,
-                                            style: const TextStyle(
-                                              fontSize: 11,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Text(
-                                      biz?.name ?? 'My Business',
-                                      style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      biz?.address ?? 'San Jose de Buenavista, Antique',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white.withValues(alpha: 0.85),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {},
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Dashboard',
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _errorMessage != null && biz == null
+                ? _buildErrorView()
+                : RefreshIndicator(
+                    onRefresh: _loadDashboardData,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(
+                        MarketSpacing.screenMargin,
+                        16,
+                        MarketSpacing.screenMargin,
+                        88,
                       ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildStoreIdentityCard(biz),
+                          _buildPerformanceCard(),
+                          const SizedBox(height: 20),
+                          _buildActivePromosSection(),
+                          const SizedBox(height: 20),
+                          _buildAboutBusinessSection(biz),
+                        ],
+                      ),
+                    ),
+                  ),
+        bottomNavigationBar: AppBottomNav(
+          currentIndex: 0,
+          role: AppNavRole.merchant,
+          onTap: _onBottomNavTapped,
+        ),
+      ),
+    );
+  }
 
-                      // Main Dashboard Body
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: MarketSpacing.screenMargin,
-                          vertical: 16,
+  Widget _buildStoreIdentityCard(Business? biz) {
+    final categoryText = categoryLabels[biz?.category] ?? biz?.category ?? 'Retail & Shopping';
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      height: 130,
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: MarketElevation.level1,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (biz?.coverUrl != null && biz!.coverUrl!.isNotEmpty)
+            Image.network(
+              biz.coverUrl!,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => _buildCategoryHeroFallback(biz.category),
+            )
+          else
+            _buildCategoryHeroFallback(biz?.category),
+          const DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Color(0x70000000),
+                  Color(0xD00F172A),
+                ],
+                stops: [0.1, 0.5, 1.0],
+              ),
+            ),
+          ),
+          Positioned(
+            left: 14,
+            right: 14,
+            bottom: 12,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: MarketColors.surfaceContainerLowest,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white, width: 2),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 6,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: biz?.logoUrl != null && biz!.logoUrl!.isNotEmpty
+                      ? Image.network(
+                          biz.logoUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _buildCategoryAvatar(biz.category),
+                        )
+                      : _buildCategoryAvatar(biz?.category),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        biz?.name ?? 'My Business',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -0.3,
                         ),
-                        sliver: SliverList(
-                          delegate: SliverChildListDelegate([
-                            // Performance Overview Section
-                            _buildPerformanceCard(),
-                            const SizedBox(height: 20),
-
-                            // Active Promos Section
-                            _buildActivePromosSection(),
-                            const SizedBox(height: 20),
-
-                            // About Our Business Section
-                            _buildAboutBusinessSection(biz),
-                            const SizedBox(height: 40),
-                          ]),
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        runSpacing: 2,
+                        children: [
+                          Text(
+                            categoryText,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (biz?.verified == true)
+                            StatusPill.verifiedMsme(isSmall: true),
+                        ],
                       ),
                     ],
                   ),
                 ),
-      bottomNavigationBar: MerchantBottomNav(
-        currentIndex: 0,
-        onTap: _onBottomNavTapped,
+                const SizedBox(width: 8),
+                InkWell(
+                  onTap: () => _openEditBusinessModal(biz),
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(Icons.edit_rounded, color: Colors.white, size: 18),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryHeroFallback(String? category) {
+    final catSlug = category != null && canonicalCategories.contains(category) ? category : 'retail';
+    return Container(
+      color: MarketColors.surfaceContainerHigh,
+      child: Center(
+        child: Image.asset(
+          'assets/categories/$catSlug.png',
+          width: 80,
+          height: 80,
+          errorBuilder: (_, _, _) => const Icon(
+            Icons.storefront_rounded,
+            size: 64,
+            color: MarketColors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryAvatar(String? category) {
+    final catSlug = category != null && canonicalCategories.contains(category) ? category : 'retail';
+    return Padding(
+      padding: const EdgeInsets.all(6),
+      child: Image.asset(
+        'assets/categories/$catSlug.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => const Icon(
+          Icons.storefront_rounded,
+          color: MarketColors.primary,
+        ),
       ),
     );
   }
 
   Widget _buildPerformanceCard() {
     final viewsCount = _funnelData?.storeAndPromoViews.count ?? 0;
-    final claimsCount = _funnelData?.claimsGenerated.count ??
+    final claimsCount = _funnelData?.claimsGenerated.count ?? 0;
+    final redemptionsCount = _funnelData?.redemptionsCount ??
         _promos.fold<int>(0, (sum, p) => sum + p.redeemedCount);
-    final hasActivity = viewsCount > 0 || claimsCount > 0;
+
+    final hasActivity = viewsCount > 0 || claimsCount > 0 || redemptionsCount > 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -263,8 +560,11 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 8,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,114 +616,38 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
           ),
           const SizedBox(height: 16),
 
-          // 2 Stats Row
+          // Real data 3-metric strip
           Row(
             children: [
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: MarketColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Store Views',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: MarketColors.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.visibility_outlined,
-                              size: 16, color: MarketColors.outline),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '$viewsCount',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: MarketColors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        hasActivity ? 'Store & promo views' : 'No views yet this week',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: MarketColors.outline,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _buildMetricItem(
+                  title: 'Store Views',
+                  count: viewsCount,
+                  icon: Icons.visibility_outlined,
+                  subtitle: 'Shopper views',
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
               Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: MarketColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'Promo Claims',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: MarketColors.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.confirmation_number_outlined,
-                              size: 16, color: MarketColors.outline),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        '$claimsCount',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: MarketColors.onSurface,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        hasActivity ? 'Vouchers claimed' : 'No claims yet this week',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: MarketColors.outline,
-                        ),
-                      ),
-                    ],
-                  ),
+                child: _buildMetricItem(
+                  title: 'Promo Claims',
+                  count: claimsCount,
+                  icon: Icons.confirmation_number_outlined,
+                  subtitle: 'Vouchers saved',
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildMetricItem(
+                  title: 'Redeemed',
+                  count: redemptionsCount,
+                  icon: Icons.verified_rounded,
+                  subtitle: 'Completed sales',
                 ),
               ),
             ],
           ),
+
           if (!hasActivity) ...[
             const SizedBox(height: 12),
             Container(
@@ -437,9 +661,11 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                 children: const [
                   Icon(Icons.info_outline_rounded, size: 14, color: MarketColors.outline),
                   SizedBox(width: 6),
-                  Text(
-                    'No activity yet this week',
-                    style: TextStyle(fontSize: 11, color: MarketColors.onSurfaceVariant),
+                  Expanded(
+                    child: Text(
+                      'No shopper activity recorded yet this week',
+                      style: TextStyle(fontSize: 11, color: MarketColors.onSurfaceVariant),
+                    ),
                   ),
                 ],
               ),
@@ -450,24 +676,89 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
     );
   }
 
+  Widget _buildMetricItem({
+    required String title,
+    required int count,
+    required IconData icon,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: MarketColors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              Icon(icon, size: 14, color: MarketColors.outline),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$count',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: MarketColors.onSurface,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w600,
+              color: MarketColors.outline,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActivePromosSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: 8,
+          runSpacing: 4,
           children: [
             Row(
+              mainAxisSize: MainAxisSize.min,
               children: const [
                 Icon(Icons.campaign_rounded,
                     color: MarketColors.primary, size: 22),
                 SizedBox(width: 8),
-                Text(
-                  'Active Promos',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: MarketColors.onSurface,
+                Flexible(
+                  child: Text(
+                    'Active Promos',
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: MarketColors.onSurface,
+                    ),
                   ),
                 ),
               ],
@@ -518,7 +809,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 const Text(
-                  'Launch your first flash deal to reach shoppers entering San Jose.',
+                  'Launch your first deal to reach shoppers entering San Jose.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
@@ -562,8 +853,11 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -581,6 +875,7 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                         ),
                       ),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: const [
                           Icon(Icons.schedule_rounded,
                               size: 14, color: Color(0xFF0284C7)),
@@ -619,8 +914,11 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                   const SizedBox(height: 12),
                   const Divider(height: 1, color: Color(0xFFBAE6FD)),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       Text(
                         '${promo.redeemedCount} claimed by locals',
@@ -677,8 +975,11 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
               const Text(
                 'About Our Business',
@@ -689,27 +990,23 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
                 ),
               ),
               TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => MerchantAccountScreen(business: biz),
-                    ),
-                  );
-                },
+                onPressed: () => _openEditBusinessModal(biz),
                 child: const Text('Edit Info', style: TextStyle(fontSize: 12)),
               ),
             ],
           ),
           const SizedBox(height: 8),
 
-          // Operating Hours
+          // Real Operating Hours
           Row(
             children: [
               const Icon(Icons.schedule_rounded, size: 18, color: MarketColors.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  biz?.hours ?? 'Mon – Sun: 7:00 AM – 9:00 PM',
+                  biz?.hours != null && biz!.hours!.trim().isNotEmpty
+                      ? biz.hours!.trim()
+                      : biz?.openStatusText ?? 'Hours not configured',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -719,24 +1016,53 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
-          // Feature chips
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: const [
-              _FeatureBadge(label: 'Locally Sourced', icon: Icons.eco_outlined),
-              _FeatureBadge(label: 'Pet Friendly', icon: Icons.pets_outlined),
-              _FeatureBadge(label: 'Fast Wi-Fi', icon: Icons.wifi_rounded),
-            ],
-          ),
-          const SizedBox(height: 14),
+          // Real Address
+          if (biz?.address != null && biz!.address!.trim().isNotEmpty) ...[
+            Row(
+              children: [
+                const Icon(Icons.location_on_outlined, size: 18, color: MarketColors.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    biz.address!.trim(),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: MarketColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+          ],
 
-          // Bio
+          // Real Hotline
+          if (biz?.phone != null && biz!.phone!.trim().isNotEmpty) ...[
+            Row(
+              children: [
+                const Icon(Icons.phone_outlined, size: 18, color: MarketColors.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    formatPhoneDisplay(biz.phone),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: MarketColors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Real Bio (Never hardcoded sample coffee copy!)
           Text(
-            biz?.bio ??
-                'Hand-roasted heirloom Philippine coffee blends, slow drip brews, and homemade native pastries served in an open garden setting.',
+            biz?.bio != null && biz!.bio!.trim().isNotEmpty
+                ? biz.bio!.trim()
+                : 'No shop bio added yet. Tap "Edit Info" above to tell customers about your brand specialties.',
             style: const TextStyle(
               fontSize: 13,
               color: MarketColors.onSurfaceVariant,
@@ -770,42 +1096,6 @@ class _MerchantDashboardScreenState extends State<MerchantDashboardScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _FeatureBadge extends StatelessWidget {
-  final String label;
-  final IconData icon;
-
-  const _FeatureBadge({required this.label, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: MarketColors.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: MarketColors.outlineVariant.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: MarketColors.outline),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: MarketColors.onSurfaceVariant,
-            ),
-          ),
-        ],
       ),
     );
   }

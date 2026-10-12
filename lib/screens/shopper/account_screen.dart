@@ -5,10 +5,11 @@ import '../../core/theme.dart';
 import '../../models/profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/geofence_service.dart';
+import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/filter_chip.dart';
-import '../../widgets/shopper_bottom_nav.dart';
 import '../../widgets/country_selector.dart';
 
 /// AccountScreen manages shopper preferences, canonical interest chips,
@@ -64,46 +65,27 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Row(
-          children: const [
-            Text(
-              'MARK',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.primaryContainer,
-              ),
-            ),
-            Text(
-              'et',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.onSurface,
-              ),
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Account',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: MarketColors.outline,
-              ),
-            ),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        Navigator.of(context).pushReplacementNamed('/shopper-home');
+      },
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Account',
         ),
-      ),
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(MarketSpacing.screenMargin),
+        body: SafeArea(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    MarketSpacing.screenMargin,
+                    MarketSpacing.screenMargin,
+                    MarketSpacing.screenMargin,
+                    88,
+                  ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -302,16 +284,18 @@ class _AccountScreenState extends State<AccountScreen> {
                 ),
               ),
       ),
-      bottomNavigationBar: ShopperBottomNav(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
+        role: AppNavRole.shopper,
         onTap: (idx) {
           if (idx == 0) Navigator.of(context).pushReplacementNamed('/shopper-home');
           if (idx == 1) Navigator.of(context).pushReplacementNamed('/roam');
           if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
         },
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildPermissionRow(String title, String statusText, bool isGranted) {
     return Row(

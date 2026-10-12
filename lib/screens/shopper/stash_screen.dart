@@ -3,8 +3,9 @@ import '../../core/theme.dart';
 import '../../models/promo.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
-import '../../widgets/shopper_bottom_nav.dart';
+import '../../widgets/app_header.dart';
 import 'redeem_store_screen.dart';
 
 /// StashScreen displays saved promotions organized by status tabs:
@@ -107,119 +108,85 @@ class _StashScreenState extends State<StashScreen> {
   Widget build(BuildContext context) {
     final promos = _filteredPromos;
 
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: const [
-              Text(
-                'MARK',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                  color: MarketColors.primaryContainer,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        Navigator.of(context).pushReplacementNamed('/shopper-home');
+      },
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Stash',
+        ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Status Filter Tabs
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MarketSpacing.screenMargin,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    _buildTabChip('all', 'All Saved', _allStash.length),
+                    const SizedBox(width: 8),
+                    _buildTabChip(
+                      'active',
+                      'Active',
+                      _allStash.where((p) => p.isCurrentlyValid).length,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildTabChip(
+                      'expiring',
+                      'Expiring Soon',
+                      _allStash.where((p) => p.isCurrentlyValid && p.endsAt.difference(DateTime.now().toUtc()).inDays <= 2).length,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildTabChip(
+                      'expired',
+                      'Expired',
+                      _allStash.where((p) => !p.isCurrentlyValid).length,
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                'et',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                  color: MarketColors.onSurface,
-                ),
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Stash',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                  color: MarketColors.outline,
-                ),
+
+              // Main Content
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _errorMessage != null
+                        ? Center(child: Text(_errorMessage!))
+                        : promos.isEmpty
+                            ? _buildEmptyState()
+                            : ListView.builder(
+                                padding: const EdgeInsets.fromLTRB(
+                                  MarketSpacing.screenMargin,
+                                  MarketSpacing.screenMargin,
+                                  MarketSpacing.screenMargin,
+                                  88,
+                                ),
+                                itemCount: promos.length,
+                                itemBuilder: (context, index) {
+                                  return _buildStashCard(promos[index]);
+                                },
+                              ),
               ),
             ],
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded, color: MarketColors.primary),
-            tooltip: 'Redeem at store',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const RedeemStoreScreen(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Status Filter Tabs
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: MarketSpacing.screenMargin,
-                vertical: 8,
-              ),
-              child: Row(
-                children: [
-                  _buildTabChip('all', 'All Saved', _allStash.length),
-                  const SizedBox(width: 8),
-                  _buildTabChip(
-                    'active',
-                    'Active',
-                    _allStash.where((p) => p.isCurrentlyValid).length,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildTabChip(
-                    'expiring',
-                    'Expiring Soon',
-                    _allStash.where((p) => p.isCurrentlyValid && p.endsAt.difference(DateTime.now().toUtc()).inDays <= 2).length,
-                  ),
-                  const SizedBox(width: 8),
-                  _buildTabChip(
-                    'expired',
-                    'Expired',
-                    _allStash.where((p) => !p.isCurrentlyValid).length,
-                  ),
-                ],
-              ),
-            ),
-
-            // Main Content
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage != null
-                      ? Center(child: Text(_errorMessage!))
-                      : promos.isEmpty
-                          ? _buildEmptyState()
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(MarketSpacing.screenMargin),
-                              itemCount: promos.length,
-                              itemBuilder: (context, index) {
-                                return _buildStashCard(promos[index]);
-                              },
-                            ),
-            ),
-          ],
+        bottomNavigationBar: AppBottomNav(
+          currentIndex: 2,
+          role: AppNavRole.shopper,
+          onTap: (idx) {
+            if (idx == 0) Navigator.of(context).pushReplacementNamed('/shopper-home');
+            if (idx == 1) Navigator.of(context).pushReplacementNamed('/roam');
+            if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
+          },
         ),
-      ),
-      bottomNavigationBar: ShopperBottomNav(
-        currentIndex: 2,
-        onTap: (idx) {
-          if (idx == 0) Navigator.of(context).pushReplacementNamed('/shopper-home');
-          if (idx == 1) Navigator.of(context).pushReplacementNamed('/roam');
-          if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
-        },
       ),
     );
   }

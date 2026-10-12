@@ -4,6 +4,7 @@ import '../../models/business.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import 'widgets/merchant_reg_stepper.dart';
 
 /// VerifiedScreen matches Stitch frame: market_verified_page_mobile
@@ -61,18 +62,9 @@ class _VerifiedScreenState extends State<VerifiedScreen> {
 
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Verification Approved',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: const AppHeader(
+        showBack: false,
+        subtitle: 'Verified',
       ),
       body: SafeArea(
         child: Padding(

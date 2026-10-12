@@ -4,7 +4,8 @@ import '../../models/business.dart';
 import '../../models/merchant_analytics.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
-import '../../widgets/merchant_bottom_nav.dart';
+import '../../widgets/app_bottom_nav.dart';
+import '../../widgets/app_header.dart';
 import 'account_screen.dart';
 import 'catalog_screen.dart';
 import 'dashboard_screen.dart';
@@ -139,62 +140,28 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
         ? _business!.name
         : 'My Business';
 
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        _onBottomNavTapped(0);
+      },
+      child: Scaffold(
         backgroundColor: MarketColors.surface,
-        elevation: 0,
-        title: Row(
-          children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: const BoxDecoration(
-                color: MarketColors.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              alignment: Alignment.center,
-              child: const Text(
-                'M',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  color: MarketColors.onSurface,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            RichText(
-              text: const TextSpan(
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: -0.5,
-                ),
-                children: [
-                  TextSpan(
-                    text: 'MARK',
-                    style: TextStyle(color: MarketColors.primaryContainer),
-                  ),
-                  TextSpan(
-                    text: 'et',
-                    style: TextStyle(color: MarketColors.onSurface),
-                  ),
-                ],
-              ),
-            ),
-          ],
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Analytics',
         ),
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadAnalytics,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: MarketSpacing.screenMargin,
-              vertical: 8,
-            ),
+        body: SafeArea(
+          child: RefreshIndicator(
+            onRefresh: _loadAnalytics,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                MarketSpacing.screenMargin,
+                8,
+                MarketSpacing.screenMargin,
+                88,
+              ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -304,12 +271,14 @@ class _MerchantAnalyticsScreenState extends State<MerchantAnalyticsScreen>
           ),
         ),
       ),
-      bottomNavigationBar: MerchantBottomNav(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 2,
+        role: AppNavRole.merchant,
         onTap: _onBottomNavTapped,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildRadarCard(String bizName) {
     return Container(

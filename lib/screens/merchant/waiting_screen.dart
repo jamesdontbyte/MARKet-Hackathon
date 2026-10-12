@@ -5,6 +5,7 @@ import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../widgets/app_header.dart';
 import 'verified_screen.dart';
 import 'widgets/merchant_reg_stepper.dart';
 
@@ -146,18 +147,9 @@ class _WaitingScreenState extends State<WaitingScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Application Status',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: const AppHeader(
+        showBack: false,
+        subtitle: 'Verification',
       ),
       body: SafeArea(
         child: Padding(

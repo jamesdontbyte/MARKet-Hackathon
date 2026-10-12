@@ -5,8 +5,9 @@ import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../services/data_service.dart';
+import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
-import '../../widgets/shopper_bottom_nav.dart';
+import '../../widgets/app_header.dart';
 import 'storefront_screen.dart';
 
 /// RoamScreen provides interactive MSME discovery in San Jose de Buenavista.
@@ -70,160 +71,148 @@ class _RoamScreenState extends State<RoamScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Row(
-          children: const [
-            Text(
-              'MARK',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.primaryContainer,
-              ),
-            ),
-            Text(
-              'et',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
-                color: MarketColors.onSurface,
-              ),
-            ),
-            SizedBox(width: 8),
-            Text(
-              'Roam',
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: MarketColors.outline,
-              ),
-            ),
-          ],
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        Navigator.of(context).pushReplacementNamed('/shopper-home');
+      },
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: const AppHeader(
+          showBack: false,
+          subtitle: 'Roam',
         ),
-        actions: [
-          // Map / List Segmented Toggle
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.all(4),
-            decoration: BoxDecoration(
-              color: MarketColors.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: MarketColors.fieldBorder),
-            ),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => setState(() => _isListView = false),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: !_isListView ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: !_isListView ? MarketElevation.level1 : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.map_rounded,
-                          size: 16,
-                          color: !_isListView ? MarketColors.primary : MarketColors.outline,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Map',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: !_isListView ? MarketColors.primary : MarketColors.secondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        body: SafeArea(
+          child: Column(
+            children: [
+              // Top control row: Map/List toggle + Category chips
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  MarketSpacing.screenMargin,
+                  8,
+                  MarketSpacing.screenMargin,
+                  4,
                 ),
-                GestureDetector(
-                  onTap: () => setState(() => _isListView = true),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _isListView ? Colors.white : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: _isListView ? MarketElevation.level1 : null,
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.list_rounded,
-                          size: 16,
-                          color: _isListView ? MarketColors.primary : MarketColors.outline,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'List',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _isListView ? MarketColors.primary : MarketColors.secondary,
+                child: Row(
+                  children: [
+                    // Map / List Segmented Toggle
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: MarketColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: MarketColors.fieldBorder),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          GestureDetector(
+                            onTap: () => setState(() => _isListView = false),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: !_isListView ? Colors.white : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: !_isListView ? MarketElevation.level1 : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.map_rounded,
+                                    size: 16,
+                                    color: !_isListView ? MarketColors.primary : MarketColors.outline,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Map',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: !_isListView ? MarketColors.primary : MarketColors.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                          GestureDetector(
+                            onTap: () => setState(() => _isListView = true),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: _isListView ? Colors.white : Colors.transparent,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: _isListView ? MarketElevation.level1 : null,
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.list_rounded,
+                                    size: 16,
+                                    color: _isListView ? MarketColors.primary : MarketColors.outline,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'List',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: !_isListView ? MarketColors.primary : MarketColors.secondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    // Category Filter Chips
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _buildFilterChip('all', 'All'),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('cafe', 'Cafés'),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('food', 'Food'),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('retail', 'Retail'),
+                            const SizedBox(width: 6),
+                            _buildFilterChip('services', 'Services'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Category Filter Chips
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: MarketSpacing.screenMargin,
-                vertical: 6,
               ),
-              child: Row(
-                children: [
-                  _buildFilterChip('all', 'All'),
-                  const SizedBox(width: 6),
-                  _buildFilterChip('cafe', 'Cafés'),
-                  const SizedBox(width: 6),
-                  _buildFilterChip('food', 'Food'),
-                  const SizedBox(width: 6),
-                  _buildFilterChip('retail', 'Retail'),
-                  const SizedBox(width: 6),
-                  _buildFilterChip('services', 'Services'),
-                ],
-              ),
-            ),
 
-            // Content Canvas
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage != null
-                      ? Center(child: Text(_errorMessage!))
-                      : _isListView
-                          ? _buildListView()
-                          : _buildMapView(),
-            ),
-          ],
+              // Content Canvas
+              Expanded(
+                child: _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _errorMessage != null
+                        ? Center(child: Text(_errorMessage!))
+                        : _isListView
+                            ? _buildListView()
+                            : _buildMapView(),
+              ),
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: ShopperBottomNav(
-        currentIndex: 1,
-        onTap: (idx) {
-          if (idx == 0) Navigator.of(context).pushReplacementNamed('/shopper-home');
-          if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
-          if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
-        },
+        bottomNavigationBar: AppBottomNav(
+          currentIndex: 1,
+          role: AppNavRole.shopper,
+          onTap: (idx) {
+            if (idx == 0) Navigator.of(context).pushReplacementNamed('/shopper-home');
+            if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
+            if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
+          },
+        ),
       ),
     );
   }
@@ -361,15 +350,7 @@ class _RoamScreenState extends State<RoamScreen> {
         children: [
           Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE0F2FE),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.storefront_rounded, color: MarketColors.primary),
-              ),
+              _buildBusinessAvatar(b, size: 48),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -382,10 +363,14 @@ class _RoamScreenState extends State<RoamScreen> {
                         fontWeight: FontWeight.w700,
                         color: MarketColors.onSurface,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     Text(
                       '${categoryLabels[b.category] ?? b.category} • San Jose',
                       style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
@@ -422,6 +407,37 @@ class _RoamScreenState extends State<RoamScreen> {
     );
   }
 
+  Widget _buildBusinessAvatar(Business b, {double size = 48}) {
+    final catSlug = canonicalCategories.contains(b.category) ? b.category : 'retail';
+    final fallback = Padding(
+      padding: const EdgeInsets.all(4),
+      child: Image.asset(
+        'assets/categories/$catSlug.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, _, _) => const Icon(
+          Icons.storefront_rounded,
+          color: MarketColors.primary,
+        ),
+      ),
+    );
+
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: MarketColors.outlineVariant.withValues(alpha: 0.3)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: b.logoUrl != null && b.logoUrl!.isNotEmpty
+          ? Image.network(b.logoUrl!, fit: BoxFit.cover, errorBuilder: (_, _, _) => fallback)
+          : (b.coverUrl != null && b.coverUrl!.isNotEmpty
+              ? Image.network(b.coverUrl!, fit: BoxFit.cover, errorBuilder: (_, _, _) => fallback)
+              : fallback),
+    );
+  }
+
   Widget _buildListView() {
     if (_businesses.isEmpty) {
       return const Center(
@@ -433,7 +449,7 @@ class _RoamScreenState extends State<RoamScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(MarketSpacing.screenMargin),
+      padding: const EdgeInsets.fromLTRB(MarketSpacing.screenMargin, MarketSpacing.screenMargin, MarketSpacing.screenMargin, 88),
       itemCount: _businesses.length,
       itemBuilder: (context, index) {
         final b = _businesses[index];
@@ -454,15 +470,7 @@ class _RoamScreenState extends State<RoamScreen> {
             ),
             child: Row(
               children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE0F2FE),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.storefront_rounded, color: MarketColors.primary),
-                ),
+                _buildBusinessAvatar(b, size: 48),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -475,10 +483,14 @@ class _RoamScreenState extends State<RoamScreen> {
                           fontWeight: FontWeight.w700,
                           color: MarketColors.onSurface,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         categoryLabels[b.category] ?? b.category,
                         style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),

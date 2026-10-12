@@ -574,6 +574,52 @@ class DataService {
     return _client.storage.from('merchant-docs').getPublicUrl(filePath);
   }
 
+  /// Upload merchant business media (logo, exterior photo, interior photos)
+  /// to public 'business-media' bucket under `<ownerId>/<fileName>`
+  Future<String> uploadBusinessMedia({
+    required String ownerId,
+    required String fileName,
+    required Uint8List fileBytes,
+    String? contentType,
+  }) async {
+    final sanitizedName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    final filePath = '$ownerId/$sanitizedName';
+
+    await _client.storage.from('business-media').uploadBinary(
+          filePath,
+          fileBytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: contentType ?? 'image/jpeg',
+          ),
+        );
+
+    return _client.storage.from('business-media').getPublicUrl(filePath);
+  }
+
+  /// Upload product photo to 'business-media' bucket under `<ownerId>/products/<fileName>`
+  Future<String> uploadProductImage({
+    required String ownerId,
+    required String fileName,
+    required Uint8List fileBytes,
+    String? contentType,
+  }) async {
+    final sanitizedName = fileName.replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_');
+    final filePath = '$ownerId/products/$sanitizedName';
+
+    await _client.storage.from('business-media').uploadBinary(
+          filePath,
+          fileBytes,
+          fileOptions: FileOptions(
+            upsert: true,
+            contentType: contentType ?? 'image/jpeg',
+          ),
+        );
+
+    return _client.storage.from('business-media').getPublicUrl(filePath);
+  }
+
+
   // -------------------------------------------------------------
   // Geofence Zones
   // -------------------------------------------------------------

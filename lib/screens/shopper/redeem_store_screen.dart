@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../models/promo.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/app_text_field.dart';
 
 enum StoreRedemptionStatus {
@@ -302,21 +303,10 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     return Scaffold(
       backgroundColor: MarketColors.surface,
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(_result?.status == StoreRedemptionStatus.ok),
-        ),
-        title: const Text(
-          'Redeem at Store',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            color: MarketColors.onSurface,
-          ),
-        ),
+      appBar: AppHeader(
+        showBack: true,
+        subtitle: 'Redeem',
+        onBackPressed: () => Navigator.of(context).pop(_result?.status == StoreRedemptionStatus.ok),
       ),
       body: SafeArea(
         child: LayoutBuilder(

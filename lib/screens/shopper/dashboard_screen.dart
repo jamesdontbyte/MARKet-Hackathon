@@ -9,8 +9,9 @@ import '../../models/promo.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../services/geofence_service.dart';
+import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
-import '../../widgets/shopper_bottom_nav.dart';
+import '../../widgets/app_header.dart';
 import '../shared/permission_explainer_screen.dart';
 import 'promo_detail_screen.dart';
 import 'redeem_store_screen.dart';
@@ -202,155 +203,203 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
   }
 
   void _showSimulationSheet() {
+    if (!emergencySimulate) return;
     showModalBottomSheet(
       context: context,
-      backgroundColor: MarketColors.surfaceContainerLowest,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: MarketColors.outlineVariant,
-                      borderRadius: BorderRadius.circular(2),
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            return Container(
+              height: MediaQuery.of(sheetContext).size.height * 0.9,
+              decoration: const BoxDecoration(
+                color: Color(0xFF0F172A),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Geofence Simulation',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: MarketColors.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Trigger hyperlocal geofence events for testing in San Jose.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: MarketColors.secondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: MarketColors.primaryContainer.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.login_rounded, color: MarketColors.primary),
-                  ),
-                  title: const Text('Simulate entering zone', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Fires promo alert for nearest verified business'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    final nearest = GeofenceService.instance.getNearestZone(
-                      _userLat != null && _userLng != null
-                          ? Position(
-                              latitude: _userLat!,
-                              longitude: _userLng!,
-                              timestamp: DateTime.now(),
-                              accuracy: 5.0,
-                              altitude: 0,
-                              altitudeAccuracy: 0,
-                              heading: 0,
-                              headingAccuracy: 0,
-                              speed: 0,
-                              speedAccuracy: 0,
-                            )
-                          : null,
-                    );
-                    if (nearest == null || _activePromos.isEmpty) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('No active promos to simulate'),
-                            duration: Duration(seconds: 3),
+                  const SizedBox(height: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Geofence Simulation & Diagnostics',
+                                style: TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              SizedBox(height: 2),
+                              Text(
+                                'Simulate zones and inspect live GPS / matching engine',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
                           ),
-                        );
-                      }
-                      return;
-                    }
-                    GeofenceService.instance.simulateEnter(zone: nearest);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Simulated entering ${nearest.name} zone.'),
-                          duration: const Duration(seconds: 3),
                         ),
-                      );
-                    }
-                  },
-                ),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: MarketColors.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(12),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                          onPressed: () => Navigator.pop(ctx),
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.logout_rounded, color: MarketColors.secondary),
                   ),
-                  title: const Text('Simulate leaving zone', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Resets inside state to outside'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    final nearest = GeofenceService.instance.getNearestZone(
-                      _userLat != null && _userLng != null
-                          ? Position(
-                              latitude: _userLat!,
-                              longitude: _userLng!,
-                              timestamp: DateTime.now(),
-                              accuracy: 5.0,
-                              altitude: 0,
-                              altitudeAccuracy: 0,
-                              heading: 0,
-                              headingAccuracy: 0,
-                              speed: 0,
-                              speedAccuracy: 0,
-                            )
-                          : null,
-                    );
-                    if (nearest == null || _activePromos.isEmpty) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('No active promos to simulate'),
-                            duration: Duration(seconds: 3),
+                  const Divider(color: Color(0xFF334155), height: 16),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 1. Simulate entering zone
+                          Material(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(12),
+                            clipBehavior: Clip.antiAlias,
+                            child: ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: MarketColors.primaryContainer.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.login_rounded, color: Colors.cyanAccent),
+                              ),
+                              title: const Text('Simulate entering zone', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                              subtitle: const Text('Fires promo alert for nearest verified business', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                              onTap: () {
+                                final nearest = GeofenceService.instance.getNearestZone(
+                                  _userLat != null && _userLng != null
+                                      ? Position(
+                                          latitude: _userLat!,
+                                          longitude: _userLng!,
+                                          timestamp: DateTime.now(),
+                                          accuracy: 5.0,
+                                          altitude: 0,
+                                          altitudeAccuracy: 0,
+                                          heading: 0,
+                                          headingAccuracy: 0,
+                                          speed: 0,
+                                          speedAccuracy: 0,
+                                        )
+                                      : null,
+                                );
+                                if (nearest == null || _activePromos.isEmpty) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('No active promos to simulate'),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                                GeofenceService.instance.simulateEnter(zone: nearest);
+                                setSheetState(() {});
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Simulated entering ${nearest.name} zone.'),
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
                           ),
-                        );
-                      }
-                      return;
-                    }
-                    GeofenceService.instance.simulateExit(zone: nearest);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Simulated leaving ${nearest.name} zone.'),
-                          duration: const Duration(seconds: 3),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
+                          const SizedBox(height: 8),
+
+                          // 2. Simulate leaving zone
+                          Material(
+                            color: const Color(0xFF1E293B),
+                            borderRadius: BorderRadius.circular(12),
+                            clipBehavior: Clip.antiAlias,
+                            child: ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white10,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(Icons.logout_rounded, color: Colors.orangeAccent),
+                              ),
+                              title: const Text('Simulate leaving zone', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                              subtitle: const Text('Resets inside state to outside', style: TextStyle(color: Colors.white60, fontSize: 12)),
+                              onTap: () {
+                                final nearest = GeofenceService.instance.getNearestZone(
+                                  _userLat != null && _userLng != null
+                                      ? Position(
+                                          latitude: _userLat!,
+                                          longitude: _userLng!,
+                                          timestamp: DateTime.now(),
+                                          accuracy: 5.0,
+                                          altitude: 0,
+                                          altitudeAccuracy: 0,
+                                          heading: 0,
+                                          headingAccuracy: 0,
+                                          speed: 0,
+                                          speedAccuracy: 0,
+                                        )
+                                      : null,
+                                );
+                                if (nearest == null || _activePromos.isEmpty) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('No active promos to simulate'),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                  return;
+                                }
+                                GeofenceService.instance.simulateExit(zone: nearest);
+                                setSheetState(() {});
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Simulated leaving ${nearest.name} zone.'),
+                                      duration: const Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          // 3. Complete Debug Panel in sheet
+                          _buildDebugPanel(setSheetState),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
@@ -422,132 +471,76 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: MarketColors.surfaceContainerLowest,
-        elevation: 0.5,
-        titleSpacing: MarketSpacing.screenMargin,
-        title: GestureDetector(
-          onLongPress: emergencySimulate ? _showSimulationSheet : null,
-          behavior: HitTestBehavior.opaque,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: MarketColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Center(
-                  child: Icon(Icons.storefront_rounded, size: 20, color: MarketColors.onPrimaryContainer),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'MARK',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                  letterSpacing: -0.5,
-                  color: MarketColors.primaryContainer,
-                ),
-              ),
-              const Text(
-                'et',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 22,
-                  letterSpacing: -0.5,
-                  color: MarketColors.onSurface,
-                ),
-              ),
-            ],
-          ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {},
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: AppHeader(
+          showBack: false,
+          onMarkLongPress: emergencySimulate ? _showSimulationSheet : null,
         ),
-        actions: [
-          // Non-functional bell icon per spec (no notifications inbox)
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              icon: const Icon(Icons.notifications_none_rounded, color: MarketColors.onSurfaceVariant),
-              tooltip: 'Notifications',
-              onPressed: () {
-                // Non-functional per spec: show subtle info
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Hyperlocal promo notifications are delivered directly to your device.'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          color: MarketColors.primary,
-          onRefresh: _loadDashboardData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Temporary Debug Panel (Phase 7B Diagnostics)
-                _buildDebugPanel(),
+        body: SafeArea(
+          child: RefreshIndicator(
+            color: MarketColors.primary,
+            onRefresh: _loadDashboardData,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 88),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 1. Missing Permissions Banner
+                  _buildPermissionBanner(),
 
-                // 1. Missing Permissions Banner
-                _buildPermissionBanner(),
+                  // 2. Search Input Bar
+                  _buildSearchBar(),
 
-                // 2. Search Input Bar
-                _buildSearchBar(),
+                  // 3. Category Filter Chips
+                  _buildCategoryChips(),
 
-                // 3. Category Filter Chips
-                _buildCategoryChips(),
+                  if (_isLoading)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60),
+                      child: Center(child: CircularProgressIndicator(color: MarketColors.primary)),
+                    )
+                  else if (_errorMessage != null)
+                    _buildErrorState()
+                  else ...[
+                    // 4. "Businesses for You" Section
+                    _buildBusinessesForYouSection(),
 
-                if (_isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 60),
-                    child: Center(child: CircularProgressIndicator(color: MarketColors.primary)),
-                  )
-                else if (_errorMessage != null)
-                  _buildErrorState()
-                else ...[
-                  // 4. "Businesses for You" Section
-                  _buildBusinessesForYouSection(),
+                    const SizedBox(height: 24),
 
-                  const SizedBox(height: 24),
+                    // 5. "Popular Establishments" Section
+                    _buildPopularSection(),
 
-                  // 5. "Popular Establishments" Section
-                  _buildPopularSection(),
+                    const SizedBox(height: 24),
 
-                  const SizedBox(height: 24),
+                    // 6. "Featured Promotions" Section
+                    _buildFeaturedPromosSection(),
 
-                  // 6. "Featured Promotions" Section
-                  _buildFeaturedPromosSection(),
-
-                  const SizedBox(height: 32),
+                    const SizedBox(height: 32),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: ShopperBottomNav(
-        currentIndex: 0,
-        onTap: (idx) {
-          if (idx == 1) Navigator.of(context).pushReplacementNamed('/roam');
-          if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
-          if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
-        },
+        bottomNavigationBar: AppBottomNav(
+          currentIndex: 0,
+          role: AppNavRole.shopper,
+          onTap: (idx) {
+            if (idx == 1) Navigator.of(context).pushReplacementNamed('/roam');
+            if (idx == 2) Navigator.of(context).pushReplacementNamed('/stash');
+            if (idx == 3) Navigator.of(context).pushReplacementNamed('/account');
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildDebugPanel() {
+  Widget _buildDebugPanel([StateSetter? setSheetState]) {
     final geo = GeofenceService.instance;
     final isRunning = geo.isRunning;
     final pos = geo.lastPosition;
@@ -593,43 +586,51 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                 ),
               ),
               InkWell(
-                    onTap: () async {
-                      await _checkPermissions();
-                      await geo.refreshZones();
-                      try {
-                        final p = await Geolocator.getCurrentPosition(
-                          locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
-                        );
-                        geo.feedManualPosition(p);
-                      } catch (_) {}
-                      if (mounted) setState(() {});
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.refresh_rounded, size: 12, color: Colors.cyanAccent),
-                          SizedBox(width: 4),
-                          Text('Poll GPS', style: TextStyle(color: Colors.cyanAccent, fontSize: 11, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                    ),
+                onTap: () async {
+                  await _checkPermissions();
+                  await geo.refreshZones();
+                  try {
+                    final p = await Geolocator.getCurrentPosition(
+                      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+                    );
+                    geo.feedManualPosition(p);
+                  } catch (_) {}
+                  if (setSheetState != null) {
+                    setSheetState(() {});
+                  }
+                  if (mounted) setState(() {});
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1E293B),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  const SizedBox(width: 8),
-                  InkWell(
-                    onTap: () => setState(() => _isDebugExpanded = !_isDebugExpanded),
-                    child: Icon(
-                      _isDebugExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
-                      color: Colors.white70,
-                      size: 20,
-                    ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.refresh_rounded, size: 12, color: Colors.cyanAccent),
+                      SizedBox(width: 4),
+                      Text('Poll GPS', style: TextStyle(color: Colors.cyanAccent, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ],
                   ),
-                ],
+                ),
               ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () {
+                  setState(() => _isDebugExpanded = !_isDebugExpanded);
+                  if (setSheetState != null) {
+                    setSheetState(() {});
+                  }
+                },
+                child: Icon(
+                  _isDebugExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                  color: Colors.white70,
+                  size: 20,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
 
           // Row 1: Service Running & Businesses Loaded

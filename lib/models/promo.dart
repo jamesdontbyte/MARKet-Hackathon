@@ -1,10 +1,11 @@
 class Promo {
   final String id;
   final String businessId;
+  final String? productId;
   final String title;
   final String? description;
-  final String promoType; // 'bogo', 'percent', 'amount_off'
-  final String? valueLabel; // 'BOGO', '20% OFF', '₱100 OFF'
+  final String promoType; // 'bogo', 'percent', 'amount_off', 'freebie'
+  final String? valueLabel; // 'BOGO', '20% OFF', '₱100 OFF', 'Free Item'
   final DateTime startsAt;
   final DateTime endsAt;
   final int redeemLimit;
@@ -15,6 +16,7 @@ class Promo {
   const Promo({
     required this.id,
     required this.businessId,
+    this.productId,
     required this.title,
     this.description,
     this.promoType = 'percent',
@@ -36,6 +38,18 @@ class Promo {
         redeemedCount < redeemLimit;
   }
 
+  bool get isScheduled {
+    final now = DateTime.now().toUtc();
+    return active && now.isBefore(startsAt);
+  }
+
+  bool get isEnded {
+    final now = DateTime.now().toUtc();
+    return !active || now.isAfter(endsAt) || redeemedCount >= redeemLimit;
+  }
+
+  bool get isActiveNow => isCurrentlyValid;
+
   /// Calculates percentage of vouchers claimed / redeemed
   double get progressFraction {
     if (redeemLimit <= 0) return 0.0;
@@ -46,6 +60,7 @@ class Promo {
     return Promo(
       id: json['id'] as String,
       businessId: json['business_id'] as String,
+      productId: json['product_id'] as String?,
       title: (json['title'] as String?) ?? '',
       description: json['description'] as String?,
       promoType: (json['promo_type'] as String?) ?? 'percent',
@@ -69,6 +84,7 @@ class Promo {
     return {
       'id': id,
       'business_id': businessId,
+      'product_id': productId,
       'title': title,
       'description': description,
       'promo_type': promoType,
@@ -85,6 +101,7 @@ class Promo {
   Promo copyWith({
     String? id,
     String? businessId,
+    String? productId,
     String? title,
     String? description,
     String? promoType,
@@ -99,6 +116,7 @@ class Promo {
     return Promo(
       id: id ?? this.id,
       businessId: businessId ?? this.businessId,
+      productId: productId ?? this.productId,
       title: title ?? this.title,
       description: description ?? this.description,
       promoType: promoType ?? this.promoType,
@@ -112,3 +130,4 @@ class Promo {
     );
   }
 }
+

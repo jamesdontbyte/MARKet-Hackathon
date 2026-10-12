@@ -5,6 +5,9 @@ class Product {
   final double price;
   final String? category;
   final String? description;
+  final String? imageUrl;
+  final bool isBestSeller;
+  final bool available;
   final DateTime createdAt;
 
   const Product({
@@ -14,6 +17,9 @@ class Product {
     required this.price,
     this.category,
     this.description,
+    this.imageUrl,
+    this.isBestSeller = false,
+    this.available = true,
     required this.createdAt,
   });
 
@@ -25,6 +31,9 @@ class Product {
       price: (json['price'] as num?)?.toDouble() ?? 0.0,
       category: json['category'] as String?,
       description: json['description'] as String?,
+      imageUrl: json['image_url'] as String?,
+      isBestSeller: (json['is_best_seller'] as bool?) ?? false,
+      available: (json['available'] as bool?) ?? true,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String).toUtc()
           : DateTime.now().toUtc(),
@@ -39,6 +48,9 @@ class Product {
       'price': price,
       'category': category,
       'description': description,
+      'image_url': imageUrl,
+      'is_best_seller': isBestSeller,
+      'available': available,
       'created_at': createdAt.toUtc().toIso8601String(),
     };
   }
@@ -50,6 +62,9 @@ class Product {
     double? price,
     String? category,
     String? description,
+    String? imageUrl,
+    bool? isBestSeller,
+    bool? available,
     DateTime? createdAt,
   }) {
     return Product(
@@ -59,7 +74,11 @@ class Product {
       price: price ?? this.price,
       category: category ?? this.category,
       description: description ?? this.description,
+      imageUrl: imageUrl ?? this.imageUrl,
+      isBestSeller: isBestSeller ?? this.isBestSeller,
+      available: available ?? this.available,
       createdAt: createdAt ?? this.createdAt,
     );
   }
 }
+

@@ -27,10 +27,9 @@ void main() {
       ),
     );
 
-    expect(find.text('MARK'), findsOneWidget);
-    expect(find.text('et'), findsOneWidget);
-    expect(find.text('MSME HYPERLOCAL DISCOVERY'), findsOneWidget);
-    expect(find.text('Connecting MSMEs to Potential Customers'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
+    expect(find.text('MARK'), findsNothing);
+    expect(find.text('MSME HYPERLOCAL DISCOVERY'), findsNothing);
 
     // Pump past splash duration to complete timer and route
     await tester.pump(const Duration(seconds: 3));
@@ -288,12 +287,12 @@ void main() {
     await tester.longPress(find.text('MARK'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Geofence Simulation'), findsOneWidget);
+    expect(find.textContaining('Geofence Simulation'), findsOneWidget);
     expect(find.text('Simulate entering zone'), findsOneWidget);
     expect(find.text('Simulate leaving zone'), findsOneWidget);
 
     // Dismiss bottom sheet and cleanup timers
-    Navigator.of(tester.element(find.text('Geofence Simulation'))).pop();
+    Navigator.of(tester.element(find.textContaining('Geofence Simulation'))).pop();
     await tester.pumpAndSettle();
   });
 }

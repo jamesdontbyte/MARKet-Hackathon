@@ -3,6 +3,7 @@ import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/app_text_field.dart';
 import '../../widgets/country_selector.dart';
 
@@ -99,13 +100,9 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: MarketColors.onSurface),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+      appBar: const AppHeader(
+        showBack: true,
+        subtitle: 'Register',
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -118,6 +115,15 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Exact Logo Icon
+                Image.asset(
+                  'assets/logos/logo_icon.png',
+                  width: 44,
+                  height: 44,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(height: 16),
+
                 // Header
                 const Text(
                   'Create Your Account',
