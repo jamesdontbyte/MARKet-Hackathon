@@ -2,8 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:market_final/models/business.dart';
+import 'package:market_final/models/promo.dart';
 import 'package:market_final/screens/merchant/analytics_screen.dart';
-import 'package:market_final/screens/merchant/scan_screen.dart';
+import 'package:market_final/screens/merchant/store_qr_screen.dart';
+import 'package:market_final/screens/shopper/redeem_store_screen.dart';
 import 'package:market_final/services/data_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -57,16 +59,23 @@ void main() {
     createdAt: DateTime.now(),
   );
 
-  group('MerchantScanScreen Unit & Widget Tests', () {
-    late FakeSupabaseClient fakeClient;
-    late DataService dataService;
+  final testPromo = Promo(
+    id: '00000000-0000-0000-0000-000000000010',
+    businessId: '00000000-0000-0000-0000-000000000001',
+    title: 'Buy 1 Take 1 Muscovado Cold Brew',
+    description: 'Refreshing local cold brew infused with Antique muscovado',
+    promoType: 'bogo',
+    valueLabel: 'BOGO',
+    startsAt: DateTime.now().toUtc().subtract(const Duration(days: 1)),
+    endsAt: DateTime.now().toUtc().add(const Duration(days: 6)),
+    redeemLimit: 100,
+    redeemedCount: 14,
+    active: true,
+    createdAt: DateTime.now().toUtc(),
+  );
 
-    setUp(() {
-      fakeClient = FakeSupabaseClient();
-      dataService = DataService(client: fakeClient);
-    });
-
-    testWidgets('Validates manual input and submits code through RPC',
+  group('Merchant StoreQrScreen Tests', () {
+    testWidgets('StoreQrScreen renders QR code, 60s countdown, and today counter',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
@@ -75,24 +84,76 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
+          home: StoreQrScreen(
             business: testBusiness,
+            initialPromo: testPromo,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // Screen Header
+      expect(find.text('Store Checkout QR'), findsOneWidget);
+      expect(find.text('Kape Tahanan'), findsOneWidget);
+
+      // Promo info
+      expect(find.text('BOGO'), findsOneWidget);
+      expect(find.text('Buy 1 Take 1 Muscovado Cold Brew'), findsOneWidget);
+
+      // 60-second countdown
+      expect(find.textContaining('Refreshes in'), findsOneWidget);
+
+      // Store Code Section
+      expect(find.text('STORE CODE (60-SECOND WINDOW)'), findsOneWidget);
+      expect(find.text('00000000'), findsOneWidget);
+
+      // Live Redeemed Today counter
+      expect(find.text('Redeemed Today'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+  });
+
+  group('Shopper RedeemStoreScreen Unit & Widget Tests', () {
+    late FakeSupabaseClient fakeClient;
+    late DataService dataService;
+
+    setUp(() {
+      fakeClient = FakeSupabaseClient();
+      dataService = DataService(client: fakeClient);
+    });
+
+    testWidgets('Validates manual input and submits code through RPC redeem_at_store',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
+      expect(find.text('Redeem at Store'), findsOneWidget);
+      expect(find.text('Upload QR from Gallery'), findsOneWidget);
+      expect(find.text('Type 8-Character Code'), findsOneWidget);
+
       // Switch to manual mode
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Manual Code Verification'), findsOneWidget);
+      expect(find.text('Enter Store Code'), findsOneWidget);
 
       // Attempt submit with empty code
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
-      expect(find.text('Voucher code is required'), findsOneWidget);
+      expect(find.text('Please enter a valid 8-character code'), findsOneWidget);
 
       // Enter valid code
       await tester.enterText(
@@ -100,22 +161,17 @@ void main() {
       await tester.pumpAndSettle();
 
       fakeClient.rpcResult = 'ok';
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      // Verify RPC was called with uppercase trimmed code
-      expect(fakeClient.capturedFunction, equals('redeem_voucher'));
-      expect(fakeClient.capturedParams, equals({'p_code': 'KT8X29Q1'}));
+      // Verify RPC was called with trimmed code
+      expect(fakeClient.capturedFunction, equals('redeem_at_store'));
+      expect(fakeClient.capturedParams, equals({'p_code': 'kt8x29q1'}));
 
       // Verify success result card
       expect(find.text('Voucher Redeemed!'), findsOneWidget);
-      expect(find.text('KT8X29Q1'), findsOneWidget);
-      expect(find.text('Scan Next Voucher'), findsOneWidget);
-
-      // Tap reset and verify input screen returns
-      await tester.tap(find.text('Scan Next Voucher'));
-      await tester.pumpAndSettle();
-      expect(find.text('Voucher Redeemed!'), findsNothing);
+      expect(find.text('Code: KT8X29Q1'), findsOneWidget);
+      expect(find.text('View Redeemed Voucher'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -131,61 +187,61 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
-            business: testBusiness,
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
           find.byType(TextFormField).first, 'ALREADY1');
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Voucher Already Redeemed'), findsOneWidget);
-      expect(find.text('Scan Another Code'), findsOneWidget);
+      expect(find.text('Already Redeemed'), findsOneWidget);
+      expect(find.text('Try Again'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('Renders distinct result card for not_your_promo',
+    testWidgets('Renders distinct result card for expired_code',
         (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
 
-      fakeClient.rpcResult = 'not_your_promo';
+      fakeClient.rpcResult = 'expired_code';
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
-            business: testBusiness,
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
-          find.byType(TextFormField).first, 'OTHERBIZ');
-      await tester.tap(find.text('Verify & Redeem'));
+          find.byType(TextFormField).first, 'EXPCODE1');
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Different Merchant Promotion'), findsOneWidget);
+      expect(find.text('Store Code Expired'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
 
-    testWidgets('Renders distinct result card for expired', (tester) async {
+    testWidgets('Renders distinct result card for expired promotion', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -195,23 +251,23 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
-            business: testBusiness,
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
           find.byType(TextFormField).first, 'EXPIRED1');
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Promotion Has Expired'), findsOneWidget);
+      expect(find.text('Promotion Expired'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -227,23 +283,23 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
-            business: testBusiness,
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
           find.byType(TextFormField).first, 'MAXQUOTA');
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Redemption Limit Reached'), findsOneWidget);
+      expect(find.text('Campaign Limit Reached'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });
@@ -259,23 +315,23 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: MerchantScanScreen(
-            business: testBusiness,
+          home: RedeemStoreScreen(
+            promo: testPromo,
             dataService: dataService,
           ),
         ),
       );
       await tester.pump();
 
-      await tester.tap(find.text('Enter Code'));
+      await tester.tap(find.text('Type 8-Character Code'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
           find.byType(TextFormField).first, 'BADCODE1');
-      await tester.tap(find.text('Verify & Redeem'));
+      await tester.tap(find.text('Redeem Code'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Invalid Voucher Code'), findsOneWidget);
+      expect(find.text('Invalid Store Code'), findsOneWidget);
 
       await tester.pumpWidget(const SizedBox());
     });

@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/shopper_bottom_nav.dart';
+import 'redeem_store_screen.dart';
 import 'voucher_screen.dart';
 
 /// StashScreen displays saved promotions organized by status tabs:
@@ -131,6 +132,19 @@ class _StashScreenState extends State<StashScreen> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner_rounded, color: MarketColors.primary),
+            tooltip: 'Redeem at store',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const RedeemStoreScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -370,9 +384,33 @@ class _StashScreenState extends State<StashScreen> {
                   ],
                 ),
               ),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 42),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  side: BorderSide(color: MarketColors.primaryContainer.withValues(alpha: 0.6)),
+                ),
+                icon: const Icon(Icons.qr_code_scanner_rounded, size: 16, color: MarketColors.primary),
+                label: const Text(
+                  'Redeem',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: MarketColors.primary),
+                ),
+                onPressed: () async {
+                  final res = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (_) => RedeemStoreScreen(promo: p),
+                    ),
+                  );
+                  if (res == true) {
+                    _loadStash();
+                  }
+                },
+              ),
+              const SizedBox(width: 8),
               PrimaryButton(
                 height: 42,
-                label: 'Open Voucher',
+                label: 'Voucher',
                 icon: const Icon(Icons.qr_code_rounded, size: 16),
                 onPressed: () {
                   Navigator.of(context).push(

@@ -350,4 +350,41 @@ lib/
      - `flutter build apk --debug`: Built successfully (`build\app\outputs\flutter-apk\app-debug.apk`).
 - **CHECKPOINT:** Phase 7B Completed.
 
+---
+
+### Phase 7C: Reverse Redemption Flow (Store Shows QR, Shopper Redeems)
+**Goal:** Reverse the redemption flow so MSME merchants display a rotating QR and 8-character code, while shoppers redeem it using live camera scanning, gallery image upload, or manual code entry. Analytics continue recording real redemptions from `redeem_at_store`.
+
+- **Key Tasks:**
+  1. **Database Patch (`db/schema_patch_qr.sql`):**
+     - Create private `app_secrets` table with RLS enabled and no public policies.
+     - Implement `get_store_code(p_promo_id)`: callable by promo's business owner. Derives 8-character code and QR payload for current 60-second window using server-side secret. Returns remaining seconds and expiration.
+     - Implement `redeem_at_store(p_code)`: callable by authenticated shopper. Validates code across current and previous window. Checks promo activity, dates, limit. Atomically creates/gets voucher, sets status `redeemed`, increments `promos.redeemed_count`, and logs `redeemed` event with business ID. Returns `ok`, `invalid`, `expired_code`, `already_redeemed`, `expired`, or `limit_reached`.
+     - Preserves `redeem_voucher` in database unused; maintains strict RLS preventing shoppers from directly modifying `redemptions`.
+  2. **DataService Updates (`lib/services/data_service.dart`):**
+     - Add `getStoreCode(String promoId)`.
+     - Add `redeemAtStore(String code)`.
+     - Add `fetchTodayRedemptionsCount(String businessId, [String? promoId])`.
+  3. **Merchant Side (`lib/screens/merchant/store_qr_screen.dart`):**
+     - Replace `scan_screen.dart` with `store_qr_screen.dart` (`StoreQrScreen`).
+     - Display large QR image via `QrImageView` and prominent 8-character code.
+     - 60-second visible countdown timer with automatic code regeneration on expiry.
+     - Promo selector dropdown/chips when multiple promos are active.
+     - Live "redeemed today" counter.
+     - Remove merchant camera scanner code.
+     - In `promotions_screen.dart`: Rename "Scan QR" to "Show QR" (`Icons.qr_code_rounded`) and open `StoreQrScreen`.
+  4. **Shopper Side (`lib/screens/shopper/redeem_store_screen.dart`):**
+     - Implement "Redeem at store" screen reachable from `VoucherScreen` and `StashScreen`.
+     - Option (a): Live camera scanner (`mobile_scanner`).
+     - Option (b): Gallery image picker (`file_picker`) analyzed with `analyzeImage()`. Shows "No QR code found, try again" if unreadable.
+     - Option (c): Manual 8-character text entry.
+     - Camera permission fallback preserves upload and manual typing usability.
+     - 1.5s debounce preventing double-submission.
+     - Distinct result cards for `ok`, `invalid`, `expired_code`, `already_redeemed`, `expired`, `limit_reached`.
+     - After `ok`, voucher screen updates status to `Redeemed`.
+  5. **Tests & Verification:**
+     - Update `test/scan_screen_test.dart` to test `StoreQrScreen` and `RedeemStoreScreen`.
+     - Update `docs/demo_script.md` for reverse redemption flow.
+     - Run `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.
+
 

@@ -7,6 +7,7 @@ import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
+import 'redeem_store_screen.dart';
 
 /// VoucherScreen renders the 8-character promo code and big QR code.
 /// Idempotently creates/fetches the redemption row and logs 'claimed' on first issue.
@@ -74,6 +75,26 @@ class _VoucherScreenState extends State<VoucherScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<void> _openRedeemAtStore() async {
+    final redeemed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => RedeemStoreScreen(promo: widget.promo),
+      ),
+    );
+
+    if (redeemed == true && mounted) {
+      setState(() {
+        if (_redemption != null) {
+          _redemption = _redemption!.copyWith(
+            status: 'redeemed',
+            redeemedAt: DateTime.now().toUtc(),
+          );
+        }
+      });
+      _issueOrLoadVoucher();
     }
   }
 
@@ -274,7 +295,7 @@ class _VoucherScreenState extends State<VoucherScreen> {
                                   SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Present this QR code or 8-character code to the cashier in-store for verification.',
+                                      'Present at store counter: scan the merchant\'s dynamic QR code, upload image, or type store code to redeem.',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: MarketColors.onSurfaceVariant,
@@ -287,7 +308,15 @@ class _VoucherScreenState extends State<VoucherScreen> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        if (_redemption != null && !_redemption!.isRedeemed) ...[
+                          PrimaryButton(
+                            width: double.infinity,
+                            label: 'Redeem at store',
+                            icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
+                            onPressed: _openRedeemAtStore,
+                          ),
+                          const SizedBox(height: 12),
+                        ],
 
                         SecondaryButton(
                           width: double.infinity,

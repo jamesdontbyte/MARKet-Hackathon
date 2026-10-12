@@ -13,7 +13,7 @@ import 'screens/merchant/reg_step1_screen.dart';
 import 'screens/merchant/reg_step2_screen.dart';
 import 'screens/merchant/reg_step3_screen.dart';
 import 'screens/merchant/reg_step4_review_screen.dart';
-import 'screens/merchant/scan_screen.dart';
+import 'screens/merchant/store_qr_screen.dart';
 import 'screens/merchant/verified_screen.dart';
 import 'screens/merchant/waiting_screen.dart';
 import 'screens/shared/login_screen.dart';
@@ -91,7 +91,8 @@ class MarketApp extends StatelessWidget {
         '/merchant-catalog': (_) => const MerchantCatalogScreen(),
         '/merchant-promotions': (_) => const MerchantPromotionsScreen(),
         '/merchant-analytics': (_) => const MerchantAnalyticsScreen(),
-        '/merchant-scan': (_) => const MerchantScanScreen(),
+        '/merchant-scan': (_) => const StoreQrScreen(),
+        '/merchant-store-qr': (_) => const StoreQrScreen(),
         '/merchant-account': (_) => const MerchantAccountScreen(),
       },
     );

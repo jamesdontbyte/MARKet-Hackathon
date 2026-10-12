@@ -9,7 +9,12 @@ import '../../widgets/app_buttons.dart';
 /// 2. Background Location ("Allow all the time")
 /// 3. Notifications (Android 13+)
 class PermissionExplainerScreen extends StatefulWidget {
-  const PermissionExplainerScreen({super.key});
+  final bool fromBanner;
+
+  const PermissionExplainerScreen({
+    super.key,
+    this.fromBanner = false,
+  });
 
   @override
   State<PermissionExplainerScreen> createState() =>
@@ -68,13 +73,7 @@ class _PermissionExplainerScreenState extends State<PermissionExplainerScreen> {
         await Permission.notification.request();
         await GeofenceService.instance.start();
         if (mounted) {
-          if (Navigator.of(context).canPop()) {
-            Navigator.of(context).pop(true);
-          } else {
-            try {
-              Navigator.of(context).pushReplacementNamed('/shopper-home');
-            } catch (_) {}
-          }
+          _navigateForward(permissionsGranted: true);
         }
         return;
       }
@@ -87,36 +86,44 @@ class _PermissionExplainerScreenState extends State<PermissionExplainerScreen> {
     }
   }
 
-  void _onSkip() {
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop(false);
+  void _navigateForward({required bool permissionsGranted}) {
+    if (widget.fromBanner && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(permissionsGranted);
     } else {
-      try {
-        Navigator.of(context).pushReplacementNamed('/shopper-home');
-      } catch (_) {}
+      Navigator.of(context).pushNamedAndRemoveUntil('/shopper-home', (route) => false);
     }
+  }
+
+  void _onSkip() {
+    _navigateForward(permissionsGranted: false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MarketColors.surface,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: _onSkip,
-            child: const Text(
-              'Not now',
-              style: TextStyle(
-                color: MarketColors.secondary,
-                fontWeight: FontWeight.w600,
+    return PopScope(
+      canPop: widget.fromBanner,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        _navigateForward(permissionsGranted: false);
+      },
+      child: Scaffold(
+        backgroundColor: MarketColors.surface,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            TextButton(
+              onPressed: _onSkip,
+              child: const Text(
+                'Not now',
+                style: TextStyle(
+                  color: MarketColors.secondary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -234,8 +241,9 @@ class _PermissionExplainerScreenState extends State<PermissionExplainerScreen> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildStepCard({
     required int stepNumber,

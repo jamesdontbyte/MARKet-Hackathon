@@ -12,7 +12,7 @@ import 'account_screen.dart';
 import 'analytics_screen.dart';
 import 'catalog_screen.dart';
 import 'dashboard_screen.dart';
-import 'scan_screen.dart';
+import 'store_qr_screen.dart';
 
 /// MSME Merchant Promotions Catalog Screen
 /// Matches Stitch frame: market_tab_2_promotions_catalog
@@ -109,10 +109,13 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
     }
   }
 
-  void _openScanScreen() {
+  void _openStoreQrScreen([Promo? promo]) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => MerchantScanScreen(business: _business),
+        builder: (_) => StoreQrScreen(
+          business: _business,
+          initialPromo: promo,
+        ),
       ),
     );
   }
@@ -429,10 +432,10 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded,
+            icon: const Icon(Icons.qr_code_rounded,
                 color: MarketColors.primary),
-            onPressed: _openScanScreen,
-            tooltip: 'Scan QR Code',
+            onPressed: () => _openStoreQrScreen(),
+            tooltip: 'Show Store QR',
           ),
         ],
       ),
@@ -761,12 +764,12 @@ class _MerchantPromotionsScreenState extends State<MerchantPromotionsScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                icon: const Icon(Icons.qr_code_scanner_rounded, size: 16),
+                icon: const Icon(Icons.qr_code_rounded, size: 16),
                 label: const Text(
-                  'Scan QR',
+                  'Show QR',
                   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                 ),
-                onPressed: _openScanScreen,
+                onPressed: () => _openStoreQrScreen(promo),
               ),
             ],
           ),

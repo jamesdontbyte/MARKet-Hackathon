@@ -4,6 +4,7 @@ import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/country_selector.dart';
 import 'merchant_reg_controller.dart';
 import 'reg_step2_screen.dart';
 import 'widgets/merchant_reg_stepper.dart';
@@ -38,8 +39,9 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
-  bool _isSubmitting = false;
   String? _errorMessage;
+  String? _dobError;
+  CountryInfo _selectedCountry = kCountries.first;
 
   @override
   void initState() {
@@ -49,10 +51,20 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
 
     _nameController = TextEditingController(text: _regController.fullName);
     _dobController = TextEditingController(text: _regController.dob);
-    _phoneController = TextEditingController(text: _regController.phone);
     _emailController = TextEditingController(text: _regController.email);
     _passwordController = TextEditingController(text: _regController.password);
     _confirmPasswordController = TextEditingController(text: _regController.password);
+
+    // Identify country from pre-existing phone in controller
+    var initialPhone = _regController.phone;
+    for (final c in kCountries) {
+      if (initialPhone.startsWith(c.dialCode)) {
+        _selectedCountry = c;
+        initialPhone = initialPhone.substring(c.dialCode.length);
+        break;
+      }
+    }
+    _phoneController = TextEditingController(text: cleanPhoneNumber(initialPhone));
   }
 
   @override
@@ -66,46 +78,96 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
     super.dispose();
   }
 
-  void _triggerOtpVerification() {
+  String _formatDob(DateTime dt) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  Future<void> _pickDateOfBirth() async {
+    final now = DateTime.now();
+    final adultCutoff = DateTime(now.year - 18, now.month, now.day);
+    final firstDate = DateTime(1900, 1, 1);
+    final initialDate = _regController.dobDateTime ?? DateTime(now.year - 25, now.month, now.day);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate.isAfter(adultCutoff) ? adultCutoff : initialDate,
+      firstDate: firstDate,
+      lastDate: adultCutoff,
+      helpText: 'Select Date of Birth',
+    );
+
+    if (picked != null) {
+      if (picked.isAfter(adultCutoff)) {
+        setState(() {
+          _dobError = 'You must be at least 18';
+        });
+        return;
+      }
+      setState(() {
+        _dobError = null;
+        _dobController.text = _formatDob(picked);
+        _regController.dob = _dobController.text;
+        _regController.dobDateTime = picked;
+      });
+    }
+  }
+
+  Future<void> _onContinue() async {
     setState(() {
       _errorMessage = null;
     });
 
     if (!_formKey.currentState!.validate()) return;
 
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter your mobile number first.';
-      });
+    final rawPhone = _phoneController.text.trim();
+    final fullPhone = buildInternationalPhone(rawPhone, _selectedCountry);
+
+    // If OTP was already verified (e.g. going back from Step 2 to Step 1),
+    // save any updated fields and advance straight to Step 2 WITHOUT re-running sign-up or showing OTP.
+    if (_regController.isOtpVerified) {
+      _regController.fullName = _nameController.text.trim();
+      _regController.dob = _dobController.text.trim();
+      _regController.phone = fullPhone;
+      _regController.email = _emailController.text.trim();
+      _regController.password = _passwordController.text;
+
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => RegStep2Screen(controller: _regController),
+        ),
+      );
       return;
     }
 
+    // Open OTP bottom sheet for one-time verification and sign-up
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) {
         return _MerchantOtpBottomSheet(
-          phone: phone,
+          phone: cleanPhoneNumber(rawPhone),
+          country: _selectedCountry,
           onVerifySuccess: () async {
-            // Register merchant via Supabase Auth & create profiles row at Step 1,
-            // right after sign-up, the exact same way AuthService.signUpShopper does for shoppers.
+            // Register merchant via Supabase Auth & create profiles row exactly once at Step 1
             await _authService.signUpMerchant(
               email: _emailController.text.trim(),
               password: _passwordController.text,
               fullName: _nameController.text.trim(),
-              phone: '+63$phone',
+              phone: fullPhone,
             );
 
-            setState(() {
-              _regController.fullName = _nameController.text.trim();
-              _regController.dob = _dobController.text.trim();
-              _regController.phone = '+63$phone';
-              _regController.email = _emailController.text.trim();
-              _regController.password = _passwordController.text;
-              _regController.isOtpVerified = true;
-            });
+            if (mounted) {
+              setState(() {
+                _regController.fullName = _nameController.text.trim();
+                _regController.dob = _dobController.text.trim();
+                _regController.phone = fullPhone;
+                _regController.email = _emailController.text.trim();
+                _regController.password = _passwordController.text;
+                _regController.isOtpVerified = true;
+              });
+            }
 
             if (modalContext.mounted) {
               Navigator.of(modalContext).pop();
@@ -121,62 +183,6 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
         );
       },
     );
-  }
-
-  Future<void> _onContinue() async {
-    setState(() {
-      _errorMessage = null;
-    });
-
-    if (!_formKey.currentState!.validate()) return;
-
-    if (!_regController.isOtpVerified) {
-      _triggerOtpVerification();
-      return;
-    }
-
-    // If OTP was already verified, ensure merchant auth user and profiles row exist
-    setState(() {
-      _isSubmitting = true;
-    });
-
-    try {
-      await _authService.signUpMerchant(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        fullName: _nameController.text.trim(),
-        phone: '+63${_phoneController.text.trim()}',
-      );
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString().replaceAll('Exception:', '').trim();
-          _isSubmitting = false;
-        });
-      }
-      return; // Do NOT continue to next step if sign-up / profile creation fails!
-    }
-
-    if (mounted) {
-      setState(() {
-        _isSubmitting = false;
-      });
-    }
-
-    // Save to controller
-    _regController.fullName = _nameController.text.trim();
-    _regController.dob = _dobController.text.trim();
-    _regController.phone = '+63${_phoneController.text.trim()}';
-    _regController.email = _emailController.text.trim();
-    _regController.password = _passwordController.text;
-
-    if (mounted) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => RegStep2Screen(controller: _regController),
-        ),
-      );
-    }
   }
 
   @override
@@ -333,19 +339,23 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                             // Date of Birth
                             AppTextField(
                               controller: _dobController,
+                              readOnly: true,
+                              onTap: _pickDateOfBirth,
                               label: 'Date of Birth',
-                              hintText: 'YYYY-MM-DD',
+                              hintText: 'Select date of birth',
+                              errorText: _dobError,
                               prefixIcon: const Icon(Icons.calendar_today_outlined, size: 20, color: MarketColors.outline),
                               validator: (v) {
                                 if (v == null || v.trim().isEmpty) {
                                   return 'Date of birth is required';
                                 }
+                                if (_dobError != null) return _dobError;
                                 return null;
                               },
                             ),
                             const SizedBox(height: 16),
 
-                            // Mobile Number with SMS verification row
+                            // Mobile Number with Country Selector
                             const Text(
                               'Mobile Number',
                               style: TextStyle(
@@ -358,23 +368,13 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  height: 52,
-                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                  decoration: BoxDecoration(
-                                    color: MarketColors.surfaceContainerLow,
-                                    borderRadius: BorderRadius.circular(MarketRadii.input),
-                                    border: Border.all(color: MarketColors.fieldBorder),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    '🇵🇭 +63',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w700,
-                                      color: MarketColors.onSurface,
-                                    ),
-                                  ),
+                                CountrySelectorButton(
+                                  selectedCountry: _selectedCountry,
+                                  onCountryChanged: (c) {
+                                    setState(() {
+                                      _selectedCountry = c;
+                                    });
+                                  },
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -382,7 +382,7 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                                     controller: _phoneController,
                                     keyboardType: TextInputType.phone,
                                     decoration: InputDecoration(
-                                      hintText: '9XX XXX XXXX',
+                                      hintText: _selectedCountry.isoCode == 'PH' ? '9XX XXX XXXX' : 'Mobile number',
                                       filled: true,
                                       fillColor: MarketColors.surfaceContainerLowest,
                                       contentPadding: const EdgeInsets.symmetric(
@@ -405,84 +405,10 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                                         ),
                                       ),
                                     ),
-                                    validator: (v) {
-                                      if (v == null || v.trim().isEmpty) {
-                                        return 'Mobile number is required';
-                                      }
-                                      if (v.trim().length < 10) {
-                                        return 'Enter valid 10-digit number';
-                                      }
-                                      return null;
-                                    },
+                                    validator: (v) => validatePhoneNumber(v, _selectedCountry),
                                   ),
                                 ),
                               ],
-                            ),
-                            const SizedBox(height: 8),
-
-                            // SMS Verification trigger row
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                              decoration: BoxDecoration(
-                                color: MarketColors.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: MarketColors.outlineVariant.withValues(alpha: 0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _regController.isOtpVerified
-                                        ? Icons.verified_rounded
-                                        : Icons.verified_user_outlined,
-                                    size: 20,
-                                    color: _regController.isOtpVerified
-                                        ? MarketColors.success
-                                        : MarketColors.primary,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      _regController.isOtpVerified
-                                          ? 'Mobile number verified ✓'
-                                          : '6-digit SMS verification required',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: _regController.isOtpVerified
-                                            ? FontWeight.w700
-                                            : FontWeight.w500,
-                                        color: _regController.isOtpVerified
-                                            ? MarketColors.success
-                                            : MarketColors.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                  if (!_regController.isOtpVerified)
-                                    ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: MarketColors.primaryContainer,
-                                        foregroundColor: MarketColors.onSurface,
-                                        elevation: 0,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 8,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
-                                        ),
-                                      ),
-                                      onPressed: _triggerOtpVerification,
-                                      child: const Text(
-                                        'Verify via SMS',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
                             ),
                             const SizedBox(height: 16),
 
@@ -601,8 +527,8 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
                 width: double.infinity,
                 height: 52,
                 label: 'Continue to Business Information',
-                isLoading: _isSubmitting,
-                onPressed: _isSubmitting ? null : _onContinue,
+                isLoading: false,
+                onPressed: _onContinue,
               ),
             ),
           ],
@@ -615,10 +541,12 @@ class _RegStep1ScreenState extends State<RegStep1Screen> {
 /// OTP Modal Bottom Sheet with Demo Shortcut ("Demo code: 123456")
 class _MerchantOtpBottomSheet extends StatefulWidget {
   final String phone;
+  final CountryInfo country;
   final Future<void> Function() onVerifySuccess;
 
   const _MerchantOtpBottomSheet({
     required this.phone,
+    required this.country,
     required this.onVerifySuccess,
   });
 
@@ -707,7 +635,7 @@ class _MerchantOtpBottomSheetState extends State<_MerchantOtpBottomSheet> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Enter the 6-digit code sent to +63 ${widget.phone.isNotEmpty ? widget.phone : "your mobile"}',
+              'Enter the 6-digit code sent to ${widget.country.dialCode} ${widget.phone.isNotEmpty ? widget.phone : "your mobile"}',
               style: const TextStyle(
                 fontSize: 14,
                 color: MarketColors.onSurfaceVariant,

@@ -4,6 +4,7 @@ import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_buttons.dart';
+import '../../widgets/country_selector.dart';
 import 'merchant_reg_controller.dart';
 import 'waiting_screen.dart';
 import 'widgets/merchant_reg_stepper.dart';
@@ -151,7 +152,10 @@ class _RegStep4ReviewScreenState extends State<RegStep4ReviewScreen> {
                       rows: [
                         _buildRow('Full Name', _regController.fullName),
                         _buildRow('Date of Birth', _regController.dob),
-                        _buildRow('Mobile Number', '+63 ${_regController.phone} (Verified)'),
+                        _buildRow(
+                          'Mobile Number',
+                          '${formatPhoneDisplay(_regController.phone)} (Verified)',
+                        ),
                         _buildRow('Email Address', _regController.email),
                       ],
                     ),

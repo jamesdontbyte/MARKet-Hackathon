@@ -4,6 +4,7 @@ import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
+import '../../widgets/country_selector.dart';
 
 /// Shopper registration screen matching the Stitch market_consumer_registration frame.
 /// Tapping "Create Account & Continue" opens a bottom sheet for OTP verification
@@ -22,6 +23,7 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  CountryInfo _selectedCountry = kCountries.first;
 
   final AuthService _authService = AuthService();
 
@@ -61,20 +63,24 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
   }
 
   void _showOtpBottomSheet() {
+    final rawPhone = _phoneController.text.trim();
+    final fullPhone = buildInternationalPhone(rawPhone, _selectedCountry);
+
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (modalContext) {
         return _ShopperOtpBottomSheet(
-          phone: _phoneController.text.trim(),
+          phone: cleanPhoneNumber(rawPhone),
+          country: _selectedCountry,
           onVerifySuccess: () async {
             // Register shopper via Supabase Auth & profiles table
             await _authService.signUpShopper(
               email: _emailController.text.trim(),
               password: _passwordController.text,
               fullName: _nameController.text.trim(),
-              phone: '+63${_phoneController.text.trim()}',
+              phone: fullPhone,
             );
 
             if (modalContext.mounted) {
@@ -211,64 +217,24 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
                               color: MarketColors.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 6),
-                          Row(
+                          const SizedBox(height: 6),                          Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                height: 48,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                decoration: BoxDecoration(
-                                  color: MarketColors.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(MarketRadii.input),
-                                  border: Border.all(color: MarketColors.fieldBorder),
-                                ),
-                                child: Row(
-                                  children: [
-                                    // PH Flag emblem representation
-                                    Container(
-                                      width: 18,
-                                      height: 12,
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF0038A8),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                      child: Stack(
-                                        children: [
-                                          Positioned(
-                                            bottom: 0,
-                                            left: 0,
-                                            right: 0,
-                                            height: 6,
-                                            child: Container(color: const Color(0xFFCE1126)),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      '+63',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w700,
-                                        color: MarketColors.onSurface,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              CountrySelectorButton(
+                                selectedCountry: _selectedCountry,
+                                onCountryChanged: (c) {
+                                  setState(() {
+                                    _selectedCountry = c;
+                                  });
+                                },
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: AppTextField(
                                   controller: _phoneController,
-                                  hintText: '917 888 4321',
+                                  hintText: _selectedCountry.isoCode == 'PH' ? '917 888 4321' : 'Mobile number',
                                   keyboardType: TextInputType.phone,
-                                  validator: (value) {
-                                    if (value == null || value.trim().length < 10) {
-                                      return 'Enter valid 10-digit number';
-                                    }
-                                    return null;
-                                  },
+                                  validator: (value) => validatePhoneNumber(value, _selectedCountry),
                                 ),
                               ),
                             ],
@@ -751,10 +717,12 @@ class _ShopperRegisterScreenState extends State<ShopperRegisterScreen> {
 /// OTP Modal Bottom Sheet with Demo Shortcut
 class _ShopperOtpBottomSheet extends StatefulWidget {
   final String phone;
+  final CountryInfo country;
   final Future<void> Function() onVerifySuccess;
 
   const _ShopperOtpBottomSheet({
     required this.phone,
+    required this.country,
     required this.onVerifySuccess,
   });
 
@@ -843,7 +811,7 @@ class _ShopperOtpBottomSheetState extends State<_ShopperOtpBottomSheet> {
             ),
             const SizedBox(height: 6),
             Text(
-              'Enter the 6-digit code sent to +63 ${widget.phone.isNotEmpty ? widget.phone : "your mobile"}',
+              'Enter the 6-digit code sent to ${widget.country.dialCode} ${widget.phone.isNotEmpty ? widget.phone : "your mobile"}',
               style: const TextStyle(
                 fontSize: 14,
                 color: MarketColors.onSurfaceVariant,

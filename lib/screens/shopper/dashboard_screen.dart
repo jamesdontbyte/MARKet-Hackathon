@@ -894,7 +894,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
             height: 36,
             onPressed: () async {
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const PermissionExplainerScreen()),
+                MaterialPageRoute(builder: (_) => const PermissionExplainerScreen(fromBanner: true)),
               );
               _checkPermissions();
             },

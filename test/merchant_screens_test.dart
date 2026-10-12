@@ -78,7 +78,7 @@ void main() {
   });
 
   group('Merchant Registration Steps UI Tests', () {
-    testWidgets('RegStep1Screen renders form fields and verify SMS button', (tester) async {
+    testWidgets('RegStep1Screen renders form fields and country selector without separate SMS button', (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 2.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -91,7 +91,9 @@ void main() {
       );
 
       expect(find.text('Account & Owner Credentials'), findsOneWidget);
-      expect(find.text('Verify via SMS'), findsOneWidget);
+      expect(find.text('Verify via SMS'), findsNothing);
+      expect(find.text('+63'), findsOneWidget);
+      expect(find.text('Date of Birth'), findsOneWidget);
       expect(find.text('Continue to Business Information'), findsOneWidget);
     });
 
@@ -397,6 +399,100 @@ void main() {
 
       // Did NOT continue to Step 2
       expect(find.text('Business Details'), findsNothing);
+    });
+
+    testWidgets('Step 1 wrong OTP shows error and stays on bottom sheet', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeAuth = FakeMerchantAuthService();
+      final regController = MerchantRegController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RegStep1Screen(
+            controller: regController,
+            authService: fakeAuth,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final textFields = find.byType(TextFormField);
+      await tester.enterText(textFields.at(0), 'Maria Santos');
+      await tester.enterText(textFields.at(1), '1990-05-15');
+      await tester.enterText(textFields.at(2), '9171234567');
+      await tester.enterText(textFields.at(3), 'maria@example.com');
+      await tester.enterText(textFields.at(4), 'password123');
+      await tester.enterText(textFields.at(5), 'password123');
+      await tester.pumpAndSettle();
+
+      final continueBtn = find.text('Continue to Business Information');
+      await tester.ensureVisible(continueBtn);
+      await tester.tap(continueBtn);
+      await tester.pumpAndSettle();
+
+      // Modal is open
+      expect(find.text('Verify Mobile Number'), findsOneWidget);
+
+      // Enter wrong code in OTP field
+      final otpField = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(otpField, '999999');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Confirm Verification'));
+      await tester.pumpAndSettle();
+
+      // Real error message is displayed and sheet remains visible
+      expect(find.textContaining('Invalid code'), findsOneWidget);
+      expect(find.text('Verify Mobile Number'), findsOneWidget);
+      expect(fakeAuth.signUpCalled, isFalse);
+    });
+
+    testWidgets('Step 1 returning from Step 2 does not re-run sign-up or reopen OTP sheet', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final fakeAuth = FakeMerchantAuthService();
+      final regController = MerchantRegController()..isOtpVerified = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RegStep1Screen(
+            controller: regController,
+            authService: fakeAuth,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final textFields = find.byType(TextFormField);
+      await tester.enterText(textFields.at(0), 'Maria Santos');
+      await tester.enterText(textFields.at(1), '1990-05-15');
+      await tester.enterText(textFields.at(2), '9171234567');
+      await tester.enterText(textFields.at(3), 'maria@example.com');
+      await tester.enterText(textFields.at(4), 'password123');
+      await tester.enterText(textFields.at(5), 'password123');
+      await tester.pumpAndSettle();
+
+      final continueBtn = find.text('Continue to Business Information');
+      await tester.ensureVisible(continueBtn);
+      await tester.tap(continueBtn);
+      await tester.pumpAndSettle();
+
+      // No OTP sheet was opened
+      expect(find.text('Verify Mobile Number'), findsNothing);
+      // Sign-up was not called again
+      expect(fakeAuth.signUpCalled, isFalse);
+      // Went directly to Step 2
+      expect(find.text('Business Details'), findsOneWidget);
     });
 
     test('FakeMerchantAuthService updates profile when row already exists rather than failing', () async {

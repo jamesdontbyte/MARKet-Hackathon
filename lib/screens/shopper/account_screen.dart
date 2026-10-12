@@ -9,6 +9,7 @@ import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/filter_chip.dart';
 import '../../widgets/shopper_bottom_nav.dart';
+import '../../widgets/country_selector.dart';
 
 /// AccountScreen manages shopper preferences, canonical interest chips,
 /// live geofence permissions, and debug access to the spike harness.
@@ -152,7 +153,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                 if (_profile?.phone != null && _profile!.phone!.isNotEmpty) ...[
                                   const SizedBox(height: 2),
                                   Text(
-                                    _profile!.phone!,
+                                    formatPhoneDisplay(_profile!.phone),
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: MarketColors.secondary,

@@ -15,7 +15,8 @@ class MerchantRegController extends ChangeNotifier {
   // Step 1: Owner Basics
   // -------------------------------------------------------------
   String fullName = '';
-  String dob = '1990-05-14';
+  String dob = 'May 14, 1990';
+  DateTime? dobDateTime;
   String phone = '';
   String email = '';
   String password = '';

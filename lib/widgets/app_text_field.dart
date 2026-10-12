@@ -26,6 +26,8 @@ class AppTextField extends StatelessWidget {
   final FocusNode? focusNode;
   final TextCapitalization textCapitalization;
   final List<TextInputFormatter>? inputFormatters;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const AppTextField({
     super.key,
@@ -35,6 +37,8 @@ class AppTextField extends StatelessWidget {
     this.helperText,
     this.errorText,
     this.obscureText = false,
+    this.readOnly = false,
+    this.onTap,
     this.keyboardType,
     this.textInputAction,
     this.onChanged,
@@ -77,6 +81,8 @@ class AppTextField extends StatelessWidget {
             focusNode: focusNode,
             autofocus: autofocus,
             enabled: enabled,
+            readOnly: readOnly,
+            onTap: onTap,
             obscureText: obscureText,
             keyboardType: keyboardType,
             textInputAction: textInputAction,

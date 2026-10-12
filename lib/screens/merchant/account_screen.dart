@@ -5,6 +5,7 @@ import '../../models/profile.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/merchant_bottom_nav.dart';
+import '../../widgets/country_selector.dart';
 import 'analytics_screen.dart';
 import 'catalog_screen.dart';
 import 'dashboard_screen.dart';
@@ -243,7 +244,7 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                           // Contact rows
                           _buildDetailRow(
                             icon: Icons.call_outlined,
-                            text: phone.startsWith('+63') ? phone : '+63 $phone',
+                            text: formatPhoneDisplay(phone),
                             tag: 'Verified',
                             tagColor: MarketColors.success,
                           ),

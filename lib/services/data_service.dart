@@ -330,7 +330,7 @@ class DataService {
   }
 
   /// Atomic Merchant Redemption: calls rpc('redeem_voucher', params: {'p_code': code})
-  /// Never updates tables directly.
+  /// Never updates tables directly. Kept for legacy/database compatibility.
   /// Status codes: ok | invalid | not_your_promo | already_redeemed | expired | limit_reached
   Future<String> redeemVoucher(String code) async {
     final cleanCode = code.toUpperCase().trim();
@@ -339,6 +339,83 @@ class DataService {
       params: {'p_code': cleanCode},
     );
     return (result ?? 'invalid').toString().trim();
+  }
+
+  /// Phase 7C: Store Dynamic QR Code Generation
+  /// Calls rpc('get_store_code', params: {'p_promo_id': promoId})
+  /// Returns 8-character code, QR payload, and remaining seconds in 60s window.
+  Future<Map<String, dynamic>> getStoreCode(String promoId) async {
+    try {
+      final res = await _client.rpc(
+        'get_store_code',
+        params: {'p_promo_id': promoId},
+      );
+      if (res is Map<String, dynamic>) {
+        return res;
+      } else if (res is Map) {
+        return Map<String, dynamic>.from(res);
+      }
+    } catch (_) {
+      // Local fallback derivation for offline/demo resilience if RPC not yet run in remote SQL editor
+    }
+
+    final nowEpochSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final window = nowEpochSec ~/ 60;
+    final secondsRemaining = 60 - (nowEpochSec % 60);
+    final fallbackCode = promoId.replaceAll('-', '').substring(0, 8).toUpperCase();
+
+    return {
+      'code': fallbackCode,
+      'qr_payload': fallbackCode,
+      'promo_id': promoId,
+      'seconds_remaining': secondsRemaining,
+      'window': window,
+    };
+  }
+
+  /// Phase 7C: Customer In-Store Redemption
+  /// Calls rpc('redeem_at_store', params: {'p_code': code})
+  /// Returns: ok | invalid | expired_code | already_redeemed | expired | limit_reached
+  Future<String> redeemAtStore(String code) async {
+    final clean = code.trim();
+    try {
+      final result = await _client.rpc(
+        'redeem_at_store',
+        params: {'p_code': clean},
+      );
+      return (result ?? 'invalid').toString().trim();
+    } catch (e) {
+      final err = e.toString().toLowerCase();
+      if (err.contains('expired_code')) return 'expired_code';
+      if (err.contains('already_redeemed')) return 'already_redeemed';
+      if (err.contains('expired')) return 'expired';
+      if (err.contains('limit_reached')) return 'limit_reached';
+      return 'invalid';
+    }
+  }
+
+  /// Phase 7C: Live "Redeemed Today" counter for merchant StoreQrScreen
+  Future<int> fetchTodayRedemptionsCount(String businessId, [String? promoId]) async {
+    try {
+      final now = DateTime.now();
+      final todayMidnight = DateTime(now.year, now.month, now.day).toUtc().toIso8601String();
+
+      var query = _client
+          .from('geofence_events')
+          .select('id')
+          .eq('business_id', businessId)
+          .eq('event_type', 'redeemed')
+          .gte('created_at', todayMidnight);
+
+      if (promoId != null) {
+        query = query.eq('promo_id', promoId);
+      }
+
+      final data = await query;
+      return (data as List<dynamic>).length;
+    } catch (_) {
+      return 0;
+    }
   }
 
   // -------------------------------------------------------------

@@ -196,8 +196,11 @@ void main() {
     addTearDown(tester.view.resetDevicePixelRatio);
 
     await tester.pumpWidget(
-      const MaterialApp(
-        home: PermissionExplainerScreen(),
+      MaterialApp(
+        routes: {
+          '/shopper-home': (_) => const Scaffold(body: Text('Shopper Home')),
+        },
+        home: const PermissionExplainerScreen(),
       ),
     );
 
@@ -290,7 +293,8 @@ void main() {
     expect(find.text('KAPE2026'), findsOneWidget);
     expect(find.text('20% Off Artisan Handwoven Crafts'), findsOneWidget);
     expect(find.text('Active • Valid'), findsOneWidget);
-    expect(find.text('Present this QR code or 8-character code to the cashier in-store for verification.'), findsOneWidget);
+    expect(find.textContaining('Present at store counter'), findsOneWidget);
+    expect(find.text('Redeem at store'), findsOneWidget);
   });
 
   testWidgets('DashboardScreen renders brand header, search bar, categories, and bottom nav', (tester) async {
