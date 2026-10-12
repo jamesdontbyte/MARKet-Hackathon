@@ -162,6 +162,27 @@ class DataService {
         .toList();
   }
 
+  /// Fetch a single promo by ID, with fallback for demo/notification ids
+  Future<Promo?> fetchPromoById(String promoId) async {
+    try {
+      final data = await _client
+          .from('promos')
+          .select()
+          .eq('id', promoId)
+          .maybeSingle();
+
+      if (data != null) {
+        return Promo.fromJson(data);
+      }
+    } catch (_) {
+      // Fallback below
+    }
+
+    // If promoId was a demo tag or not found in table, fallback to first active promo
+    final active = await fetchActivePromos();
+    return active.isNotEmpty ? active.first : null;
+  }
+
   /// Create a new promo
   Future<Promo> createPromo(Promo promo) async {
     final data = await _client

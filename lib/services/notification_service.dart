@@ -8,6 +8,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   void Function(String? payload)? onNotificationTapped;
+  String? initialPayload;
 
   Future<void> init({void Function(String? payload)? onTapped}) async {
     onNotificationTapped = onTapped;
@@ -25,9 +26,8 @@ class NotificationService {
     if (launchDetails != null &&
         launchDetails.didNotificationLaunchApp &&
         launchDetails.notificationResponse != null) {
-      onNotificationTapped?.call(
-        launchDetails.notificationResponse!.payload,
-      );
+      initialPayload = launchDetails.notificationResponse!.payload;
+      onNotificationTapped?.call(initialPayload);
     }
   }
 
@@ -41,7 +41,7 @@ class NotificationService {
 
   Future<void> showPromo({
     required int id,
-    required String title,
+    String title = 'Promos near you in San Jose',
     required String body,
     String? payload,
   }) async {

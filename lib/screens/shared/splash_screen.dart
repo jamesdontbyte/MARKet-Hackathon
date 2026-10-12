@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../services/notification_service.dart';
+import '../shopper/promo_detail_screen.dart';
 
 /// 2-second branded splash screen matching the Stitch market_splash_screen.
 /// Evaluates Supabase session and user profile, routing accordingly.
@@ -79,7 +81,21 @@ class _SplashScreenState extends State<SplashScreen>
     }
 
     if (mounted) {
-      Navigator.of(context).pushReplacementNamed(nextRoute);
+      final initialPromo = NotificationService.instance.initialPayload;
+      if (initialPromo != null && initialPromo.isNotEmpty) {
+        NotificationService.instance.initialPayload = null;
+        Navigator.of(context).pushReplacementNamed(nextRoute);
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => PromoDetailScreen(
+              promoId: initialPromo,
+              fromNotification: true,
+            ),
+          ),
+        );
+      } else {
+        Navigator.of(context).pushReplacementNamed(nextRoute);
+      }
     }
   }
 

@@ -35,6 +35,9 @@ class Business {
     required this.createdAt,
   });
 
+  double get latitude => lat;
+  double get longitude => lng;
+
   factory Business.fromJson(Map<String, dynamic> json) {
     return Business(
       id: json['id'] as String,

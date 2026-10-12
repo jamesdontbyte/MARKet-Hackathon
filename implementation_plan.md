@@ -196,28 +196,33 @@ lib/
   - `flutter analyze` passes with 0 warnings.
   - `flutter test` passes.
   - `flutter build apk --debug` succeeds.
-- **CHECKPOINT:** Stop after Phase 3 and wait for user review before proceeding.
+- **CHECKPOINT:** Phase 3 Passed.
 
 ---
 
-### Phase 4: Shopper Screens & Hyperlocal Demo Loop
-**Goal:** Implement full shopper experience: OTP registration modal, canonical interest grid, dashboard with long-press MARK simulate trigger, real OSM map discovery with fallback, Stash, QR voucher screen, and Account.
-- **Files to create:**
-  - `lib/screens/shopper/register_screen.dart` — Form + bottom sheet OTP modal ("Demo code: 123456").
-  - `lib/screens/shopper/interests_screen.dart` — Grid from 8 canonical category slugs.
-  - `lib/screens/shopper/dashboard_screen.dart` — Recommendations, featured promos. Long-press "MARK" logo opens sheet with "Simulate entering zone".
-  - `lib/screens/shopper/roam_screen.dart` — `flutter_map` + OSM tiles, 1500m zone circle, business markers, bottom sheet, auto-switch to List view if tiles fail repeatedly.
-  - `lib/screens/shopper/storefront_screen.dart` — Storefront details, cover image / category fallback, active promos with Save button.
-  - `lib/screens/shopper/promo_detail_screen.dart` — Opened by notification tap or browse. Logs `viewed`/`opened` events. "Save to Stash" & "Get Voucher".
-  - `lib/screens/shopper/stash_screen.dart` — Saved promos tabs (All/Active/Expiring/Expired), "Open Voucher" action.
-  - `lib/screens/shopper/voucher_screen.dart` — Generates 8-char code & QR via `qr_flutter`. Issues `redemptions` row and logs `claimed` on first open.
-  - `lib/screens/shopper/account_screen.dart` — Canonical interest chips, live permission status, notification toggles, logout.
+### Phase 4: Shopper Experience, Hyperlocal Discovery & Notification Flow
+**Goal:** Implement full shopper portal: permission explainer, 4-tab dashboard landing with missing permissions banner & MARK long-press simulator, real OSM map discovery with fallback, storefront catalog, promo detail with viewed/opened logging, stash with status tabs, QR voucher issuance, and account preferences.
+- **Files to create/modify:**
+  - `lib/screens/shared/permission_explainer_screen.dart` — 3 steps: foreground location, "Allow all the time" separate step, then notifications.
+  - `lib/screens/shopper/dashboard_screen.dart` — Shopper landing screen (replaces placeholder). "Businesses for You" filtered by `profiles.interests`, popular businesses, featured promos. Missing permissions banner. Long-press "MARK" header logo opens simulation sheet ("Simulate entering zone", "Simulate leaving zone", "Open Geofence Spike Screen").
+  - `lib/screens/shopper/roam_screen.dart` — `flutter_map` + OSM tiles, 1500m zone circle, verified business markers, user location pulse, bottom quick-view sheet, Map/List toggle, and auto-switch to List view if tiles fail.
+  - `lib/screens/shopper/storefront_screen.dart` — Business header (`cover_url` / category fallback, verified badge), active promos with Save button, catalog products menu.
+  - `lib/screens/shopper/promo_detail_screen.dart` — Promo details, "Save to Stash", "Get Voucher". Logs `viewed` on in-app open; logs `opened` only when opened from notification tap.
+  - `lib/screens/shopper/stash_screen.dart` — Saved promos with 4 status tabs (All/Active/Expiring/Expired), "Open Voucher" action, empty states.
+  - `lib/screens/shopper/voucher_screen.dart` — Generates 8-char code & QR via `qr_flutter`. Issues `redemptions` row and logs `claimed` only on first open.
+  - `lib/screens/shopper/account_screen.dart` — Profile details, canonical interest chips from 8 slugs with edit action, live permissions check + `openAppSettings()`, notification toggles in `profiles.prefs`, link to geofence spike, logout.
+  - `lib/services/notification_service.dart` & `lib/main.dart` — Notification title "Promos near you in San Jose" everywhere; cold-start notification tap routing directly to `promo_detail_screen`.
+  - `lib/services/data_service.dart` — Add `fetchPromoById` and helper queries.
 - **Acceptance Checks:**
-  - Simulating zone entry triggers local notification.
-  - Notification tap navigates to `promo_detail_screen.dart` and logs `opened` event.
-  - Saving promo writes to `stash` only.
-  - Opening voucher issues `redemptions` row and logs `claimed` event.
-  - `flutter analyze` passes.
+  - Notification title is "Promos near you in San Jose" everywhere.
+  - Tapping promo notification opens `promo_detail_screen` (cold start and running).
+  - Telemetry: `viewed` on in-app browse, `opened` on notification tap, `claimed` on voucher creation.
+  - "Businesses for You" filtered by user interests; only verified businesses shown.
+  - Loading, empty, and error states present on every screen.
+  - `flutter analyze` passes (0 issues).
+  - `flutter test` passes.
+  - `flutter build apk --debug` succeeds.
+- **CHECKPOINT:** Phase 4 Passed. All shopper experience screens, OSM discovery, telemetry logging, permissions banner, and geofence simulation sheets built and verified. Ready for user on-device review.
 
 ---
 

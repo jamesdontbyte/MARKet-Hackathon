@@ -32,6 +32,10 @@ class MarketColors {
   static const Color success = Color(0xFF10B981);
   static const Color warning = Color(0xFFF59E0B);
   static const Color error = Color(0xFFEF4444);
+  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color onErrorContainer = Color(0xFF93000A);
+  static const Color inverseSurface = Color(0xFF213145);
+  static const Color inverseOnSurface = Color(0xFFEAF1FF);
   static const Color secondary = Color(0xFF565E74);
 }
 
