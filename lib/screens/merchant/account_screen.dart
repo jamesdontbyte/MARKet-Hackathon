@@ -409,22 +409,24 @@ class _MerchantAccountScreenState extends State<MerchantAccountScreen> {
                             'GPS: ${biz?.lat.toStringAsFixed(6) ?? demoShopLat.toStringAsFixed(6)}, ${biz?.lng.toStringAsFixed(6) ?? demoShopLng.toStringAsFixed(6)}',
                             style: const TextStyle(fontSize: 12, color: MarketColors.outline),
                           ),
-                          const SizedBox(height: 10),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              minimumSize: const Size(double.infinity, 40),
-                              side: BorderSide(color: MarketColors.outlineVariant.withValues(alpha: 0.5)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          if (demoMode) ...[
+                            const SizedBox(height: 10),
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 40),
+                                side: BorderSide(color: MarketColors.outlineVariant.withValues(alpha: 0.5)),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              icon: const Icon(Icons.developer_mode_rounded, size: 16),
+                              label: const Text(
+                                'Open Geofence Spike Screen',
+                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).pushNamed('/spike');
+                              },
                             ),
-                            icon: const Icon(Icons.developer_mode_rounded, size: 16),
-                            label: const Text(
-                              'Open Geofence Spike Screen',
-                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('/spike');
-                            },
-                          ),
+                          ],
                         ],
                       ),
                     ),

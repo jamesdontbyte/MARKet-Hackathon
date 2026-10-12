@@ -2,6 +2,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/env.dart';
 import '../core/supabase.dart';
 import '../models/profile.dart';
+import 'geofence_service.dart';
 
 /// AuthService handles user authentication, session streaming,
 /// profile management, and one-tap demo logins.
@@ -143,6 +144,9 @@ class AuthService {
 
   /// Sign out
   Future<void> signOut() async {
+    try {
+      await GeofenceService.instance.stop();
+    } catch (_) {}
     await _client.auth.signOut();
   }
 }

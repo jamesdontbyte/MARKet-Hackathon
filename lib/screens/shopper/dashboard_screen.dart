@@ -276,24 +276,26 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                     }
                   },
                 ),
-                const Divider(),
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEFF6FF),
-                      borderRadius: BorderRadius.circular(12),
+                if (demoMode) ...[
+                  const Divider(),
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEFF6FF),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.bug_report_rounded, color: Color(0xFF2563EB)),
                     ),
-                    child: const Icon(Icons.bug_report_rounded, color: Color(0xFF2563EB)),
+                    title: const Text('Open Geofence Spike Screen', style: TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: const Text('Live GPS logs, coordinates & diagnostics'),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Navigator.of(context).pushNamed('/spike');
+                    },
                   ),
-                  title: const Text('Open Geofence Spike Screen', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Live GPS logs, coordinates & diagnostics'),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    Navigator.of(context).pushNamed('/spike');
-                  },
-                ),
+                ],
               ],
             ),
           ),
@@ -374,7 +376,7 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
         elevation: 0.5,
         titleSpacing: MarketSpacing.screenMargin,
         title: GestureDetector(
-          onLongPress: _showSimulationSheet,
+          onLongPress: demoMode ? _showSimulationSheet : null,
           behavior: HitTestBehavior.opaque,
           child: Row(
             mainAxisSize: MainAxisSize.min,

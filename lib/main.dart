@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'core/config.dart';
 import 'core/supabase.dart';
 import 'core/theme.dart';
 import 'services/notification_service.dart';
@@ -94,7 +95,7 @@ class MarketApp extends StatelessWidget {
         '/merchant-analytics': (_) => const MerchantAnalyticsScreen(),
         '/merchant-scan': (_) => const MerchantScanScreen(),
         '/merchant-account': (_) => const MerchantAccountScreen(),
-        '/spike': (_) => const GeofenceSpikeScreen(),
+        '/spike': (_) => demoMode ? const GeofenceSpikeScreen() : const SplashScreen(),
       },
     );
   }

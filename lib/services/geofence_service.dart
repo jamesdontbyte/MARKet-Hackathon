@@ -27,6 +27,8 @@ class GeofenceZone {
 }
 
 class GeofenceService {
+  static final GeofenceService instance = GeofenceService();
+
   GeofenceService({
     List<GeofenceZone>? zones,
     this.onLog,
