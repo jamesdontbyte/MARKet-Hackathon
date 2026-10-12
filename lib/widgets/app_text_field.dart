@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../core/theme.dart';
 
 /// AppTextField provides a styled text input matching the Stitch design:
@@ -23,6 +24,8 @@ class AppTextField extends StatelessWidget {
   final int minLines;
   final bool autofocus;
   final FocusNode? focusNode;
+  final TextCapitalization textCapitalization;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppTextField({
     super.key,
@@ -44,6 +47,8 @@ class AppTextField extends StatelessWidget {
     this.minLines = 1,
     this.autofocus = false,
     this.focusNode,
+    this.textCapitalization = TextCapitalization.none,
+    this.inputFormatters,
   });
 
   @override
@@ -78,6 +83,8 @@ class AppTextField extends StatelessWidget {
             onChanged: onChanged,
             onFieldSubmitted: onSubmitted,
             validator: validator,
+            textCapitalization: textCapitalization,
+            inputFormatters: inputFormatters,
             maxLines: maxLines,
             minLines: minLines,
             style: TextStyle(

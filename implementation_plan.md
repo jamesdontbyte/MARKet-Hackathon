@@ -226,26 +226,60 @@ lib/
 
 ---
 
-### Phase 5: MSME Merchant Portal & QR Redemption
-**Goal:** Implement 4-step merchant registration with resume capability, 10s auto-verification, Dashboard, Catalog & Promos CRUD, QR Scanner calling `redeem_voucher` RPC, and Analytics.
-- **Files to create:**
-  - `lib/screens/merchant/reg_step1_screen.dart` — Owner details + demo OTP.
-  - `lib/screens/merchant/reg_step2_screen.dart` — Business info, category mapping, lat/lng defaulting to Kape Tahanan. Resume entrypoint if uncompleted.
-  - `lib/screens/merchant/reg_step3_screen.dart` — Document uploads to Supabase Storage `merchant-docs/<uid>/`.
-  - `lib/screens/merchant/reg_step4_review_screen.dart` — Summary review & submit unverified business.
+### Phase 5a: MSME Merchant Portal & Registration Wizard (COMPLETED)
+**Goal:** Implement 4-step merchant registration with resume capability, 10s auto-verification, Dashboard, Catalog & Promos CRUD, Account & Compliance screen. (Scan & Analytics deferred to Phase 5b).
+- **Files created/modified:**
+  - `lib/services/data_service.dart` — Added `updateProduct`, `updatePromo`, `deletePromo`.
+  - `lib/widgets/merchant_bottom_nav.dart` — 4-tab bar (Dashboard 0, Catalog 1, Analytics 2, Account 3).
+  - `lib/screens/merchant/merchant_reg_controller.dart` — Multi-step form controller with resume repopulation, GPS fallback, and file upload to `merchant-docs/<uid>/`.
+  - `lib/screens/merchant/widgets/merchant_reg_stepper.dart` — 4-step wizard stepper.
+  - `lib/screens/merchant/reg_step1_screen.dart` — Owner credentials & demo OTP ("123456").
+  - `lib/screens/merchant/reg_step2_screen.dart` — Business info, 8 canonical category chips, GPS fix fallback.
+  - `lib/screens/merchant/reg_step3_screen.dart` — 4 document dropzones with non-blocking fallback.
+  - `lib/screens/merchant/reg_step4_review_screen.dart` — Summary review & unverified business submission.
   - `lib/screens/merchant/waiting_screen.dart` — 10s auto-verify timer updating `businesses.verified = true`.
   - `lib/screens/merchant/verified_screen.dart` — Feature unlocked celebration.
-  - `lib/screens/merchant/dashboard_screen.dart` — Immersive header, store status, performance stats, quick promo button.
-  - `lib/screens/merchant/catalog_screen.dart` — Products list + Add Item modal.
-  - `lib/screens/merchant/promotions_screen.dart` — Promos list + Create Promo modal + "Scan QR" button.
-  - `lib/screens/merchant/scan_screen.dart` — `mobile_scanner` + manual code input. Invokes `rpc('redeem_voucher', params: {'p_code': code})`. Displays atomic result states.
-  - `lib/screens/merchant/analytics_screen.dart` — 7-day conversion funnel from `geofence_events` with static/fallback numbers.
-  - `lib/screens/merchant/account_screen.dart` — Business profile, permit checklist, alert toggles, logout.
+  - `lib/screens/merchant/dashboard_screen.dart` — Immersive hero header, performance stats, active promos, about section.
+  - `lib/screens/merchant/catalog_screen.dart` — Products CRUD with Add/Edit Item modal and delete confirmation.
+  - `lib/screens/merchant/promotions_screen.dart` — Promos list + Create Promo modal + "Scan QR" button with "Coming in Phase 5b" dialog.
+  - `lib/screens/merchant/account_screen.dart` — Business profile, Compliance Vault, geofence status, logout.
+  - `lib/screens/merchant/merchant_reg_entry_screen.dart` — Entrypoint resuming at Step 2 if profile exists without business.
+  - `lib/main.dart` — Wired all merchant named routes.
+  - `test/merchant_screens_test.dart` — 13 tests covering controller, stepper, all 4 reg screens, waiting, verified, dashboard, catalog, promos, and account.
 - **Acceptance Checks:**
   - Resuming registration re-populates state in Step 2 via `MerchantRegController`.
-  - QR Scanner validates code via `redeem_voucher` RPC and shows correct result (`ok`, `already_redeemed`, `expired`, etc.).
-  - Analytics reflect updated redemption metric.
-  - `flutter analyze` passes.
+  - 10-second auto-verify timer in `WaitingScreen` marks business verified.
+  - Verified business immediately appears in shopper dashboard and roam discovery.
+  - Catalog supports adding, editing, and deleting products.
+  - Promotions supports creating promotions with discounts and validity dates.
+  - `flutter analyze` passes (0 issues).
+  - `flutter test` passes (31/31 tests pass).
+  - `flutter build apk --debug` succeeds.
+- **CHECKPOINT:** Phase 5a Completed.
+
+---
+
+### Phase 5b: QR Scanner & MSME Analytics
+**Goal:** Implement QR camera scanner calling `redeem_voucher` RPC and 7-day conversion funnel analytics.
+- **Files created/modified:**
+  - `lib/models/merchant_analytics.dart` — `FunnelStep` and `MerchantAnalyticsData` with fallback benchmarks from `specs/04-demo-shortcuts.md`.
+  - `lib/services/data_service.dart` — Added `fetchMerchantFunnel(businessId)` querying `geofence_events`.
+  - `lib/widgets/app_text_field.dart` — Added `textCapitalization` and `inputFormatters` support with `services.dart` import.
+  - `lib/screens/merchant/scan_screen.dart` — `mobile_scanner` QR reader with torch/flip toggles, 8-character manual code fallback, camera permission fallback, 1.5s debounce, and distinct result cards for `ok`, `already_redeemed`, `not_your_promo`, `expired`, `limit_reached`, `invalid`.
+  - `lib/screens/merchant/analytics_screen.dart` — 7-day conversion funnel matching Stitch layout (`market_tab_3_analytics`) with animated radar range visualizer, real vs "Sample data" badges, and peak footfall insights card.
+  - `lib/screens/merchant/promotions_screen.dart` — Replaced placeholder with navigation to `MerchantScanScreen`.
+  - `lib/screens/merchant/dashboard_screen.dart` — Replaced placeholder bottom nav with `MerchantAnalyticsScreen` and wired real vs sample data stats.
+  - `lib/screens/merchant/catalog_screen.dart` & `account_screen.dart` — Replaced placeholder bottom nav with `MerchantAnalyticsScreen`.
+  - `test/scan_screen_test.dart` — Hand-written `FakeSupabaseClient` test suite verifying RPC parameter validation, result state UI cards, and analytics screen components.
+- **Acceptance Checks:**
+  - QR Scanner validates code via `redeem_voucher` RPC and shows correct result (`ok`, `already_redeemed`, `expired`, `not_your_promo`, `limit_reached`, `invalid`).
+  - Debounced scanning prevents double RPC calls.
+  - Camera permission denied presents manual entry fallback.
+  - Analytics reflect real vs sample fallback numbers.
+  - `flutter analyze` passes (0 issues).
+  - `flutter test` passes (38/38 tests pass).
+  - `flutter build apk --debug` succeeds.
+- **CHECKPOINT:** Phase 5b Completed.
 
 ---
 

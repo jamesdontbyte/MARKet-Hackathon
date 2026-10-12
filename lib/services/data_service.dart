@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/config.dart';
 import '../core/supabase.dart';
 import '../models/business.dart';
+import '../models/merchant_analytics.dart';
 import '../models/product.dart';
 import '../models/promo.dart';
 import '../models/redemption.dart';
@@ -111,6 +112,18 @@ class DataService {
     await _client.from('products').delete().eq('id', productId);
   }
 
+  /// Update product in merchant catalog
+  Future<Product> updateProduct(Product product) async {
+    final data = await _client
+        .from('products')
+        .update(product.toJson()..remove('id'))
+        .eq('id', product.id)
+        .select()
+        .single();
+
+    return Product.fromJson(data);
+  }
+
   // -------------------------------------------------------------
   // Promotions
   // -------------------------------------------------------------
@@ -192,6 +205,23 @@ class DataService {
         .single();
 
     return Promo.fromJson(data);
+  }
+
+  /// Update promo in merchant catalog
+  Future<Promo> updatePromo(Promo promo) async {
+    final data = await _client
+        .from('promos')
+        .update(promo.toJson()..remove('id'))
+        .eq('id', promo.id)
+        .select()
+        .single();
+
+    return Promo.fromJson(data);
+  }
+
+  /// Delete promo from catalog
+  Future<void> deletePromo(String promoId) async {
+    await _client.from('promos').delete().eq('id', promoId);
   }
 
   // -------------------------------------------------------------
@@ -379,23 +409,74 @@ class DataService {
       // If demo counts are zero, provide demo fallback numbers for presentation
       if (counts.values.every((v) => v == 0)) {
         return {
-          'ping_sent': 48,
-          'viewed': 36,
-          'opened': 22,
-          'claimed': 15,
-          'redeemed': 9,
+          'ping_sent': 1840,
+          'opened': 620,
+          'viewed': 412,
+          'claimed': 142,
+          'redeemed': 118,
         };
       }
 
       return counts;
     } catch (_) {
       return {
-        'ping_sent': 48,
-        'viewed': 36,
-        'opened': 22,
-        'claimed': 15,
-        'redeemed': 9,
+        'ping_sent': 1840,
+        'opened': 620,
+        'viewed': 412,
+        'claimed': 142,
+        'redeemed': 118,
       };
+    }
+  }
+
+  /// Fetch 7-day conversion funnel metrics with real-data vs fallback tracking per step.
+  /// If a metric has no real data, uses fallback numbers from specs/04-demo-shortcuts.md.
+  /// As soon as real data exists (>0), it replaces the fallback.
+  Future<MerchantAnalyticsData> fetchMerchantFunnel(String businessId) async {
+    try {
+      final sevenDaysAgo =
+          DateTime.now().subtract(const Duration(days: 7)).toIso8601String();
+
+      final data = await _client
+          .from('geofence_events')
+          .select('event_type')
+          .eq('business_id', businessId)
+          .gte('created_at', sevenDaysAgo);
+
+      int realPings = 0;
+      int realOpened = 0;
+      int realViews = 0;
+      int realClaims = 0;
+      int realRedeemed = 0;
+
+      for (final row in data as List<dynamic>) {
+        final type = row['event_type'] as String?;
+        if (type == 'ping_sent') realPings++;
+        if (type == 'opened') realOpened++;
+        if (type == 'viewed') realViews++;
+        if (type == 'claimed') realClaims++;
+        if (type == 'redeemed') realRedeemed++;
+      }
+
+      // Cross-check redemptions from promos.redeemed_count
+      if (realRedeemed == 0) {
+        final promos = await fetchPromosForBusiness(businessId);
+        final promoRedeemed =
+            promos.fold<int>(0, (sum, p) => sum + p.redeemedCount);
+        if (promoRedeemed > 0) {
+          realRedeemed = promoRedeemed;
+        }
+      }
+
+      return MerchantAnalyticsData.fromCounts(
+        realPings: realPings,
+        realOpened: realOpened,
+        realViews: realViews,
+        realClaims: realClaims,
+        realRedeemed: realRedeemed,
+      );
+    } catch (_) {
+      return MerchantAnalyticsData.fallback();
     }
   }
 
