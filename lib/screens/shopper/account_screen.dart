@@ -4,6 +4,7 @@ import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/profile.dart';
 import '../../services/auth_service.dart';
+import '../../services/geofence_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_card.dart';
 import '../../widgets/filter_chip.dart';
@@ -23,8 +24,6 @@ class _AccountScreenState extends State<AccountScreen> {
 
   Profile? _profile;
   bool _isLoading = true;
-  bool _geoAlertsEnabled = true;
-  bool _promoAlertsEnabled = true;
 
   PermissionStatus _locationStatus = PermissionStatus.denied;
   PermissionStatus _notificationStatus = PermissionStatus.denied;
@@ -46,11 +45,6 @@ class _AccountScreenState extends State<AccountScreen> {
           _profile = p;
           _locationStatus = loc;
           _notificationStatus = notif;
-          final prefs = p?.prefs;
-          if (prefs != null) {
-            _geoAlertsEnabled = prefs['geo_alerts'] as bool? ?? true;
-            _promoAlertsEnabled = prefs['promo_alerts'] as bool? ?? true;
-          }
           _isLoading = false;
         });
       }
@@ -59,24 +53,8 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Future<void> _updatePreference(String key, bool val) async {
-    if (_profile == null) return;
-    final updatedPrefs = Map<String, dynamic>.from(_profile!.prefs);
-    updatedPrefs[key] = val;
-
-    final updatedProfile = _profile!.copyWith(prefs: updatedPrefs);
-    setState(() {
-      _profile = updatedProfile;
-      if (key == 'geo_alerts') _geoAlertsEnabled = val;
-      if (key == 'promo_alerts') _promoAlertsEnabled = val;
-    });
-
-    try {
-      await _authService.updateProfile(updatedProfile);
-    } catch (_) {}
-  }
-
   Future<void> _logout() async {
+    await GeofenceService.instance.stop();
     await _authService.signOut();
     if (mounted) {
       Navigator.of(context).pushNamedAndRemoveUntil('/role-selection', (route) => false);
@@ -285,35 +263,26 @@ class _AccountScreenState extends State<AccountScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Notification Preferences
+                    // Hyperlocal Alerts Status
                     AppCard(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Notification Preferences',
+                        children: const [
+                          Text(
+                            'Hyperlocal Alerts',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
                               color: MarketColors.onSurface,
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Geofence Arrival Alerts', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text('Notify when entering San Jose de Buenavista zone', style: TextStyle(fontSize: 12)),
-                            value: _geoAlertsEnabled,
-                            activeThumbColor: MarketColors.primaryContainer,
-                            onChanged: (val) => _updatePreference('geo_alerts', val),
-                          ),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: const Text('Exclusive MSME Discounts', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text('Receive secret BOGO promotions matching your interests', style: TextStyle(fontSize: 12)),
-                            value: _promoAlertsEnabled,
-                            activeThumbColor: MarketColors.primaryContainer,
-                            onChanged: (val) => _updatePreference('promo_alerts', val),
+                          SizedBox(height: 6),
+                          Text(
+                            'Foreground promo alerts are always on for shoppers while logged in.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: MarketColors.onSurfaceVariant,
+                            ),
                           ),
                         ],
                       ),

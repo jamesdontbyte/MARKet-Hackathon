@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../services/geofence_service.dart';
 import '../../services/notification_service.dart';
 import '../shopper/promo_detail_screen.dart';
 
@@ -55,7 +57,15 @@ class _SplashScreenState extends State<SplashScreen>
             if (profile.interests.isEmpty) {
               nextRoute = '/interests';
             } else {
-              nextRoute = '/shopper-home';
+              final locInUse = await Permission.locationWhenInUse.isGranted;
+              final locAlways = await Permission.locationAlways.isGranted;
+              final notif = await Permission.notification.isGranted;
+              if (!locInUse || !locAlways || !notif) {
+                nextRoute = '/permission-explainer';
+              } else {
+                await GeofenceService.instance.start();
+                nextRoute = '/shopper-home';
+              }
             }
           } else if (profile.role == 'merchant') {
             final business = await _dataService.fetchMerchantBusiness(profile.id);

@@ -322,3 +322,32 @@ lib/
   - `flutter build apk --debug`: Built successfully (`build\app\outputs\flutter-apk\app-debug.apk`).
 - **CHECKPOINT:** Phase 7A Completed.
 
+---
+
+### Phase 7B: Real MSME Geofencing & Local Notifications Engine
+**Goal:** Promo alerts originate dynamically from real verified businesses with active promos instead of hardcoded zones.
+- **Key Tasks:**
+  1. `lib/core/config.dart`: Remove `demoZoneName`, `demoZoneLat`, `demoZoneLng`, `demoZoneRadiusMeters`, `perBusinessGeofence`. Add `defaultBusinessRadiusMeters = 200.0`.
+  2. `lib/screens/shopper/roam_screen.dart`: Replace `demoZoneLat`/`demoZoneLng` usage with local municipal center `LatLng(10.7674886, 121.9428977)`.
+  3. `lib/services/notification_service.dart`: Add `cancelAll()` to clear alerts on logout.
+  4. `lib/services/data_service.dart`: Implement `fetchGeofenceZones()` querying verified businesses with at least one active promo, defaulting radius to 200m when null.
+  5. `lib/services/geofence_service.dart`:
+     - Dynamic `GeofenceZone` structure with `category`.
+     - Refresh zones list on app start, after login, and every 10 minutes while service runs.
+     - State tracking per business (`_inside`, `_lastEntered`, `_lastNotified`).
+     - Check cooldown and shopper interest match (skip if interest list non-empty and does not match business category).
+     - Notification title `"<business name> has a promo near you"` and body as best active promo title.
+     - Implement `getNearestZone()` and unify `simulateEnter`/`simulateExit` to pass synthetic coordinates into `_handlePosition()`.
+     - Logout stops service and cancels notifications via `NotificationService.instance.cancelAll()`.
+  6. Shopper lifecycle & permissions:
+     - `SplashScreen`, `LoginScreen`, `InterestsScreen`: Check permissions; if missing, route to `PermissionExplainerScreen`; if granted, start `GeofenceService.instance.start()`.
+     - `PermissionExplainerScreen`: Start `GeofenceService` upon grant.
+     - `AccountScreen`: Remove switch that turns alerts off.
+     - `DashboardScreen`: Wire long-press MARK simulation sheet to nearest zone using `GeofenceService.instance`.
+  7. Verification:
+     - `flutter analyze`: Passed (0 issues).
+     - `flutter test`: Passed (47/47 tests passed).
+     - `flutter build apk --debug`: Built successfully (`build\app\outputs\flutter-apk\app-debug.apk`).
+- **CHECKPOINT:** Phase 7B Completed.
+
+

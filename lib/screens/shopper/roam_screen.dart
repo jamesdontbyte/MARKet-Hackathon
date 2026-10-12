@@ -253,8 +253,10 @@ class _RoamScreenState extends State<RoamScreen> {
     );
   }
 
+  static const _sanJoseCenter = LatLng(10.7674886, 121.9428977);
+
   Widget _buildMapView() {
-    final center = LatLng(demoZoneLat, demoZoneLng);
+    final center = _sanJoseCenter;
 
     return Stack(
       children: [

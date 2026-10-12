@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/geofence_service.dart';
 import '../../widgets/app_buttons.dart';
 
 /// InterestSelectionScreen matching market_consumer_interest_selection_mobile.
@@ -59,7 +61,15 @@ class _InterestsScreenState extends State<InterestsScreen> {
 
     try {
       await _authService.updateInterests(_selectedSlugs.toList());
-      if (mounted) {
+      final locInUse = await Permission.locationWhenInUse.isGranted;
+      final locAlways = await Permission.locationAlways.isGranted;
+      final notif = await Permission.notification.isGranted;
+      if (!mounted) return;
+      if (!locInUse || !locAlways || !notif) {
+        Navigator.of(context).pushReplacementNamed('/permission-explainer');
+      } else {
+        await GeofenceService.instance.start();
+        if (!mounted) return;
         Navigator.of(context).pushReplacementNamed('/shopper-home');
       }
     } catch (e) {
@@ -72,8 +82,18 @@ class _InterestsScreenState extends State<InterestsScreen> {
     }
   }
 
-  void _onSkip() {
-    Navigator.of(context).pushReplacementNamed('/shopper-home');
+  Future<void> _onSkip() async {
+    final locInUse = await Permission.locationWhenInUse.isGranted;
+    final locAlways = await Permission.locationAlways.isGranted;
+    final notif = await Permission.notification.isGranted;
+    if (!mounted) return;
+    if (!locInUse || !locAlways || !notif) {
+      Navigator.of(context).pushReplacementNamed('/permission-explainer');
+    } else {
+      await GeofenceService.instance.start();
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed('/shopper-home');
+    }
   }
 
   @override

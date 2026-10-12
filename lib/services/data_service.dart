@@ -2,12 +2,14 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../core/config.dart';
 import '../core/supabase.dart';
 import '../models/business.dart';
 import '../models/merchant_analytics.dart';
 import '../models/product.dart';
 import '../models/promo.dart';
 import '../models/redemption.dart';
+import 'geofence_service.dart';
 
 /// DataService handles database queries, mutations, atomic RPC redemption,
 /// geofence event logging, and MSME analytics.
@@ -474,5 +476,47 @@ class DataService {
         );
 
     return _client.storage.from('merchant-docs').getPublicUrl(filePath);
+  }
+
+  // -------------------------------------------------------------
+  // Geofence Zones
+  // -------------------------------------------------------------
+
+  /// Fetch geofence zones for verified businesses that have at least one active promo
+  Future<List<GeofenceZone>> fetchGeofenceZones() async {
+    final businesses = await fetchVerifiedBusinesses();
+    if (businesses.isEmpty) return [];
+
+    final activePromos = await fetchActivePromos();
+    if (activePromos.isEmpty) return [];
+
+    final Map<String, List<Promo>> promosByBiz = {};
+    for (final promo in activePromos) {
+      promosByBiz.putIfAbsent(promo.businessId, () => []).add(promo);
+    }
+
+    final List<GeofenceZone> zones = [];
+    for (final biz in businesses) {
+      final bizPromos = promosByBiz[biz.id];
+      if (bizPromos == null || bizPromos.isEmpty) continue;
+
+      final bestPromo = bizPromos.first;
+      final radius = (biz.radiusMeters != null && biz.radiusMeters! > 0)
+          ? biz.radiusMeters!
+          : defaultBusinessRadiusMeters;
+
+      zones.add(GeofenceZone(
+        id: biz.id,
+        name: biz.name,
+        category: biz.category,
+        lat: biz.lat,
+        lng: biz.lng,
+        radiusMeters: radius,
+        promoTitle: '${biz.name} has a promo near you',
+        promoBody: bestPromo.title,
+        promoId: bestPromo.id,
+      ));
+    }
+    return zones;
   }
 }

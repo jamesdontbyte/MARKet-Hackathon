@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../services/geofence_service.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_text_field.dart';
 
@@ -45,7 +47,17 @@ class _LoginScreenState extends State<LoginScreen> {
       if (profile.interests.isEmpty) {
         Navigator.of(context).pushReplacementNamed('/interests');
       } else {
-        Navigator.of(context).pushReplacementNamed('/shopper-home');
+        final locInUse = await Permission.locationWhenInUse.isGranted;
+        final locAlways = await Permission.locationAlways.isGranted;
+        final notif = await Permission.notification.isGranted;
+        if (!mounted) return;
+        if (!locInUse || !locAlways || !notif) {
+          Navigator.of(context).pushReplacementNamed('/permission-explainer');
+        } else {
+          await GeofenceService.instance.start();
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed('/shopper-home');
+        }
       }
     } else if (profile.role == 'merchant') {
       final business = await _dataService.fetchMerchantBusiness(profile.id);

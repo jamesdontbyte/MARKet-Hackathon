@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../core/theme.dart';
+import '../../services/geofence_service.dart';
 import '../../widgets/app_buttons.dart';
 
 /// PermissionExplainerScreen guides the shopper through 3 permission steps:
@@ -65,8 +66,15 @@ class _PermissionExplainerScreenState extends State<PermissionExplainerScreen> {
       } else if (_currentStep == 3) {
         // Step 3: Notifications
         await Permission.notification.request();
+        await GeofenceService.instance.start();
         if (mounted) {
-          Navigator.of(context).pop(true);
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop(true);
+          } else {
+            try {
+              Navigator.of(context).pushReplacementNamed('/shopper-home');
+            } catch (_) {}
+          }
         }
         return;
       }
@@ -80,7 +88,13 @@ class _PermissionExplainerScreenState extends State<PermissionExplainerScreen> {
   }
 
   void _onSkip() {
-    Navigator.of(context).pop(false);
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop(false);
+    } else {
+      try {
+        Navigator.of(context).pushReplacementNamed('/shopper-home');
+      } catch (_) {}
+    }
   }
 
   @override

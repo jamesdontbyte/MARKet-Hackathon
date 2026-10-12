@@ -10,7 +10,7 @@ class Business {
   final String? hours;
   final double lat;
   final double lng;
-  final double radiusMeters;
+  final double? radiusMeters;
   final double rating;
   final bool verified;
   final String? coverUrl;
@@ -28,7 +28,7 @@ class Business {
     this.hours,
     required this.lat,
     required this.lng,
-    this.radiusMeters = 1500.0,
+    this.radiusMeters,
     this.rating = 4.5,
     this.verified = false,
     this.coverUrl,
@@ -51,7 +51,7 @@ class Business {
       hours: json['hours'] as String?,
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
       lng: (json['lng'] as num?)?.toDouble() ?? 0.0,
-      radiusMeters: (json['radius_m'] as num?)?.toDouble() ?? 1500.0,
+      radiusMeters: (json['radius_m'] as num?)?.toDouble(),
       rating: (json['rating'] as num?)?.toDouble() ?? 4.5,
       verified: (json['verified'] as bool?) ?? false,
       coverUrl: json['cover_url'] as String?,

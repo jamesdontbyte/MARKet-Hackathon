@@ -39,22 +39,30 @@ class NotificationService {
         ?.requestNotificationsPermission();
   }
 
+  Future<void> cancelAll() async {
+    try {
+      await _plugin.cancelAll();
+    } catch (_) {}
+  }
+
   Future<void> showPromo({
     required int id,
-    String title = 'Promos near you in San Jose',
+    required String title,
     required String body,
     String? payload,
   }) async {
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        'promo_channel',
-        'Business Promotions',
-        channelDescription: 'Promotions from nearby businesses',
-        importance: Importance.max,
-        priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
-      ),
-    );
-    await _plugin.show(id, title, body, details, payload: payload);
+    try {
+      const details = NotificationDetails(
+        android: AndroidNotificationDetails(
+          'promo_channel',
+          'Business Promotions',
+          channelDescription: 'Promotions from nearby businesses',
+          importance: Importance.max,
+          priority: Priority.high,
+          icon: '@mipmap/ic_launcher',
+        ),
+      );
+      await _plugin.show(id, title, body, details, payload: payload);
+    } catch (_) {}
   }
 }

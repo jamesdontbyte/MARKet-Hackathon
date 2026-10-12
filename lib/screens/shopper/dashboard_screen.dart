@@ -91,10 +91,14 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
       final locInUse = await Permission.locationWhenInUse.isGranted;
       final locAlways = await Permission.locationAlways.isGranted;
       final notif = await Permission.notification.isGranted;
+      final granted = locInUse && locAlways && notif;
       if (mounted) {
         setState(() {
-          _hasPermissions = locInUse && locAlways && notif;
+          _hasPermissions = granted;
         });
+      }
+      if (granted && !GeofenceService.instance.isRunning) {
+        GeofenceService.instance.start();
       }
     } catch (_) {}
   }
@@ -240,10 +244,26 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                     child: const Icon(Icons.login_rounded, color: MarketColors.primary),
                   ),
                   title: const Text('Simulate entering zone', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Fires promo notification in San Jose'),
+                  subtitle: const Text('Fires promo alert for nearest verified business'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    if (_activePromos.isEmpty) {
+                    final nearest = GeofenceService.instance.getNearestZone(
+                      _userLat != null && _userLng != null
+                          ? Position(
+                              latitude: _userLat!,
+                              longitude: _userLng!,
+                              timestamp: DateTime.now(),
+                              accuracy: 5.0,
+                              altitude: 0,
+                              altitudeAccuracy: 0,
+                              heading: 0,
+                              headingAccuracy: 0,
+                              speed: 0,
+                              speedAccuracy: 0,
+                            )
+                          : null,
+                    );
+                    if (nearest == null || _activePromos.isEmpty) {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -254,12 +274,12 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                       }
                       return;
                     }
-                    GeofenceService().simulateEnter();
+                    GeofenceService.instance.simulateEnter(zone: nearest);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Simulated entering San Jose geofence! Promo notification triggered.'),
-                          duration: Duration(seconds: 3),
+                        SnackBar(
+                          content: Text('Simulated entering ${nearest.name} zone.'),
+                          duration: const Duration(seconds: 3),
                         ),
                       );
                     }
@@ -279,12 +299,39 @@ class _DashboardScreenState extends State<DashboardScreen> with WidgetsBindingOb
                   subtitle: const Text('Resets inside state to outside'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    GeofenceService().simulateExit();
+                    final nearest = GeofenceService.instance.getNearestZone(
+                      _userLat != null && _userLng != null
+                          ? Position(
+                              latitude: _userLat!,
+                              longitude: _userLng!,
+                              timestamp: DateTime.now(),
+                              accuracy: 5.0,
+                              altitude: 0,
+                              altitudeAccuracy: 0,
+                              heading: 0,
+                              headingAccuracy: 0,
+                              speed: 0,
+                              speedAccuracy: 0,
+                            )
+                          : null,
+                    );
+                    if (nearest == null || _activePromos.isEmpty) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No active promos to simulate'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    GeofenceService.instance.simulateExit(zone: nearest);
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Simulated leaving San Jose geofence.'),
-                          duration: Duration(seconds: 3),
+                        SnackBar(
+                          content: Text('Simulated leaving ${nearest.name} zone.'),
+                          duration: const Duration(seconds: 3),
                         ),
                       );
                     }

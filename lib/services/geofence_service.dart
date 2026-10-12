@@ -2,11 +2,14 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../core/config.dart';
+import 'auth_service.dart';
+import 'data_service.dart';
 import 'notification_service.dart';
 
 class GeofenceZone {
   final String id;
   final String name;
+  final String category;
   final double lat;
   final double lng;
   final double radiusMeters;
@@ -17,6 +20,7 @@ class GeofenceZone {
   const GeofenceZone({
     required this.id,
     required this.name,
+    this.category = 'retail',
     required this.lat,
     required this.lng,
     required this.radiusMeters,
@@ -31,15 +35,26 @@ class GeofenceService {
 
   GeofenceService({
     List<GeofenceZone>? zones,
+    List<String>? shopperInterests,
+    this.dataService,
+    this.authService,
     this.onLog,
     this.onPosition,
     this.onZoneEntered,
     this.onError,
     this.cooldown = notificationCooldown,
     this.exitBufferMeters = geofenceExitBufferMeters,
-  }) : zones = zones ?? [defaultSanJoseZone];
+  })  : zones = zones ?? [],
+        shopperInterests = shopperInterests ?? [];
 
   final List<GeofenceZone> zones;
+  List<String> shopperInterests;
+  final DataService? dataService;
+  final AuthService? authService;
+
+  DataService get _effectiveDataService => dataService ?? DataService();
+  AuthService get _effectiveAuthService => authService ?? AuthService();
+
   final void Function(String message)? onLog;
   final void Function(Position position, Map<String, bool> inside, String source)? onPosition;
   final void Function(GeofenceZone zone)? onZoneEntered;
@@ -64,11 +79,13 @@ class GeofenceService {
 
   Timer? _fallbackTimer;
   Timer? _safetyPollTimer;
+  Timer? _refreshTimer;
   bool _streamFixReceived = false;
   DateTime? _lastStreamFixTime;
   DateTime? _lastAnyFixTime;
   String _lastSource = 'none';
   int _fixCount = 0;
+  Position? _lastPosition;
 
   bool get isRunning => _sub != null;
 
@@ -76,6 +93,7 @@ class GeofenceService {
   DateTime? getLastNotified(String zoneId) => _lastNotified[zoneId];
   DateTime? get lastFixTime => _lastAnyFixTime;
   String get lastSource => _lastSource;
+  Position? get lastPosition => _lastPosition;
 
   Duration? getRemainingCooldown(String zoneId) {
     final last = _lastNotified[zoneId];
@@ -85,16 +103,24 @@ class GeofenceService {
     return cooldown - elapsed;
   }
 
-  static const defaultSanJoseZone = GeofenceZone(
-    id: 'san_jose_zone',
-    name: demoZoneName,
-    lat: demoZoneLat,
-    lng: demoZoneLng,
-    radiusMeters: demoZoneRadiusMeters,
-    promoTitle: 'Promos near you in San Jose',
-    promoBody: 'Buy 1 Take 1 Afternoon Coffee Hour at Kape Tahanan (+2 more)',
-    promoId: 'demo-top-promo-kape-tahanan',
-  );
+  Future<void> refreshZones() async {
+    try {
+      final loaded = await _effectiveDataService.fetchGeofenceZones();
+      zones.clear();
+      zones.addAll(loaded);
+
+      try {
+        final profile = await _effectiveAuthService.fetchCurrentProfile();
+        if (profile != null) {
+          shopperInterests = List<String>.from(profile.interests);
+        }
+      } catch (_) {}
+
+      onLog?.call('Loaded ${zones.length} verified business geofence zone(s). Interests: $shopperInterests');
+    } catch (e) {
+      onLog?.call('Failed to refresh geofence zones: $e');
+    }
+  }
 
   void _startStream({required bool forceLocationManager}) {
     _sub?.cancel();
@@ -134,7 +160,10 @@ class GeofenceService {
 
   /// Returns null on success, or an error message to display.
   Future<String?> start() async {
-    if (isRunning) return null;
+    if (isRunning) {
+      await refreshZones();
+      return null;
+    }
 
     if (!await Geolocator.isLocationServiceEnabled()) {
       return 'GPS is turned off. Please enable location services.';
@@ -156,6 +185,9 @@ class GeofenceService {
     if (!always.isGranted) {
       onLog?.call('Notice: Background location not set to "Allow all the time".');
     }
+
+    // Refresh dynamic zones from database
+    await refreshZones();
 
     _lastError = null;
     _streamFixReceived = false;
@@ -196,11 +228,20 @@ class GeofenceService {
       }
     });
 
+    // Refresh zone list every 10 minutes while running
+    _refreshTimer?.cancel();
+    _refreshTimer = Timer.periodic(const Duration(minutes: 10), (_) async {
+      if (!isRunning) return;
+      await refreshZones();
+    });
+
     onLog?.call('Geofence foreground service started.');
     return null;
   }
 
   Future<void> stop() async {
+    _refreshTimer?.cancel();
+    _refreshTimer = null;
     _fallbackTimer?.cancel();
     _fallbackTimer = null;
     _safetyPollTimer?.cancel();
@@ -208,6 +249,8 @@ class GeofenceService {
     _streamFixReceived = false;
     await _sub?.cancel();
     _sub = null;
+    _inside.clear();
+    await NotificationService.instance.cancelAll();
     onLog?.call('Geofence service stopped.');
   }
 
@@ -225,6 +268,7 @@ class GeofenceService {
     _lastAnyFixTime = DateTime.now();
     _lastSource = source;
     _lastError = null;
+    _lastPosition = p;
 
     onLog?.call(
       'FIX #${++_fixCount} [$source]: (${p.latitude.toStringAsFixed(6)}, ${p.longitude.toStringAsFixed(6)}) | acc: ${p.accuracy.toStringAsFixed(1)}m | mocked: ${p.isMocked} | provider: $_activeProvider',
@@ -261,36 +305,80 @@ class GeofenceService {
       onLog?.call('Skipped notification for ${zone.name} (cooldown active).');
       return;
     }
+    if (shopperInterests.isNotEmpty && !shopperInterests.contains(zone.category)) {
+      onLog?.call('Skipped notification for ${zone.name} (category ${zone.category} not in shopper interests).');
+      return;
+    }
     _lastNotified[zone.id] = DateTime.now();
 
     NotificationService.instance.showPromo(
       id: zone.id.hashCode & 0x7fffffff,
-      title: zone.promoTitle,
+      title: '${zone.name} has a promo near you',
       body: zone.promoBody,
       payload: zone.promoId ?? zone.id,
     );
   }
 
-  /// Demo shortcut: simulate entering zone immediately, ignoring cooldown
-  void simulateEnter({GeofenceZone? zone}) {
-    final target = zone ?? zones.first;
-    _inside[target.id] = true;
-    _lastEntered[target.id] = DateTime.now();
-    _lastNotified[target.id] = DateTime.now();
-    onLog?.call('SIMULATED ENTER: ${target.name}');
-    NotificationService.instance.showPromo(
-      id: target.id.hashCode & 0x7fffffff,
-      title: target.promoTitle,
-      body: target.promoBody,
-      payload: target.promoId ?? target.id,
-    );
-    onZoneEntered?.call(target);
+  GeofenceZone? getNearestZone([Position? currentPos]) {
+    if (zones.isEmpty) return null;
+    final pos = currentPos ?? _lastPosition;
+    if (pos == null) return zones.first;
+    GeofenceZone? nearest;
+    double minDistance = double.infinity;
+    for (final zone in zones) {
+      final dist = Geolocator.distanceBetween(
+        zone.lat,
+        zone.lng,
+        pos.latitude,
+        pos.longitude,
+      );
+      if (dist < minDistance) {
+        minDistance = dist;
+        nearest = zone;
+      }
+    }
+    return nearest ?? zones.first;
   }
 
-  /// Demo shortcut: simulate leaving zone
-  void simulateExit({GeofenceZone? zone}) {
-    final target = zone ?? zones.first;
+  /// Long-press simulation: enter zone using the exact same code path as real entry
+  void simulateEnter({GeofenceZone? zone}) {
+    final target = zone ?? getNearestZone();
+    if (target == null) return;
     _inside[target.id] = false;
+    _lastNotified.remove(target.id);
+    onLog?.call('SIMULATED ENTER: ${target.name}');
+    final syntheticPos = Position(
+      latitude: target.lat,
+      longitude: target.lng,
+      timestamp: DateTime.now(),
+      accuracy: 5.0,
+      altitude: 0.0,
+      altitudeAccuracy: 0.0,
+      heading: 0.0,
+      headingAccuracy: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0,
+    );
+    _handlePosition(syntheticPos, source: 'simulation');
+  }
+
+  /// Long-press simulation: leave zone using the exact same code path as real exit
+  void simulateExit({GeofenceZone? zone}) {
+    final target = zone ?? getNearestZone();
+    if (target == null) return;
     onLog?.call('SIMULATED EXIT: ${target.name}');
+    final syntheticPos = Position(
+      latitude: target.lat + 1.0,
+      longitude: target.lng + 1.0,
+      timestamp: DateTime.now(),
+      accuracy: 5.0,
+      altitude: 0.0,
+      altitudeAccuracy: 0.0,
+      heading: 0.0,
+      headingAccuracy: 0.0,
+      speed: 0.0,
+      speedAccuracy: 0.0,
+    );
+    _handlePosition(syntheticPos, source: 'simulation');
   }
 }
