@@ -175,6 +175,14 @@ class _AssistantScreenState extends State<AssistantScreen> {
           startsAt = DateTime.now();
         }
 
+        final now = DateTime.now();
+        final isToday = startsAt.year == now.year &&
+            startsAt.month == now.month &&
+            startsAt.day == now.day;
+        if (isToday && startsAt.isBefore(now)) {
+          startsAt = now;
+        }
+
         DateTime endsAt;
         final rawEnds = args['ends_at']?.toString();
         if (rawEnds != null && rawEnds.isNotEmpty) {

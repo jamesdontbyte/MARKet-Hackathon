@@ -672,3 +672,32 @@ lib/
      - Test `RedeemStoreScreen` scanning JSON payload, verifying RPC parameter and result card rendering without overflow.
      - Test `RedeemStoreScreen` scanning invalid QR code, showing error banner without calling server.
 
+---
+
+### Phase 15: Fix Promo Picker Timezone Offset & Start Time Clamping
+
+**Goal:** Fix the bug where promo start/end times created via date/time pickers are stored 8 hours late (e.g. 10:00 AM Manila stored as 10:00:00+00 instead of 02:00:00+00). Ensure picker values are built as local `DateTime(y, m, d, h, min)` and converted to UTC `.toUtc().toIso8601String()`. Parse with `DateTime.parse(...).toLocal()` when loading promos in Edit modal and displaying them. Clamp start times earlier than now on today's date to `now` for immediate live status. Display merchant promo status chip computed from starts_at/ends_at (Upcoming / Live / Ended).
+
+- **Tasks:**
+  1. **Date/Time Picker Local Construction & Clamping (`catalog_screen.dart`):**
+     - Ensure `_pickDateTime` constructs a local `DateTime(year, month, day, hour, minute)`.
+     - In `_openAddOrEditPromoModal`, when user selects a start time earlier than `now` on today's date, clamp `startsAt` to `now`.
+     - When saving new promo or editing promo, clamp `startsAt` to `now` if today and in past, then convert to UTC before sending to `DataService`.
+     - When loading existing promo into Edit modal, parse with `.toLocal()`.
+  2. **DataService Clamping & Serialization (`data_service.dart`):**
+     - In `createPromo` and `updatePromo`, clamp start time earlier than now today to `now`, serialize to UTC ISO-8601 string ending in `Z`.
+  3. **Promo Model Parsing (`promo.dart`):**
+     - In `Promo.fromJson`, parse `starts_at` and `ends_at` with `DateTime.parse(...).toLocal()`.
+     - Keep `toJson` converting to UTC.
+  4. **Merchant Promo List Status Chip (`catalog_screen.dart`):**
+     - Update `_buildPromoStatusBadge` to display clear chips computed from `starts_at`/`ends_at`:
+       - `UPCOMING • Starts ...` (blue badge)
+       - `LIVE • Ends in ...` (green badge)
+       - `ENDED • Expired / Paused / Limit Reached` (gray badge)
+  5. **Unit Tests (`test/models_test.dart`):**
+     - Test: Picking 2026-10-13 10:00 local Manila produces `starts_at = 2026-10-13T02:00:00Z`.
+     - Test: Picking end 21:00 local Manila produces `ends_at = 2026-10-13T13:00:00Z`.
+     - Test: Clamping start times earlier than now today to `now`.
+     - Test: Round-trip JSON deserialization with `.toLocal()`.
+
+

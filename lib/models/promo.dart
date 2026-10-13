@@ -71,17 +71,17 @@ class Promo {
       promoType: (json['promo_type'] as String?) ?? 'percent',
       valueLabel: json['value_label'] as String?,
       startsAt: json['starts_at'] != null
-          ? DateTime.parse(json['starts_at'] as String).toUtc()
-          : DateTime.now().toUtc(),
+          ? DateTime.parse(json['starts_at'] as String).toLocal()
+          : DateTime.now(),
       endsAt: json['ends_at'] != null
-          ? DateTime.parse(json['ends_at'] as String).toUtc()
-          : DateTime.now().toUtc().add(const Duration(days: 7)),
+          ? DateTime.parse(json['ends_at'] as String).toLocal()
+          : DateTime.now().add(const Duration(days: 7)),
       redeemLimit: (json['redeem_limit'] as num?)?.toInt() ?? 100,
       redeemedCount: (json['redeemed_count'] as num?)?.toInt() ?? 0,
       active: (json['active'] as bool?) ?? true,
       createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String).toUtc()
-          : DateTime.now().toUtc(),
+          ? DateTime.parse(json['created_at'] as String).toLocal()
+          : DateTime.now(),
     );
   }
 

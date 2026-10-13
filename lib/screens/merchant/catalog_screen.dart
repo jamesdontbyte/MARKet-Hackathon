@@ -1062,7 +1062,12 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                     onTap: () async {
                                       final picked = await _pickDateTime(modalContext, startsAt);
                                       if (picked != null) {
-                                        setModalState(() => startsAt = picked);
+                                        final now = DateTime.now();
+                                        final isToday = picked.year == now.year &&
+                                            picked.month == now.month &&
+                                            picked.day == now.day;
+                                        final effective = (isToday && picked.isBefore(now)) ? now : picked;
+                                        setModalState(() => startsAt = effective);
                                       }
                                     },
                                     child: Container(
@@ -1142,7 +1147,16 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                     });
                                     return;
                                   }
-                                  if (!endsAt.isAfter(startsAt)) {
+                                  final now = DateTime.now();
+                                  final localStarts = startsAt.toLocal();
+                                  final isToday = localStarts.year == now.year &&
+                                      localStarts.month == now.month &&
+                                      localStarts.day == now.day;
+                                  final effectiveStartsAt = (isToday && localStarts.isBefore(now))
+                                      ? now
+                                      : localStarts;
+
+                                  if (!endsAt.toLocal().isAfter(effectiveStartsAt)) {
                                     setModalState(() {
                                       modalError = 'End date-time must be after start date-time.';
                                     });
@@ -1177,6 +1191,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                     }
 
                                     final limitVal = int.tryParse(limitCtrl.text.trim()) ?? 100;
+                                    final startsAtUtc = effectiveStartsAt.toUtc();
+                                    final endsAtUtc = endsAt.toLocal().toUtc();
 
                                     if (isEditing) {
                                       final updated = existingPromo.copyWith(
@@ -1186,14 +1202,14 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
                                         productId: selectedProductId,
-                                        startsAt: startsAt.toLocal().toUtc(),
-                                        endsAt: endsAt.toLocal().toUtc(),
+                                        startsAt: startsAtUtc,
+                                        endsAt: endsAtUtc,
                                         redeemLimit: limitVal,
                                       );
-                                      await _dataService.updatePromo(updated);
+                                      final saved = await _dataService.updatePromo(updated);
                                       setState(() {
                                         final idx = _promos.indexWhere((item) => item.id == existingPromo.id);
-                                        if (idx != -1) _promos[idx] = updated;
+                                        if (idx != -1) _promos[idx] = saved;
                                       });
                                     } else {
                                       final newPromo = Promo(
@@ -1205,8 +1221,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         imageUrl: finalImageUrl,
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
-                                        startsAt: startsAt.toLocal().toUtc(),
-                                        endsAt: endsAt.toLocal().toUtc(),
+                                        startsAt: startsAtUtc,
+                                        endsAt: endsAtUtc,
                                         redeemLimit: limitVal,
                                         redeemedCount: 0,
                                         active: true,
@@ -1721,12 +1737,12 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
       ),
       children: [
         if (activeList.isNotEmpty) ...[
-          _buildPromoGroupHeader('Active Promotions', activeList.length, MarketColors.success),
+          _buildPromoGroupHeader('Live Promotions', activeList.length, MarketColors.success),
           ...activeList.map((p) => _buildPromoCard(p)),
           const SizedBox(height: 16),
         ],
         if (scheduledList.isNotEmpty) ...[
-          _buildPromoGroupHeader('Scheduled Promotions', scheduledList.length, Colors.blue),
+          _buildPromoGroupHeader('Upcoming Promotions', scheduledList.length, Colors.blue),
           ...scheduledList.map((p) => _buildPromoCard(p)),
           const SizedBox(height: 16),
         ],
@@ -1813,16 +1829,47 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     final localStarts = p.startsAt.toLocal();
     final localEnds = p.endsAt.toLocal();
 
-    if (p.isActiveNow) {
+    // 1. Upcoming: active is true, but starts_at is in the future
+    if (p.active && now.isBefore(localStarts)) {
+      final diff = localStarts.difference(now);
+      final startsText = diff.inDays > 1
+          ? 'in ${diff.inDays}d'
+          : (diff.inHours > 0
+              ? 'in ${diff.inHours}h'
+              : 'in ${diff.inMinutes.clamp(1, 60)}m');
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F2FE),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFFBAE6FD)),
+        ),
+        child: Text(
+          'UPCOMING • Starts $startsText',
+          style: const TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0369A1),
+          ),
+        ),
+      );
+    }
+
+    // 2. Live: active is true, within [startsAt, endsAt], and capacity remains
+    if (p.active &&
+        (now.isAfter(localStarts) || now.isAtSameMomentAs(localStarts)) &&
+        now.isBefore(localEnds) &&
+        p.redeemedCount < p.redeemLimit) {
       final diff = localEnds.difference(now);
       final endsText = diff.inDays > 1
           ? 'Ends in ${diff.inDays}d'
           : (diff.inHours > 0 ? 'Ends in ${diff.inHours}h' : 'Ends soon');
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
         decoration: BoxDecoration(
           color: const Color(0xFFDCFCE7),
           borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: const Color(0xFF86EFAC)),
         ),
         child: Text(
           'LIVE • $endsText',
@@ -1833,46 +1880,32 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
           ),
         ),
       );
-    } else if (p.isScheduled) {
-      final m = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ][localStarts.month - 1];
-      final hour12 = localStarts.hour == 0 ? 12 : (localStarts.hour > 12 ? localStarts.hour - 12 : localStarts.hour);
-      final min = localStarts.minute.toString().padLeft(2, '0');
-      final ampm = localStarts.hour >= 12 ? 'PM' : 'AM';
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: const Color(0xFFE0F2FE),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Text(
-          'STARTS $m ${localStarts.day} $hour12:$min $ampm',
-          style: const TextStyle(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0284C7),
-          ),
-        ),
-      );
-    } else {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: MarketColors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Text(
-          'EXPIRED',
-          style: TextStyle(
-            fontSize: 9.5,
-            fontWeight: FontWeight.w800,
-            color: MarketColors.outline,
-          ),
-        ),
-      );
     }
+
+    // 3. Ended: !active, ends_at passed, or limit reached
+    String reason = 'Expired';
+    if (!p.active) {
+      reason = 'Paused';
+    } else if (p.redeemedCount >= p.redeemLimit) {
+      reason = 'Limit Reached';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: MarketColors.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: MarketColors.outlineVariant),
+      ),
+      child: Text(
+        'ENDED • $reason',
+        style: const TextStyle(
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+          color: MarketColors.outline,
+        ),
+      ),
+    );
   }
 
   Widget _buildPromoCard(Promo p) {

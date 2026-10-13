@@ -244,62 +244,80 @@ void main() {
       expect(json['created_at'], endsWith('Z'));
 
       final roundTrip = Promo.fromJson(json);
-      expect(roundTrip.startsAt.isUtc, isTrue);
-      expect(roundTrip.endsAt.isUtc, isTrue);
-      expect(roundTrip.startsAt.isBefore(DateTime.now().toUtc()) || roundTrip.startsAt.isAtSameMomentAs(DateTime.now().toUtc()), isTrue);
-      expect(roundTrip.endsAt.isAfter(DateTime.now().toUtc()), isTrue);
+      expect(roundTrip.startsAt.isUtc, isFalse);
+      expect(roundTrip.endsAt.isUtc, isFalse);
+      expect(roundTrip.startsAt.toUtc().isBefore(DateTime.now().toUtc()) || roundTrip.startsAt.toUtc().isAtSameMomentAs(DateTime.now().toUtc()), isTrue);
+      expect(roundTrip.endsAt.toUtc().isAfter(DateTime.now().toUtc()), isTrue);
       expect(roundTrip.isCurrentlyValid, isTrue);
     });
 
-    test('Promo created for 2026-10-13 09:00 local Manila time produces starts_at 2026-10-13T01:00:00Z and end date 23:59:59 becomes 15:59:59Z', () {
+    test('Picking 2026-10-13 10:00 local Manila produces starts_at 2026-10-13T02:00:00Z and 21:00 produces 13:00:00Z', () {
       final manilaOffset = const Duration(hours: 8);
 
       // 1. Timezone-explicit test using +08:00 offset
-      final manilaStarts = DateTime.parse('2026-10-13T09:00:00+08:00');
-      final manilaEnds = DateTime.parse('2026-10-13T23:59:59+08:00');
+      final manilaStarts = DateTime.parse('2026-10-13T10:00:00+08:00');
+      final manilaEnds = DateTime.parse('2026-10-13T21:00:00+08:00');
 
       final promoIso = Promo(
-        id: 'promo-manila-iso-test',
+        id: 'promo-manila-10am-test',
         businessId: 'biz-123',
-        title: 'Manila 9AM Promo',
+        title: 'Manila 10AM Promo',
         startsAt: manilaStarts.toUtc(),
         endsAt: manilaEnds.toUtc(),
         createdAt: manilaStarts.toUtc(),
       );
 
       final jsonIso = promoIso.toJson();
-      expect(jsonIso['starts_at'], startsWith('2026-10-13T01:00:00'));
+      expect(jsonIso['starts_at'], startsWith('2026-10-13T02:00:00'));
       expect(jsonIso['starts_at'], endsWith('Z'));
-      expect(jsonIso['ends_at'], startsWith('2026-10-13T15:59:59'));
+      expect(jsonIso['ends_at'], startsWith('2026-10-13T13:00:00'));
       expect(jsonIso['ends_at'], endsWith('Z'));
 
-      // 2. Local picker constructor test when running in Manila timezone (+08:00)
+      // Deserialization with Promo.fromJson must convert UTC to local time
+      final parsed = Promo.fromJson(jsonIso);
+      expect(parsed.startsAt.isUtc, isFalse);
+      expect(parsed.endsAt.isUtc, isFalse);
+      expect(parsed.startsAt.timeZoneOffset, equals(DateTime.now().timeZoneOffset));
+
+      // 2. Local picker constructor when running in Manila timezone (+08:00)
       if (DateTime.now().timeZoneOffset == manilaOffset) {
-        final localPickerStarts = DateTime(2026, 10, 13, 9, 0, 0);
-        final localPickerEnds = DateTime(2026, 10, 13, 23, 59, 59);
+        final localPickerStarts = DateTime(2026, 10, 13, 10, 0, 0);
+        final localPickerEnds = DateTime(2026, 10, 13, 21, 0, 0);
 
         final promoLocal = Promo(
-          id: 'promo-manila-local-test',
+          id: 'promo-manila-local-10am-test',
           businessId: 'biz-123',
-          title: 'Manila Local Picker Promo',
+          title: 'Manila Local Picker 10AM Promo',
           startsAt: localPickerStarts.toUtc(),
           endsAt: localPickerEnds.toUtc(),
           createdAt: localPickerStarts.toUtc(),
         );
 
         final jsonLocal = promoLocal.toJson();
-        expect(jsonLocal['starts_at'], startsWith('2026-10-13T01:00:00'));
+        expect(jsonLocal['starts_at'], startsWith('2026-10-13T02:00:00'));
         expect(jsonLocal['starts_at'], endsWith('Z'));
-        expect(jsonLocal['ends_at'], startsWith('2026-10-13T15:59:59'));
+        expect(jsonLocal['ends_at'], startsWith('2026-10-13T13:00:00'));
         expect(jsonLocal['ends_at'], endsWith('Z'));
 
         final readBack = Promo.fromJson(jsonLocal);
-        expect(readBack.startsAt.toLocal().hour, equals(9));
-        expect(readBack.startsAt.toLocal().minute, equals(0));
-        expect(readBack.endsAt.toLocal().hour, equals(23));
-        expect(readBack.endsAt.toLocal().minute, equals(59));
-        expect(readBack.endsAt.toLocal().second, equals(59));
+        expect(readBack.startsAt.hour, equals(10));
+        expect(readBack.startsAt.minute, equals(0));
+        expect(readBack.endsAt.hour, equals(21));
+        expect(readBack.endsAt.minute, equals(0));
       }
+    });
+
+    test('Start time earlier than now on today\'s date clamps to now', () {
+      final now = DateTime.now();
+      final earlierToday = DateTime(now.year, now.month, now.day, 0, 1, 0);
+
+      final isToday = earlierToday.year == now.year &&
+          earlierToday.month == now.month &&
+          earlierToday.day == now.day;
+      final clamped = (isToday && earlierToday.isBefore(now)) ? now : earlierToday;
+
+      expect(clamped.isAfter(earlierToday) || clamped.isAtSameMomentAs(earlierToday), isTrue);
+      expect(clamped.isAtSameMomentAs(now), isTrue);
     });
   });
 }

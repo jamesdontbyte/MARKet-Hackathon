@@ -92,13 +92,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
       if (_business != null) {
         try {
           final allPromos = await _dataService.fetchPromosForBusiness(_business!.id);
-          final now = DateTime.now().toUtc();
-          _activePromos = allPromos
-              .where((p) =>
-                  p.active &&
-                  (now.isAfter(p.startsAt) || now.isAtSameMomentAs(p.startsAt)) &&
-                  now.isBefore(p.endsAt))
-              .toList();
+          _activePromos = allPromos.where((p) => p.isCurrentlyValid).toList();
         } catch (_) {}
 
         if (_activePromos.isEmpty && widget.initialPromo != null) {

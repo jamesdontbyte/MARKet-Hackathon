@@ -188,9 +188,16 @@ class DataService {
 
   /// Create a new promo
   Future<Promo> createPromo(Promo promo) async {
+    final now = DateTime.now();
+    final localStarts = promo.startsAt.toLocal();
+    final isToday = localStarts.year == now.year &&
+        localStarts.month == now.month &&
+        localStarts.day == now.day;
+    final clampedStarts = (isToday && localStarts.isBefore(now)) ? now : localStarts;
+
     final payload = promo.toJson()..remove('id');
-    payload['starts_at'] = promo.startsAt.toUtc().toIso8601String();
-    payload['ends_at'] = promo.endsAt.toUtc().toIso8601String();
+    payload['starts_at'] = clampedStarts.toUtc().toIso8601String();
+    payload['ends_at'] = promo.endsAt.toLocal().toUtc().toIso8601String();
     final data = await _client
         .from('promos')
         .insert(payload)
@@ -202,9 +209,16 @@ class DataService {
 
   /// Update promo in merchant catalog
   Future<Promo> updatePromo(Promo promo) async {
+    final now = DateTime.now();
+    final localStarts = promo.startsAt.toLocal();
+    final isToday = localStarts.year == now.year &&
+        localStarts.month == now.month &&
+        localStarts.day == now.day;
+    final clampedStarts = (isToday && localStarts.isBefore(now)) ? now : localStarts;
+
     final payload = promo.toJson()..remove('id');
-    payload['starts_at'] = promo.startsAt.toUtc().toIso8601String();
-    payload['ends_at'] = promo.endsAt.toUtc().toIso8601String();
+    payload['starts_at'] = clampedStarts.toUtc().toIso8601String();
+    payload['ends_at'] = promo.endsAt.toLocal().toUtc().toIso8601String();
     final data = await _client
         .from('promos')
         .update(payload)
