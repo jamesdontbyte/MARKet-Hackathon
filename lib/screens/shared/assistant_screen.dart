@@ -166,18 +166,31 @@ class _AssistantScreenState extends State<AssistantScreen> {
     try {
       if (action.name == 'propose_promo') {
         final args = action.args;
+        DateTime startsAt;
+        final rawStarts = args['starts_at']?.toString();
+        if (rawStarts != null && rawStarts.isNotEmpty) {
+          final parsed = DateTime.tryParse(rawStarts);
+          startsAt = parsed != null ? parsed.toLocal() : DateTime.now();
+        } else {
+          startsAt = DateTime.now();
+        }
+
+        DateTime endsAt;
+        final rawEnds = args['ends_at']?.toString();
+        if (rawEnds != null && rawEnds.isNotEmpty) {
+          final parsed = DateTime.tryParse(rawEnds);
+          endsAt = parsed != null ? parsed.toLocal() : DateTime.now().add(const Duration(days: 7));
+        } else {
+          endsAt = DateTime.now().add(const Duration(days: 7));
+        }
+
         final draft = PromoDraft(
           title: args['title']?.toString() ?? '',
           description: args['description']?.toString() ?? '',
           promoType: args['promo_type']?.toString() ?? 'percent',
           valueLabel: args['value_label']?.toString(),
-          startsAt: args['starts_at'] != null
-              ? DateTime.tryParse(args['starts_at'].toString()) ?? DateTime.now()
-              : DateTime.now(),
-          endsAt: args['ends_at'] != null
-              ? DateTime.tryParse(args['ends_at'].toString()) ??
-                  DateTime.now().add(const Duration(days: 7))
-              : DateTime.now().add(const Duration(days: 7)),
+          startsAt: startsAt,
+          endsAt: endsAt,
           redeemLimit: (args['redeem_limit'] as num?)?.toInt() ?? 100,
         );
 
@@ -790,9 +803,23 @@ class _AssistantScreenState extends State<AssistantScreen> {
       title = pTitle.isNotEmpty
           ? 'Create Promo: $pTitle'
           : 'Create Promotion Draft';
+
+      String dateText = '';
+      final rawStarts = action.args['starts_at']?.toString();
+      final rawEnds = action.args['ends_at']?.toString();
+      if (rawStarts != null && rawStarts.isNotEmpty && rawEnds != null && rawEnds.isNotEmpty) {
+        final s = DateTime.tryParse(rawStarts)?.toLocal();
+        final e = DateTime.tryParse(rawEnds)?.toLocal();
+        if (s != null && e != null) {
+          dateText = ' • Valid: ${_formatProposalDate(s)} – ${_formatProposalDate(e)}';
+        }
+      }
+
       description = pType.isNotEmpty
-          ? 'Type: $pType • Review and customize before publishing.'
-          : 'Review and customize your promotion draft before publishing.';
+          ? 'Type: $pType$dateText • Review and customize before publishing.'
+          : (dateText.isNotEmpty
+              ? 'Valid: $dateText • Review and customize before publishing.'
+              : 'Review and customize your promotion draft before publishing.');
       confirmLabel = 'Review & Create Promo';
       icon = Icons.campaign_rounded;
     } else if (action.name == 'propose_product') {
@@ -1023,6 +1050,15 @@ class _AssistantScreenState extends State<AssistantScreen> {
         ],
       ),
     );
+  }
+
+  static String _formatProposalDate(DateTime dt) {
+    final local = dt.toLocal();
+    final m = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ][local.month - 1];
+    return '$m ${local.day}';
   }
 
   Widget _buildTypingIndicator() {

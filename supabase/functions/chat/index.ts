@@ -407,6 +407,8 @@ ${(promos || [])
 
 MERCHANT GUIDANCE & CAPABILITIES:
 • Suggest discount types ('bogo', 'percent', 'amount_off') and durations (up to 90 days).
+• When proposing a promo with propose_promo, set starts_at to the current time (${manilaTime}) in Asia/Manila (UTC+8) so the promo is live immediately. Do NOT use a fixed 9 AM or future time unless explicitly instructed by the merchant.
+• All promo dates (starts_at, ends_at) must be formatted as ISO-8601 strings in Asia/Manila time with the +08:00 offset (e.g. 2026-10-13T09:00:00+08:00).
 • Help draft titles (<= 60 chars), descriptions (<= 200 chars), and promotional copy.
 • Explain counter verification and Show QR: merchants display the Show QR screen on their counter; shoppers scan or enter the 8-character code to redeem vouchers atomically.
 • Analyze the funnel: pinpoint the weakest conversion drop-off and offer 1 concrete, actionable recommendation.
@@ -444,11 +446,11 @@ STRICT WRITING & PRESENTATION RULES:
               },
               starts_at: {
                 type: "STRING",
-                description: "ISO-8601 start date-time string (e.g. 2026-10-12T00:00:00Z)",
+                description: "ISO-8601 start date-time string in Asia/Manila time with +08:00 offset (e.g. 2026-10-13T09:00:00+08:00)",
               },
               ends_at: {
                 type: "STRING",
-                description: "ISO-8601 end date-time string (must be within 90 days)",
+                description: "ISO-8601 end date-time string in Asia/Manila time with +08:00 offset (e.g. 2026-10-20T23:59:59+08:00, within 90 days)",
               },
               redeem_limit: {
                 type: "INTEGER",
@@ -634,6 +636,30 @@ STRICT WRITING & PRESENTATION RULES:
           validationMessage =
             "Only verified MSME businesses can create promotions. Please complete verification first.";
         } else {
+          // Normalize model dates to Asia/Manila (+08:00) before app converts them
+          const normalizeManilaDate = (val: any): string => {
+            let s = String(val || "").trim();
+            if (!s) return s;
+            if (s.endsWith("Z") || s.endsWith("z")) {
+              s = s.slice(0, -1);
+            }
+            s = s.replace(/([+-]\d{2}:?\d{2})$/, "");
+            s = s.replace(" ", "T");
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+              s += "T00:00:00";
+            } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(s)) {
+              s += ":00";
+            }
+            return `${s}+08:00`;
+          };
+
+          if (act.args.starts_at) {
+            act.args.starts_at = normalizeManilaDate(act.args.starts_at);
+          }
+          if (act.args.ends_at) {
+            act.args.ends_at = normalizeManilaDate(act.args.ends_at);
+          }
+
           const title = String(act.args.title || "").trim();
           const description = String(act.args.description || "").trim();
           const pType = String(act.args.promo_type || "").trim();

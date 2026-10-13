@@ -89,14 +89,14 @@ class _StashScreenState extends State<StashScreen> {
   }
 
   List<Promo> get _filteredPromos {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     switch (_activeTab) {
       case 'active':
         return _allStash.where((p) => p.isCurrentlyValid).toList();
       case 'expiring':
         return _allStash.where((p) {
           if (!p.isCurrentlyValid) return false;
-          return p.endsAt.difference(now).inDays <= 2;
+          return p.endsAt.toLocal().difference(now).inDays <= 2;
         }).toList();
       case 'expired':
         return _allStash.where((p) => !p.isCurrentlyValid).toList();
@@ -143,7 +143,7 @@ class _StashScreenState extends State<StashScreen> {
                     _buildTabChip(
                       'expiring',
                       'Expiring Soon',
-                      _allStash.where((p) => p.isCurrentlyValid && p.endsAt.difference(DateTime.now().toUtc()).inDays <= 2).length,
+                      _allStash.where((p) => p.isCurrentlyValid && p.endsAt.toLocal().difference(DateTime.now()).inDays <= 2).length,
                     ),
                     const SizedBox(width: 8),
                     _buildTabChip(
@@ -388,12 +388,14 @@ class _StashScreenState extends State<StashScreen> {
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Valid until ${_formatDate(p.endsAt)}',
+                  'Valid until ${_formatDate(p.endsAt.toLocal())}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 12, color: MarketColors.secondary),
                 ),
               ),
+              const SizedBox(width: 6),
+              _buildPromoStatusBadge(p),
             ],
           ),
           const SizedBox(height: 12),
@@ -417,6 +419,81 @@ class _StashScreenState extends State<StashScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildPromoStatusBadge(Promo p) {
+    final now = DateTime.now();
+    final localEnds = p.endsAt.toLocal();
+    final localStarts = p.startsAt.toLocal();
+
+    if (p.isCurrentlyValid) {
+      final diff = localEnds.difference(now);
+      if (diff.inDays <= 2) {
+        final label = diff.inDays > 0 ? 'Ends in ${diff.inDays}d' : (diff.inHours > 0 ? 'Ends in ${diff.inHours}h' : 'Ends soon');
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFEF3C7),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFFB45309),
+            ),
+          ),
+        );
+      }
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCFCE7),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          'Active',
+          style: TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF15803D),
+          ),
+        ),
+      );
+    } else if (now.isBefore(localStarts)) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F2FE),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          'Starts ${_formatDate(localStarts)}',
+          style: const TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0284C7),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: MarketColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          'Expired',
+          style: TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: MarketColors.outline,
+          ),
+        ),
+      );
+    }
   }
 
   String _formatDate(DateTime dt) {

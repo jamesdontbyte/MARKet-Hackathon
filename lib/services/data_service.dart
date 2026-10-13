@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -187,9 +188,12 @@ class DataService {
 
   /// Create a new promo
   Future<Promo> createPromo(Promo promo) async {
+    final payload = promo.toJson()..remove('id');
+    payload['starts_at'] = promo.startsAt.toUtc().toIso8601String();
+    payload['ends_at'] = promo.endsAt.toUtc().toIso8601String();
     final data = await _client
         .from('promos')
-        .insert(promo.toJson()..remove('id'))
+        .insert(payload)
         .select()
         .single();
 
@@ -198,9 +202,12 @@ class DataService {
 
   /// Update promo in merchant catalog
   Future<Promo> updatePromo(Promo promo) async {
+    final payload = promo.toJson()..remove('id');
+    payload['starts_at'] = promo.startsAt.toUtc().toIso8601String();
+    payload['ends_at'] = promo.endsAt.toUtc().toIso8601String();
     final data = await _client
         .from('promos')
-        .update(promo.toJson()..remove('id'))
+        .update(payload)
         .eq('id', promo.id)
         .select()
         .single();
@@ -287,6 +294,9 @@ class DataService {
     final rnd = math.Random();
     return List.generate(8, (_) => chars[rnd.nextInt(chars.length)]).join();
   }
+
+  /// Shared helper extracting and validating 8-character store code.
+  static String? extractStoreCode(String raw) => _extractStoreCode(raw);
 
   /// Opens voucher: returns existing redemption or creates a new one idempotently.
   /// Logs 'claimed' event in geofence_events only when a new voucher row is created.
@@ -397,7 +407,7 @@ class DataService {
   /// Calls rpc('redeem_at_store', params: {'p_code': code})
   /// Returns: ok | invalid | already_redeemed | expired | limit_reached
   Future<String> redeemAtStore(String code) async {
-    final clean = code.trim();
+    final clean = extractStoreCode(code) ?? code.trim().toUpperCase();
     try {
       final result = await _client.rpc(
         'redeem_at_store',
@@ -683,4 +693,47 @@ class DataService {
     }
     return zones;
   }
+}
+
+/// Shared helper extracting and validating 8-character store code from raw scan or text input.
+/// - Trims and uppercases input
+/// - If input starts with '{', jsonDecode it and reads CODE field case-insensitively
+/// - Otherwise treats as plain code
+/// - Strips spaces and dashes, and rejects anything that is not 8 alphanumeric characters
+/// - Returns 8-character uppercase code or null on failure
+String? extractStoreCode(String raw) => _extractStoreCode(raw);
+
+String? _extractStoreCode(String raw) {
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+
+  String candidate = trimmed;
+  if (trimmed.startsWith('{')) {
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is Map) {
+        dynamic foundCode;
+        for (final entry in decoded.entries) {
+          if (entry.key.toString().trim().toUpperCase() == 'CODE') {
+            foundCode = entry.value;
+            break;
+          }
+        }
+        if (foundCode == null) return null;
+        candidate = foundCode.toString();
+      } else {
+        return null;
+      }
+    } catch (_) {
+      return null;
+    }
+  }
+
+  final clean = candidate.replaceAll(RegExp(r'[\s\-]'), '').toUpperCase();
+  final alphanumeric8 = RegExp(r'^[A-Z0-9]{8}$');
+  if (!alphanumeric8.hasMatch(clean)) {
+    return null;
+  }
+
+  return clean;
 }

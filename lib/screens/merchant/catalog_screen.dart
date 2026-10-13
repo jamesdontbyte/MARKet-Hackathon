@@ -597,9 +597,10 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
 
   Future<DateTime?> _pickDateTime(BuildContext context, DateTime initial) async {
     final now = DateTime.now();
+    final initialLocal = initial.toLocal();
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: initial,
+      initialDate: initialLocal,
       firstDate: now.subtract(const Duration(days: 365)),
       lastDate: now.add(const Duration(days: 365 * 5)),
     );
@@ -607,7 +608,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
 
     final pickedTime = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
+      initialTime: TimeOfDay.fromDateTime(initialLocal),
     );
     if (pickedTime == null) return null;
 
@@ -674,8 +675,11 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
 
     String selectedType = existingPromo?.promoType ?? promoDraft?.promoType ?? 'percent';
     String? selectedProductId = existingPromo?.productId;
-    DateTime startsAt = existingPromo?.startsAt.toLocal() ?? promoDraft?.startsAt.toLocal() ?? DateTime.now();
-    DateTime endsAt = existingPromo?.endsAt.toLocal() ?? promoDraft?.endsAt.toLocal() ?? DateTime.now().add(const Duration(days: 7));
+    final now = DateTime.now();
+    DateTime startsAt = existingPromo?.startsAt.toLocal() ?? promoDraft?.startsAt.toLocal() ?? now;
+    DateTime endsAt = existingPromo?.endsAt.toLocal() ??
+        promoDraft?.endsAt.toLocal() ??
+        DateTime(now.year, now.month, now.day, 23, 59, 59).add(const Duration(days: 7));
     bool isSaving = false;
     String? modalError;
     Uint8List? pickedPromoBytes;
@@ -1182,8 +1186,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
                                         productId: selectedProductId,
-                                        startsAt: startsAt.toUtc(),
-                                        endsAt: endsAt.toUtc(),
+                                        startsAt: startsAt.toLocal().toUtc(),
+                                        endsAt: endsAt.toLocal().toUtc(),
                                         redeemLimit: limitVal,
                                       );
                                       await _dataService.updatePromo(updated);
@@ -1201,8 +1205,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         imageUrl: finalImageUrl,
                                         promoType: selectedType,
                                         valueLabel: valueCtrl.text.trim(),
-                                        startsAt: startsAt.toUtc(),
-                                        endsAt: endsAt.toUtc(),
+                                        startsAt: startsAt.toLocal().toUtc(),
+                                        endsAt: endsAt.toLocal().toUtc(),
                                         redeemLimit: limitVal,
                                         redeemedCount: 0,
                                         active: true,
@@ -1804,6 +1808,73 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     );
   }
 
+  Widget _buildPromoStatusBadge(Promo p) {
+    final now = DateTime.now();
+    final localStarts = p.startsAt.toLocal();
+    final localEnds = p.endsAt.toLocal();
+
+    if (p.isActiveNow) {
+      final diff = localEnds.difference(now);
+      final endsText = diff.inDays > 1
+          ? 'Ends in ${diff.inDays}d'
+          : (diff.inHours > 0 ? 'Ends in ${diff.inHours}h' : 'Ends soon');
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCFCE7),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          'LIVE • $endsText',
+          style: const TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF15803D),
+          ),
+        ),
+      );
+    } else if (p.isScheduled) {
+      final m = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      ][localStarts.month - 1];
+      final hour12 = localStarts.hour == 0 ? 12 : (localStarts.hour > 12 ? localStarts.hour - 12 : localStarts.hour);
+      final min = localStarts.minute.toString().padLeft(2, '0');
+      final ampm = localStarts.hour >= 12 ? 'PM' : 'AM';
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE0F2FE),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          'STARTS $m ${localStarts.day} $hour12:$min $ampm',
+          style: const TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0284C7),
+          ),
+        ),
+      );
+    } else {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: MarketColors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          'EXPIRED',
+          style: TextStyle(
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            color: MarketColors.outline,
+          ),
+        ),
+      );
+    }
+  }
+
   Widget _buildPromoCard(Promo p) {
     final bool canEnd = p.isActiveNow || p.isScheduled;
 
@@ -1858,6 +1929,8 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 6),
+                        _buildPromoStatusBadge(p),
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(

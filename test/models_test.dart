@@ -250,5 +250,56 @@ void main() {
       expect(roundTrip.endsAt.isAfter(DateTime.now().toUtc()), isTrue);
       expect(roundTrip.isCurrentlyValid, isTrue);
     });
+
+    test('Promo created for 2026-10-13 09:00 local Manila time produces starts_at 2026-10-13T01:00:00Z and end date 23:59:59 becomes 15:59:59Z', () {
+      final manilaOffset = const Duration(hours: 8);
+
+      // 1. Timezone-explicit test using +08:00 offset
+      final manilaStarts = DateTime.parse('2026-10-13T09:00:00+08:00');
+      final manilaEnds = DateTime.parse('2026-10-13T23:59:59+08:00');
+
+      final promoIso = Promo(
+        id: 'promo-manila-iso-test',
+        businessId: 'biz-123',
+        title: 'Manila 9AM Promo',
+        startsAt: manilaStarts.toUtc(),
+        endsAt: manilaEnds.toUtc(),
+        createdAt: manilaStarts.toUtc(),
+      );
+
+      final jsonIso = promoIso.toJson();
+      expect(jsonIso['starts_at'], startsWith('2026-10-13T01:00:00'));
+      expect(jsonIso['starts_at'], endsWith('Z'));
+      expect(jsonIso['ends_at'], startsWith('2026-10-13T15:59:59'));
+      expect(jsonIso['ends_at'], endsWith('Z'));
+
+      // 2. Local picker constructor test when running in Manila timezone (+08:00)
+      if (DateTime.now().timeZoneOffset == manilaOffset) {
+        final localPickerStarts = DateTime(2026, 10, 13, 9, 0, 0);
+        final localPickerEnds = DateTime(2026, 10, 13, 23, 59, 59);
+
+        final promoLocal = Promo(
+          id: 'promo-manila-local-test',
+          businessId: 'biz-123',
+          title: 'Manila Local Picker Promo',
+          startsAt: localPickerStarts.toUtc(),
+          endsAt: localPickerEnds.toUtc(),
+          createdAt: localPickerStarts.toUtc(),
+        );
+
+        final jsonLocal = promoLocal.toJson();
+        expect(jsonLocal['starts_at'], startsWith('2026-10-13T01:00:00'));
+        expect(jsonLocal['starts_at'], endsWith('Z'));
+        expect(jsonLocal['ends_at'], startsWith('2026-10-13T15:59:59'));
+        expect(jsonLocal['ends_at'], endsWith('Z'));
+
+        final readBack = Promo.fromJson(jsonLocal);
+        expect(readBack.startsAt.toLocal().hour, equals(9));
+        expect(readBack.startsAt.toLocal().minute, equals(0));
+        expect(readBack.endsAt.toLocal().hour, equals(23));
+        expect(readBack.endsAt.toLocal().minute, equals(59));
+        expect(readBack.endsAt.toLocal().second, equals(59));
+      }
+    });
   });
 }

@@ -33,21 +33,23 @@ class Promo {
 
   /// Evaluates whether the promo is currently redeemable
   bool get isCurrentlyValid {
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
+    final localStarts = startsAt.toLocal();
+    final localEnds = endsAt.toLocal();
     return active &&
-        (now.isAfter(startsAt) || now.isAtSameMomentAs(startsAt)) &&
-        now.isBefore(endsAt) &&
+        (now.isAfter(localStarts) || now.isAtSameMomentAs(localStarts)) &&
+        now.isBefore(localEnds) &&
         redeemedCount < redeemLimit;
   }
 
   bool get isScheduled {
-    final now = DateTime.now().toUtc();
-    return active && now.isBefore(startsAt);
+    final now = DateTime.now();
+    return active && now.isBefore(startsAt.toLocal());
   }
 
   bool get isEnded {
-    final now = DateTime.now().toUtc();
-    return !active || now.isAfter(endsAt) || redeemedCount >= redeemLimit;
+    final now = DateTime.now();
+    return !active || now.isAfter(endsAt.toLocal()) || redeemedCount >= redeemLimit;
   }
 
   bool get isActiveNow => isCurrentlyValid;

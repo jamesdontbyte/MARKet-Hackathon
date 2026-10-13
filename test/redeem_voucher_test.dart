@@ -145,4 +145,65 @@ void main() {
       }
     });
   });
+
+  group('extractStoreCode Shared Helper Unit Tests', () {
+    test('extracts plain 8-character uppercase code', () {
+      expect(extractStoreCode('KT8924B1'), equals('KT8924B1'));
+      expect(DataService.extractStoreCode('KT8924B1'), equals('KT8924B1'));
+    });
+
+    test('extracts lowercase code and normalizes to uppercase', () {
+      expect(extractStoreCode('kt8924b1'), equals('KT8924B1'));
+      expect(extractStoreCode('  kt8924b1  '), equals('KT8924B1'));
+    });
+
+    test('strips spaces and dashes from code', () {
+      expect(extractStoreCode('KT89-24B1'), equals('KT8924B1'));
+      expect(extractStoreCode('KT 89 24 B1'), equals('KT8924B1'));
+      expect(extractStoreCode(' kt-89-24-b1 '), equals('KT8924B1'));
+    });
+
+    test('extracts code from JSON payload', () {
+      expect(
+        extractStoreCode('{"APP":"MARKET","CODE":"KT8924B1"}'),
+        equals('KT8924B1'),
+      );
+      expect(
+        extractStoreCode('{"app":"market","code":"kt8924b1"}'),
+        equals('KT8924B1'),
+      );
+      expect(
+        extractStoreCode('{"Code":"kt8924b1"}'),
+        equals('KT8924B1'),
+      );
+    });
+
+    test('extracts code from JSON payload with extra fields', () {
+      const jsonWithExtras =
+          '{"app":"market","code":"KT8924B1","promo_id":"00000000-0000","business_id":"11111111-1111","active":true}';
+      expect(extractStoreCode(jsonWithExtras), equals('KT8924B1'));
+    });
+
+    test('rejects garbage text and symbols', () {
+      expect(extractStoreCode('not-a-valid-qr-code'), isNull);
+      expect(extractStoreCode('garbage'), isNull);
+      expect(extractStoreCode('ABC!@#12'), isNull);
+      expect(extractStoreCode('1234567!'), isNull);
+    });
+
+    test('rejects wrong length (shorter or longer than 8 characters)', () {
+      expect(extractStoreCode('KT8924'), isNull); // 6 chars
+      expect(extractStoreCode('KT8924B'), isNull); // 7 chars
+      expect(extractStoreCode('KT8924B1X'), isNull); // 9 chars
+      expect(extractStoreCode(''), isNull);
+      expect(extractStoreCode('   '), isNull);
+    });
+
+    test('rejects malformed JSON and JSON without CODE field', () {
+      expect(extractStoreCode('{broken json content'), isNull);
+      expect(extractStoreCode('{"app":"market","other":"value"}'), isNull);
+      expect(extractStoreCode('{"CODE":""}'), isNull);
+    });
+  });
 }
+

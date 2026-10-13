@@ -304,7 +304,84 @@ void main() {
 
       await tester.pumpWidget(const SizedBox());
     });
+
+    testWidgets('Extracts code from raw JSON payload and renders result without overflow',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      fakeClient.rpcResult = 'ok';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RedeemStoreScreen(
+            promo: testPromo,
+            dataService: dataService,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Type Code'));
+      await tester.pumpAndSettle();
+
+      // Enter raw JSON payload with extra attributes
+      const rawJson = '{"APP":"MARKET","CODE":"KT8X29Q1","PROMO_ID":"some-promo"}';
+      await tester.enterText(find.byType(TextFormField).first, rawJson);
+      await tester.tap(find.text('Redeem Code'));
+      await tester.pumpAndSettle();
+
+      // Verify server received ONLY extracted code 'KT8X29Q1'
+      expect(fakeClient.capturedFunction, equals('redeem_at_store'));
+      expect(fakeClient.capturedParams, equals({'p_code': 'KT8X29Q1'}));
+
+      // Verify result card displays extracted code cleanly
+      expect(find.text('Promotion Redeemed!'), findsOneWidget);
+      expect(find.text('KT8X29Q1'), findsOneWidget);
+      expect(find.text(rawJson), findsNothing);
+
+      await tester.pumpWidget(const SizedBox());
+    });
+
+    testWidgets('Rejects invalid QR code without calling server RPC',
+        (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      fakeClient.capturedFunction = null;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RedeemStoreScreen(
+            promo: testPromo,
+            dataService: dataService,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      await tester.tap(find.text('Type Code'));
+      await tester.pumpAndSettle();
+
+      // Enter invalid non-MARKet code
+      await tester.enterText(find.byType(TextFormField).first, 'https://evil.com/fake-qr');
+      await tester.tap(find.text('Redeem Code'));
+      await tester.pumpAndSettle();
+
+      // Verify server was NOT called
+      expect(fakeClient.capturedFunction, isNull);
+
+      // Verify user error banner
+      expect(find.text("This QR isn't a MARKet store code"), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+    });
   });
+
 
   group('Layout Responsiveness & RenderFlex Overflow Tests', () {
     final viewports = [

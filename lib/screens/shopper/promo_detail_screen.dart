@@ -296,7 +296,7 @@ class _PromoDetailScreenState extends State<PromoDetailScreen> {
                                       size: 16, color: MarketColors.primary),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Valid until ${_formatDate(_promo!.endsAt)}',
+                                    'Valid until ${_formatDate(_promo!.endsAt.toLocal())}',
                                     style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w500,

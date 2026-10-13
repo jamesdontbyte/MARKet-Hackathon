@@ -150,6 +150,7 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
 
   RedeemInputOption _currentOption = RedeemInputOption.camera;
   bool _isProcessing = false;
+  bool _isHandlingScan = false;
   bool _cameraPermissionDenied = false;
   bool _torchOn = false;
   DateTime? _lastScanTime;
@@ -173,8 +174,20 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     super.dispose();
   }
 
+  Future<void> _stopCamera() async {
+    try {
+      await _scannerController.stop();
+    } catch (_) {}
+  }
+
+  Future<void> _startCamera() async {
+    try {
+      await _scannerController.start();
+    } catch (_) {}
+  }
+
   void _onDetect(BarcodeCapture capture) {
-    if (_isProcessing || _result != null) return;
+    if (_isProcessing || _isHandlingScan || _result != null) return;
 
     final now = DateTime.now();
     if (_lastScanTime != null &&
@@ -189,14 +202,24 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     if (rawValue == null || rawValue.trim().isEmpty) return;
 
     _lastScanTime = now;
-    _redeem(rawValue);
+    _isHandlingScan = true;
+    _redeem(rawValue).whenComplete(() {
+      if (mounted) {
+        _isHandlingScan = false;
+      }
+    });
   }
 
   Future<void> _redeem(String rawCode) async {
     if (_isProcessing) return;
 
-    final cleanCode = rawCode.trim().toUpperCase();
-    if (cleanCode.isEmpty) return;
+    final cleanCode = extractStoreCode(rawCode);
+    if (cleanCode == null) {
+      setState(() {
+        _errorMessage = "This QR isn't a MARKet store code";
+      });
+      return;
+    }
 
     setState(() {
       _isProcessing = true;
@@ -211,6 +234,7 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
         _isProcessing = false;
         _result = StoreRedemptionResult.fromStatus(cleanCode, status);
       });
+      await _stopCamera();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -281,13 +305,20 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
   void _onManualSubmit() {
     if (_isProcessing) return;
     final code = _codeController.text.trim();
-    if (code.length < 6) {
+    if (code.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter a valid 8-character store code';
       });
       return;
     }
-    _redeem(code);
+    final cleanCode = extractStoreCode(code);
+    if (cleanCode == null) {
+      setState(() {
+        _errorMessage = "This QR isn't a MARKet store code";
+      });
+      return;
+    }
+    _redeem(cleanCode);
   }
 
   void _resetFlow() {
@@ -296,7 +327,11 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
       _errorMessage = null;
       _codeController.clear();
       _isProcessing = false;
+      _isHandlingScan = false;
     });
+    if (_currentOption == RedeemInputOption.camera) {
+      _startCamera();
+    }
   }
 
   @override
@@ -464,10 +499,16 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
     return Expanded(
       child: GestureDetector(
         onTap: () {
+          if (_currentOption == option) return;
           setState(() {
             _currentOption = option;
             _errorMessage = null;
           });
+          if (option == RedeemInputOption.camera && _result == null) {
+            _startCamera();
+          } else {
+            _stopCamera();
+          }
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
@@ -773,12 +814,11 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
               label: 'Store Code',
               hintText: 'e.g. KT8924B1',
               inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-                LengthLimitingTextInputFormatter(8),
+                LengthLimitingTextInputFormatter(256),
               ],
               validator: (v) {
-                if (v == null || v.trim().length < 6) {
-                  return 'Please enter a valid 8-character code';
+                if (v == null || v.trim().isEmpty) {
+                  return 'Please enter a valid 8-character store code';
                 }
                 return null;
               },
@@ -896,19 +936,27 @@ class _RedeemStoreScreenState extends State<RedeemStoreScreen> {
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 const Text(
                   'Code: ',
                   style: TextStyle(fontSize: 13, color: MarketColors.secondary, fontWeight: FontWeight.w600),
                 ),
-                Text(
-                  result.code,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2.0,
-                    fontFamily: 'monospace',
-                    color: MarketColors.onSurface,
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      result.code,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 2.0,
+                        fontFamily: 'monospace',
+                        color: MarketColors.onSurface,
+                      ),
+                    ),
                   ),
                 ),
               ],

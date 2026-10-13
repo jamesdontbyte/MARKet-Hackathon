@@ -613,3 +613,62 @@ lib/
      - Verify file sizes and visual recognition of silhouette at 24px-96px.
      - Unit test notification icon configuration.
      - Execute `flutter analyze`, `flutter test`, `flutter build apk --debug`, and `flutter install --debug -d RFCY327KCFN`.
+
+---
+
+### Phase 13: Fix Promo Timezone Offset (Asia/Manila UTC+8) & Immediate Start Defaults
+
+**Goal:** Ensure promo `starts_at` and `ends_at` are created as local DateTime objects from date/time pickers and converted with `.toUtc()` before `.toIso8601String()`, defaulting new promos to "now" so they are live immediately. In `chat/index.ts`, normalize model-returned dates to Asia/Manila (+08:00) and update the system prompt. On reading, parse with `DateTime.parse(...).toLocal()` before displaying or computing live/expired badges.
+
+- **Tasks:**
+  1. **Edge Function `chat/index.ts`:**
+     - Update system prompt to instruct model that promo dates (`starts_at`, `ends_at`) must be formatted as ISO-8601 strings in Asia/Manila with `+08:00` offset, and `starts_at` defaults to current time (${manilaTime}) rather than a fixed 9 AM.
+     - In tool parameters for `propose_promo`, document `+08:00` format in Asia/Manila time.
+     - When receiving `propose_promo` tool calls, treat dates as Asia/Manila, stripping naive/Z representation and appending `+08:00` before returning in proposed action.
+  2. **Merchant New/Edit Promo Modal (`catalog_screen.dart`):**
+     - Default new promo start time to "now" (`DateTime.now()`), not fixed 9 AM.
+     - Default new promo end time to 7 days ahead end-of-day.
+     - Ensure date/time picker builds local `DateTime(y, m, d, h, min)` and converts with `.toUtc()` on save.
+     - Display live/expired/scheduled status badge using local time.
+  3. **DataService (`data_service.dart`):**
+     - In `createPromo` and `updatePromo`, ensure `starts_at` and `ends_at` are serialized to UTC strings ending in `Z`.
+  4. **AI Assistant Screen (`assistant_screen.dart`):**
+     - In `_handleActionConfirm`, parse incoming `starts_at` and `ends_at` with `.toLocal()` before constructing `PromoDraft`.
+     - In `_buildActionProposalCard`, parse dates with `.toLocal()` when displaying draft validity.
+  5. **Promo Model & Badge Computations (`promo.dart`, `stash_screen.dart`, etc.):**
+     - In `Promo`, ensure validity check compares local or UTC properly and handles `.toLocal()` consistently.
+     - In `stash_screen.dart` and `promo_detail_screen.dart`, ensure `ends_at` and `starts_at` are converted `.toLocal()`.
+  6. **Unit Tests (`test/models_test.dart`):**
+     - Test: Promo created for `2026-10-13 09:00` local Manila time produces `starts_at = 2026-10-13T01:00:00Z`.
+     - Test: End date of `23:59:59` local Manila time becomes `15:59:59Z`.
+     - Run `flutter analyze` and `flutter test`.
+
+---
+
+### Phase 14: Static Store QR Code Extraction & Scanner Overflow Fix
+
+**Goal:** Fix the bug where scanning the merchant's static QR code sends raw JSON `{"APP":"MARKET","CODE":"..."}` to `redeem_at_store` (causing "Invalid Store Code") and overflows the result card by ~1494px.
+
+- **Tasks:**
+  1. **Shared Helper `extractStoreCode(String raw)`:**
+     - Trim and uppercase input.
+     - If it starts with `{`, decode JSON and extract `CODE` field case-insensitively.
+     - Otherwise treat as plain code.
+     - Strip spaces and dashes; reject anything that is not 8 alphanumeric characters (`^[A-Z0-9]{8}$`).
+     - On failure, return `null`.
+     - In UI, show `"This QR isn't a MARKet store code"` without calling server.
+  2. **Server RPC Calling:**
+     - Both QR scan and manual submit extract code first and pass only the 8-character extracted code to `redeem_at_store`.
+     - `DataService.redeemAtStore` normalizes input with `extractStoreCode` as defense-in-depth.
+  3. **Result Card Overflow-Proofing:**
+     - Display only the extracted 8-character code with `maxLines: 1`, `overflow: TextOverflow.ellipsis`, and wrapped in `Flexible` + `FittedBox(fit: BoxFit.scaleDown)`.
+  4. **Merchant QR Encoding:**
+     - In `StoreQrScreen`, encode the plain 8-character code in `QrImageView`, while keeping `extractStoreCode` tolerant of JSON payloads.
+  5. **Camera Lifecycle & Debounce:**
+     - Debounce scan events so one scan executes exactly one RPC call.
+     - Stop camera controller immediately after obtaining a redemption result; restart when tapping "Try Again" or switching back to Camera tab.
+  6. **Unit & Widget Tests:**
+     - Test `extractStoreCode` with plain code, lowercase code, JSON payload, JSON with extra fields, garbage text, and wrong length.
+     - Test `RedeemStoreScreen` scanning JSON payload, verifying RPC parameter and result card rendering without overflow.
+     - Test `RedeemStoreScreen` scanning invalid QR code, showing error banner without calling server.
+

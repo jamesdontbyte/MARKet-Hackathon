@@ -372,7 +372,7 @@ class _StoreQrScreenState extends State<StoreQrScreen> {
 
   Widget _buildQrContent() {
     final codeDisplay = _storeCode ?? '••••••••';
-    final payload = _qrPayload ?? codeDisplay;
+    final payload = _storeCode ?? _qrPayload ?? codeDisplay;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(MarketSpacing.screenMargin),
