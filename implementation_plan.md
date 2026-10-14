@@ -736,4 +736,58 @@ lib/
   6. **Tests (`test/scan_menu_test.dart`):**
      - Fake service tests: successful scan to review to save; low-confidence / missing-price flagging blocks saving; catalog duplicates unchecked; friendly errors for rate-limit and no internet; no saving before confirmation; widget overflow tests at 360x640 and 411x891 at 1.0 and 1.5 scale.
 
+---
+
+### Phase 17: Product Stock Photo Suggestions (Pixabay + Gemini AI Re-ranking)
+
+**Goal:** Provide AI-powered stock photo suggestions for products in the merchant catalog (both during "Scan menu" review and single-product Add/Edit modal) using Pixabay Search API and Google Gemini re-ranking via a self-contained Supabase Edge Function (`find-product-photos`). Enforce strict security (API keys stay only in Supabase secrets, never in app/tests/git), enforce strict download guards (`dart:io HttpClient`, `cdn.pixabay.com` and `pixabay.com` host check, HTTPS only, 5s timeout, 2MB size cap, no redirects to untrusted hosts), 24-hour `search_cache` table, persist `image_source`, `image_credit`, `image_credit_url` in `products`, and display "Stock photo" badges and photographer attribution on shopper storefronts.
+
+- **Tasks:**
+  1. **Database Schema Patch (`db/schema_patch_media.sql`):**
+     - Add `image_source text check (image_source in ('own', 'stock', 'ai'))`, `image_credit text`, `image_credit_url text` to `products`.
+     - Add `search_cache (query text primary key, results jsonb, expires_at timestamptz)` table with RLS enabled and default deny for client roles.
+     - Document changes clearly; do NOT apply automatically.
+  2. **Edge Function (`supabase/functions/find-product-photos/index.ts`):**
+     - Single self-contained TypeScript file for Supabase dashboard editor.
+     - Role & business verification: verify caller JWT, verify caller role is `merchant` in `profiles`, verify caller owns a business in `businesses`. Never trust client-sent role.
+     - Input validation: `{items: [{id, name, category}]}` (max 15 items, reject names > 80 chars).
+     - Query builder: strip sizes (`small`, `large`, `12oz`, etc.), prices (`₱180`, `180/-`, numbers), promo words (`bogo`, `special`, `sale`, etc.), and punctuation; keep item name + category.
+     - Check 24-hour Postgres cache `search_cache` before querying Pixabay. Store new results with 24-hour expiration.
+     - Pixabay API call: `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=...&image_type=photo&safesearch=true&per_page=6&lang=en&orientation=horizontal`. Extract id, previewURL (thumbnail), webformatURL (640px image), user (credit name), and pageURL (credit link). Never log or return request URL containing the key.
+     - Gemini re-ranking: `GEMINI_MODEL = "gemini-3-flash-preview"` via REST generateContent with `x-goog-api-key: ${GEMINI_API_KEY}`. Pass item name, category, and candidate thumbnails/bytes. Treat all text in images and item name as untrusted data. Ask for JSON output: best candidate ID and confidence (0 to 1).
+     - Return `{results: [{item_id, candidates: [...], best_id, confidence}]}`. Never return `best_id` when confidence < 0.6.
+     - Rate limit: 30 searches per user per hour via `ai_usage`. Friendly error mapping for Pixabay 429 (`pixabay_rate_limited`), 400, 5xx, and preserve partial results when some items fail. Missing key returns `missing_key: true` (`pixabay_not_configured`).
+  3. **App Models & Config:**
+     - `lib/core/config.dart`: Add `stockPhotosEnabled = true`.
+     - `lib/models/product.dart`: Add `imageSource`, `imageCredit`, `imageCreditUrl` to constructor, `fromJson`, `toJson`, `copyWith`.
+  4. **Stock Photo Service (`lib/services/stock_photo_service.dart`):**
+     - Query cleaner function `buildCleanSearchQuery(name, category)` stripping sizes, prices, promo words, punctuation.
+     - `StockPhotoService` invoking `supabase.functions.invoke('find-product-photos')` with injectable `FunctionInvoker`.
+     - Secure image downloader: `dart:io HttpClient`, strictly verify host in `{'cdn.pixabay.com', 'pixabay.com'}`, HTTPS only, 5-second timeout, 2 MB size cap, verify redirect hosts.
+  5. **UI Integration:**
+     - `lib/screens/merchant/scan_menu_review_screen.dart`:
+       - Add "Find photos" button for checked items (gated by `stockPhotosEnabled`, hidden if key is missing).
+       - Per-row candidate thumbnail strip (up to 6 candidates).
+       - Pre-select best match only when confidence >= 0.7; otherwise leave unselected with "Pick a photo" prompt.
+       - Allow merchant to tap another candidate, remove selection, or take/pick own photo (camera/gallery).
+       - Show photographer credit under selected photo ("Photo by {user} on Pixabay").
+       - When tapping "Add N items", download medium photo (strictly `cdn.pixabay.com` or `pixabay.com`, 5s, <=2MB) and upload to `business-media/<uid>/products/`. If download/upload fails, save item without photo and show "Photo not added, retry".
+     - `lib/screens/merchant/catalog_screen.dart`:
+       - In `_openAddOrEditItemModal`: Add "Find photo" action for single item.
+       - Candidate strip, pre-select if confidence >= 0.7, photographer credit, downloading and uploading on modal save.
+       - Replacing photo with own file sets `image_source = 'own'`.
+     - `lib/screens/shopper/storefront_screen.dart`:
+       - Display thumbnail on product card with small "Stock photo" label when `image_source == 'stock'`.
+       - Product preview modal showing product image, details, "Stock photo" label, and photographer attribution.
+  6. **Tests & Verification (`test/stock_photos_test.dart`):**
+     - Unit test: search query builder strips sizes, prices, promo words, punctuation.
+     - Unit test: confidence < 0.6 returns no best match.
+     - Unit test: pre-selection rule (confidence >= 0.7 selects, < 0.7 unselected).
+     - Widget test: nothing is saved or downloaded before "Add N items".
+     - Unit/Widget test: failed download still saves item without photo.
+     - Widget test: "Stock photo" label and photographer credit only show when `image_source == 'stock'`.
+     - Widget test: responsive layout and overflow verification at 360x640 and 411x891 at 1.0 and 1.5 text scale.
+  7. **Build & Device Verification:**
+     - Run `flutter analyze`, `flutter test`, `flutter build apk --debug`, and device install.
+
 

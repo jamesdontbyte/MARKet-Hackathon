@@ -7,6 +7,7 @@ const Duration notificationCooldown = Duration(minutes: 3);
 const String demoOtp = '123456';
 const int demoAutoVerifySeconds = 10;
 const bool emergencySimulate = true;
+const bool stockPhotosEnabled = true;
 
 /// 8 Canonical category slugs
 const List<String> canonicalCategories = [

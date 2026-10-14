@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/product.dart';
@@ -9,6 +10,7 @@ import '../../models/promo.dart';
 import '../../models/scanned_menu_item.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
+import '../../services/stock_photo_service.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
@@ -318,6 +320,9 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
     String? currentImageUrl = existingProduct?.imageUrl;
     Uint8List? pickedFileBytes;
     String? pickedFileName;
+    StockPhotoCandidate? selectedStockCandidate;
+    List<StockPhotoCandidate> stockCandidates = [];
+    bool isSearchingStock = false;
     bool isSaving = false;
     String? modalError;
 
@@ -403,6 +408,7 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                 modalError = null;
                                 pickedFileBytes = f.bytes;
                                 pickedFileName = f.name;
+                                selectedStockCandidate = null; // Overridden with own photo
                               });
                             }
                           },
@@ -414,42 +420,275 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: MarketColors.cardBorder),
                             ),
-                            child: pickedFileBytes != null
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: Image.memory(
-                                      pickedFileBytes!,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )
-                                : (currentImageUrl != null && currentImageUrl.isNotEmpty)
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(14),
-                                        child: Image.network(
-                                          currentImageUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (_, _, _) => const Center(
-                                            child: Icon(Icons.broken_image_rounded, color: MarketColors.outline),
-                                          ),
-                                        ),
-                                      )
-                                    : Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: const [
-                                          Icon(Icons.add_a_photo_outlined, color: MarketColors.primary, size: 24),
-                                          SizedBox(width: 8),
-                                          Text(
-                                            'Select Photo (Max 5 MB)',
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w600,
-                                              color: MarketColors.primary,
+                            child: selectedStockCandidate != null
+                                ? Stack(
+                                    children: [
+                                      Positioned.fill(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(14),
+                                          child: Image.network(
+                                            selectedStockCandidate!.mediumUrl,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, _, _) => const Center(
+                                              child: Icon(Icons.broken_image_rounded, color: MarketColors.outline),
                                             ),
                                           ),
-                                        ],
+                                        ),
                                       ),
+                                      Positioned(
+                                        top: 8,
+                                        left: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.65),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: const Text(
+                                            'Stock photo',
+                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : pickedFileBytes != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(14),
+                                        child: Image.memory(
+                                          pickedFileBytes!,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : (currentImageUrl != null && currentImageUrl!.isNotEmpty)
+                                        ? Stack(
+                                            children: [
+                                              Positioned.fill(
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(14),
+                                                  child: Image.network(
+                                                    currentImageUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (_, _, _) => const Center(
+                                                      child: Icon(Icons.broken_image_rounded, color: MarketColors.outline),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              if (existingProduct?.imageSource == 'stock')
+                                                Positioned(
+                                                  top: 8,
+                                                  left: 8,
+                                                  child: Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black.withValues(alpha: 0.65),
+                                                      borderRadius: BorderRadius.circular(6),
+                                                    ),
+                                                    child: const Text(
+                                                      'Stock photo',
+                                                      style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Colors.white),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          )
+                                        : Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: const [
+                                              Icon(Icons.add_a_photo_outlined, color: MarketColors.primary, size: 24),
+                                              SizedBox(width: 8),
+                                              Text(
+                                                'Select Photo (Max 5 MB)',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: MarketColors.primary,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                           ),
                         ),
+                        const SizedBox(height: 8),
+
+                        // Action Bar: Find stock photo button & Remove photo
+                        Row(
+                          children: [
+                            if (stockPhotosEnabled)
+                              OutlinedButton.icon(
+                                key: const Key('catalog_find_stock_photo_button'),
+                                onPressed: isSearchingStock
+                                    ? null
+                                    : () async {
+                                        final qName = nameCtrl.text.trim();
+                                        if (qName.isEmpty) {
+                                          setModalState(() {
+                                            modalError = 'Enter item name first to find photos';
+                                          });
+                                          return;
+                                        }
+
+                                        setModalState(() {
+                                          isSearchingStock = true;
+                                          modalError = null;
+                                        });
+
+                                        try {
+                                          final service = StockPhotoService();
+                                          final res = await service.findPhotos([
+                                            {
+                                              'id': 'edit_item',
+                                              'name': qName,
+                                              'category': catCtrl.text.trim(),
+                                            }
+                                          ]);
+
+                                          setModalState(() {
+                                            isSearchingStock = false;
+                                            if (res.isNotEmpty) {
+                                              stockCandidates = res.first.candidates;
+                                              if (res.first.confidence >= 0.7 && res.first.bestId != null) {
+                                                selectedStockCandidate = res.first.bestMatch;
+                                                pickedFileBytes = null;
+                                                pickedFileName = null;
+                                              } else {
+                                                selectedStockCandidate = null;
+                                              }
+                                            } else {
+                                              modalError = 'No matching photos found.';
+                                            }
+                                          });
+                                        } on StockPhotoException catch (e) {
+                                          setModalState(() {
+                                            isSearchingStock = false;
+                                            modalError = e.message;
+                                          });
+                                        } catch (e) {
+                                          setModalState(() {
+                                            isSearchingStock = false;
+                                            modalError = 'Unable to find photos right now.';
+                                          });
+                                        }
+                                      },
+                                icon: isSearchingStock
+                                    ? const SizedBox(
+                                        width: 14,
+                                        height: 14,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      )
+                                    : const Icon(Icons.image_search_rounded, size: 16),
+                                label: Text(
+                                  isSearchingStock ? 'Finding...' : 'Find photo',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: MarketColors.primary,
+                                  side: const BorderSide(color: MarketColors.primary),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  minimumSize: const Size(0, 34),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                            const Spacer(),
+                            if (pickedFileBytes != null || selectedStockCandidate != null || (currentImageUrl != null && currentImageUrl!.isNotEmpty))
+                              TextButton(
+                                onPressed: () {
+                                  setModalState(() {
+                                    pickedFileBytes = null;
+                                    pickedFileName = null;
+                                    selectedStockCandidate = null;
+                                    currentImageUrl = null;
+                                  });
+                                },
+                                child: const Text(
+                                  'Remove photo',
+                                  style: TextStyle(color: MarketColors.error, fontSize: 12),
+                                ),
+                              ),
+                          ],
+                        ),
+
+                        // Candidate strip
+                        if (stockCandidates.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          if (selectedStockCandidate == null)
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 6),
+                              child: Text(
+                                'Pick a photo',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFFB45309),
+                                ),
+                              ),
+                            ),
+                          SizedBox(
+                            height: 60,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: stockCandidates.length,
+                              separatorBuilder: (_, _) => const SizedBox(width: 8),
+                              itemBuilder: (ctx, cIdx) {
+                                final cand = stockCandidates[cIdx];
+                                final isSelected = selectedStockCandidate?.id == cand.id;
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    setModalState(() {
+                                      if (isSelected) {
+                                        selectedStockCandidate = null;
+                                      } else {
+                                        selectedStockCandidate = cand;
+                                        pickedFileBytes = null;
+                                        pickedFileName = null;
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: isSelected ? MarketColors.primary : MarketColors.cardBorder,
+                                        width: isSelected ? 2.5 : 1.0,
+                                      ),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.network(
+                                        cand.thumbnailUrl,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, _, _) => const Icon(Icons.broken_image, size: 20),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          if (selectedStockCandidate != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                'Photo by ${selectedStockCandidate!.photographer} on Pixabay',
+                                style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: MarketColors.secondary),
+                              ),
+                            ),
+                        ] else if (existingProduct?.imageCredit != null && selectedStockCandidate == null && pickedFileBytes == null && (currentImageUrl != null && currentImageUrl!.isNotEmpty)) ...[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              'Photo by ${existingProduct!.imageCredit} on Pixabay',
+                              style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: MarketColors.secondary),
+                            ),
+                          ),
+                        ],
+
                         const SizedBox(height: 14),
 
                         // Name
@@ -556,13 +795,55 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                     }
 
                                     String? finalImageUrl = currentImageUrl;
-                                    if (pickedFileBytes != null && pickedFileName != null) {
+                                    String? finalImageSource = isEditing ? existingProduct.imageSource : null;
+                                    String? finalImageCredit = isEditing ? existingProduct.imageCredit : null;
+                                    String? finalImageCreditUrl = isEditing ? existingProduct.imageCreditUrl : null;
+
+                                    if (selectedStockCandidate != null) {
+                                      try {
+                                        final fileBytes = await StockPhotoService.downloadMediumImage(
+                                          selectedStockCandidate!.mediumUrl,
+                                        );
+                                        final uid = _authService.currentUserId ?? _business?.ownerId ?? 'merchant';
+                                        final safeName = 'stock_${selectedStockCandidate!.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+                                        finalImageUrl = await _dataService.uploadProductImage(
+                                          ownerId: uid,
+                                          fileName: safeName,
+                                          fileBytes: fileBytes,
+                                        );
+                                        finalImageSource = 'stock';
+                                        finalImageCredit = selectedStockCandidate!.photographer;
+                                        finalImageCreditUrl = selectedStockCandidate!.url;
+                                      } catch (photoErr) {
+                                        // Save product without photo and show "Photo not added, retry"
+                                        finalImageUrl = null;
+                                        finalImageSource = null;
+                                        finalImageCredit = null;
+                                        finalImageCreditUrl = null;
+                                        if (mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Photo not added, retry'),
+                                              backgroundColor: MarketColors.error,
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    } else if (pickedFileBytes != null && pickedFileName != null) {
                                       final uid = _authService.currentUserId ?? _business?.ownerId ?? 'merchant';
                                       finalImageUrl = await _dataService.uploadProductImage(
                                         ownerId: uid,
                                         fileName: '${DateTime.now().millisecondsSinceEpoch}_$pickedFileName',
                                         fileBytes: pickedFileBytes!,
                                       );
+                                      finalImageSource = 'own';
+                                      finalImageCredit = null;
+                                      finalImageCreditUrl = null;
+                                    } else if (currentImageUrl == null) {
+                                      finalImageUrl = null;
+                                      finalImageSource = null;
+                                      finalImageCredit = null;
+                                      finalImageCreditUrl = null;
                                     }
 
                                     final priceVal = double.tryParse(priceCtrl.text.trim()) ?? 0.0;
@@ -575,6 +856,9 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         category: catVal,
                                         description: descCtrl.text.trim(),
                                         imageUrl: finalImageUrl,
+                                        imageSource: finalImageSource,
+                                        imageCredit: finalImageCredit,
+                                        imageCreditUrl: finalImageCreditUrl,
                                         isBestSeller: isBestSeller,
                                         available: isAvailable,
                                       );
@@ -592,6 +876,9 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                                         category: catVal,
                                         description: descCtrl.text.trim(),
                                         imageUrl: finalImageUrl,
+                                        imageSource: finalImageSource,
+                                        imageCredit: finalImageCredit,
+                                        imageCreditUrl: finalImageCreditUrl,
                                         isBestSeller: isBestSeller,
                                         available: isAvailable,
                                         createdAt: DateTime.now().toUtc(),

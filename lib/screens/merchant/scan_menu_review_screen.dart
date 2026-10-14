@@ -1,10 +1,14 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../../core/config.dart';
 import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/product.dart';
 import '../../models/scanned_menu_item.dart';
 import '../../services/data_service.dart';
+import '../../services/stock_photo_service.dart';
 import '../../widgets/app_bottom_nav.dart';
 import '../../widgets/app_buttons.dart';
 import '../../widgets/app_header.dart';
@@ -15,6 +19,7 @@ import 'dashboard_screen.dart';
 
 /// Item state holder for editable row in the review screen
 class ReviewItemEntry {
+  final String id;
   final TextEditingController nameCtrl;
   final TextEditingController priceCtrl;
   final TextEditingController categoryCtrl;
@@ -25,7 +30,15 @@ class ReviewItemEntry {
   bool hasSaveFailed;
   String? saveError;
 
+  // Stock photos & own photo support
+  List<StockPhotoCandidate> candidates;
+  StockPhotoCandidate? selectedCandidate;
+  Uint8List? ownPhotoBytes;
+  String? ownPhotoName;
+  String? photoSaveError;
+
   ReviewItemEntry({
+    required this.id,
     required this.nameCtrl,
     required this.priceCtrl,
     required this.categoryCtrl,
@@ -35,7 +48,12 @@ class ReviewItemEntry {
     required this.isDuplicate,
     this.hasSaveFailed = false,
     this.saveError,
-  });
+    List<StockPhotoCandidate>? candidates,
+    this.selectedCandidate,
+    this.ownPhotoBytes,
+    this.ownPhotoName,
+    this.photoSaveError,
+  }) : candidates = candidates ?? [];
 
   void dispose() {
     nameCtrl.dispose();
@@ -62,6 +80,7 @@ class ScanMenuReviewScreen extends StatefulWidget {
   final List<Product> existingProducts;
   final List<ScannedMenuItem> scannedItems;
   final DataService? dataService;
+  final StockPhotoService? stockPhotoService;
 
   const ScanMenuReviewScreen({
     super.key,
@@ -69,6 +88,7 @@ class ScanMenuReviewScreen extends StatefulWidget {
     required this.existingProducts,
     required this.scannedItems,
     this.dataService,
+    this.stockPhotoService,
   });
 
   @override
@@ -77,8 +97,11 @@ class ScanMenuReviewScreen extends StatefulWidget {
 
 class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
   late final DataService _dataService;
+  late final StockPhotoService _stockPhotoService;
   final List<ReviewItemEntry> _items = [];
   bool _isSaving = false;
+  bool _isFindingPhotos = false;
+  bool _hideFindPhotosButton = false;
   String? _statusMessage;
   bool _statusIsError = false;
 
@@ -86,7 +109,9 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
   void initState() {
     super.initState();
     _dataService = widget.dataService ?? DataService();
+    _stockPhotoService = widget.stockPhotoService ?? StockPhotoService();
 
+    int idCounter = 0;
     for (final item in widget.scannedItems) {
       final isDup = _checkDuplicate(item.name);
       final priceStr = item.price != null
@@ -105,6 +130,7 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
 
       _items.add(
         ReviewItemEntry(
+          id: 'item_${idCounter++}',
           nameCtrl: nameCtrl,
           priceCtrl: priceCtrl,
           categoryCtrl: catCtrl,
@@ -151,6 +177,7 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
     setState(() {
       _items.add(
         ReviewItemEntry(
+          id: 'item_${DateTime.now().microsecondsSinceEpoch}',
           nameCtrl: nameCtrl,
           priceCtrl: priceCtrl,
           categoryCtrl: catCtrl,
@@ -178,6 +205,106 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
     });
   }
 
+  Future<void> _pickOwnPhoto(ReviewItemEntry entry, ImageSource source) async {
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 1600,
+        maxHeight: 1600,
+        imageQuality: 85,
+      );
+      if (picked != null) {
+        final bytes = await picked.readAsBytes();
+        setState(() {
+          entry.ownPhotoBytes = bytes;
+          entry.ownPhotoName = picked.name;
+          entry.selectedCandidate = null;
+          entry.photoSaveError = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pick photo: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _findPhotosForCheckedItems() async {
+    if (!stockPhotosEnabled || _isFindingPhotos) return;
+
+    final checked = _items.where((e) => e.isChecked).toList();
+    if (checked.isEmpty) {
+      setState(() {
+        _statusMessage = 'Select items to find photos';
+        _statusIsError = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isFindingPhotos = true;
+      _statusMessage = null;
+      _statusIsError = false;
+    });
+
+    try {
+      // Limit to 15 items per batch
+      final batch = checked.take(15).toList();
+      final payload = batch.map((e) {
+        return {
+          'id': e.id,
+          'name': e.nameCtrl.text.trim().isEmpty ? 'Item' : e.nameCtrl.text.trim(),
+          'category': e.categoryCtrl.text.trim(),
+        };
+      }).toList();
+
+      final results = await _stockPhotoService.findPhotos(payload);
+
+      setState(() {
+        for (final res in results) {
+          final match = _items.where((it) => it.id == res.itemId).toList();
+          if (match.isNotEmpty) {
+            final entry = match.first;
+            entry.candidates = res.candidates;
+            entry.photoSaveError = null;
+
+            // Pre-select best match only when confidence is at least 0.7.
+            // Otherwise leave it unselected with a "Pick a photo" prompt.
+            if (res.confidence >= 0.7 && res.bestId != null) {
+              entry.selectedCandidate = res.bestMatch;
+            } else {
+              entry.selectedCandidate = null;
+            }
+          }
+        }
+      });
+    } on StockPhotoException catch (e) {
+      setState(() {
+        if (e.code == 'missing_api_key') {
+          _hideFindPhotosButton = true;
+          _statusMessage = 'Stock photo service is unavailable.';
+        } else {
+          _statusMessage = e.message;
+        }
+        _statusIsError = true;
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Unable to find photos right now. Please try again.';
+        _statusIsError = true;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFindingPhotos = false;
+        });
+      }
+    }
+  }
+
   Future<void> _saveCheckedItems() async {
     final checked = _items.where((e) => e.isChecked).toList();
     if (checked.isEmpty || _isSaving) return;
@@ -200,6 +327,7 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
 
     int addedCount = 0;
     int failedCount = 0;
+    int photoFailedCount = 0;
     final successfulEntries = <ReviewItemEntry>[];
 
     for (final entry in checked) {
@@ -209,6 +337,56 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
             ? entry.categoryCtrl.text.trim()
             : 'General';
 
+        String? finalImageUrl;
+        String? finalImageSource;
+        String? finalImageCredit;
+        String? finalImageCreditUrl;
+
+        // Requirement 10: Download medium image from cdn.pixabay.com or pixabay.com only,
+        // 5s timeout, max 2 MB. Upload to business-media/<uid>/products/
+        if (entry.selectedCandidate != null) {
+          try {
+            final fileBytes = await StockPhotoService.downloadMediumImage(
+              entry.selectedCandidate!.mediumUrl,
+            );
+            final uid = widget.business.ownerId ?? 'merchant';
+            final safeName = 'stock_${entry.selectedCandidate!.id}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+            finalImageUrl = await _dataService.uploadProductImage(
+              ownerId: uid,
+              fileName: safeName,
+              fileBytes: fileBytes,
+            );
+            finalImageSource = 'stock';
+            finalImageCredit = entry.selectedCandidate!.photographer;
+            finalImageCreditUrl = entry.selectedCandidate!.url;
+            entry.photoSaveError = null;
+          } catch (photoErr) {
+            photoFailedCount++;
+            entry.photoSaveError = 'Photo not added, retry';
+            finalImageUrl = null;
+            finalImageSource = null;
+            finalImageCredit = null;
+            finalImageCreditUrl = null;
+          }
+        } else if (entry.ownPhotoBytes != null) {
+          try {
+            final uid = widget.business.ownerId ?? 'merchant';
+            final safeName = 'own_${DateTime.now().millisecondsSinceEpoch}_${entry.ownPhotoName ?? 'photo.jpg'}';
+            finalImageUrl = await _dataService.uploadProductImage(
+              ownerId: uid,
+              fileName: safeName,
+              fileBytes: entry.ownPhotoBytes!,
+            );
+            finalImageSource = 'own';
+            entry.photoSaveError = null;
+          } catch (photoErr) {
+            photoFailedCount++;
+            entry.photoSaveError = 'Photo not added, retry';
+            finalImageUrl = null;
+            finalImageSource = null;
+          }
+        }
+
         final newProd = Product(
           id: '',
           businessId: widget.business.id,
@@ -216,7 +394,10 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
           price: priceVal,
           category: catVal,
           description: entry.description?.trim(),
-          imageUrl: null,
+          imageUrl: finalImageUrl,
+          imageSource: finalImageSource,
+          imageCredit: finalImageCredit,
+          imageCreditUrl: finalImageCreditUrl,
           isBestSeller: false,
           available: true,
           createdAt: DateTime.now().toUtc(),
@@ -226,7 +407,11 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
         addedCount++;
         entry.hasSaveFailed = false;
         entry.saveError = null;
-        successfulEntries.add(entry);
+
+        // If photo failed, keep entry to display "Photo not added, retry"
+        if (entry.photoSaveError == null) {
+          successfulEntries.add(entry);
+        }
       } catch (e) {
         failedCount++;
         entry.hasSaveFailed = true;
@@ -243,13 +428,17 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
       _isSaving = false;
     });
 
-    if (failedCount == 0 && addedCount > 0) {
+    if (failedCount == 0 && photoFailedCount == 0 && addedCount > 0) {
       if (mounted) {
         Navigator.of(context).pop(addedCount);
       }
     } else {
       setState(() {
-        _statusMessage = 'Added $addedCount items. $failedCount failed to save. Please review and retry.';
+        if (photoFailedCount > 0 && failedCount == 0) {
+          _statusMessage = 'Added $addedCount items. Photo not added, retry.';
+        } else {
+          _statusMessage = 'Added $addedCount items. $failedCount failed to save. Please review and retry.';
+        }
         _statusIsError = true;
       });
     }
@@ -329,55 +518,87 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
                 ),
               ),
 
-            // Top Select-All Row & Instructions
+            // Top Select-All Row, Find Photos & Count
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Row(
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 6,
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () => _toggleSelectAll(!allChecked),
-                      borderRadius: BorderRadius.circular(8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: Checkbox(
-                                value: allChecked,
-                                activeColor: MarketColors.primary,
-                                onChanged: _toggleSelectAll,
-                              ),
+                  InkWell(
+                    onTap: () => _toggleSelectAll(!allChecked),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: Checkbox(
+                              value: allChecked,
+                              activeColor: MarketColors.primary,
+                              onChanged: _toggleSelectAll,
                             ),
-                            const SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                allChecked ? 'Deselect All' : 'Select All',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: MarketColors.onSurface,
-                                ),
-                              ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            allChecked ? 'Deselect All' : 'Select All',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: MarketColors.onSurface,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${_items.length} detected',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: MarketColors.secondary,
-                    ),
+
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      // "Find photos" button (Requirement 9, 13)
+                      if (stockPhotosEnabled && !_hideFindPhotosButton)
+                        OutlinedButton.icon(
+                          key: const Key('find_photos_button'),
+                          onPressed: _isFindingPhotos ? null : _findPhotosForCheckedItems,
+                          icon: _isFindingPhotos
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Icon(Icons.photo_library_outlined, size: 16),
+                          label: Text(
+                            _isFindingPhotos ? 'Finding...' : 'Find photos',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: MarketColors.primary,
+                            side: const BorderSide(color: MarketColors.primary),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            minimumSize: const Size(0, 36),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+
+                      Text(
+                        '${_items.length} detected',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: MarketColors.secondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -604,24 +825,7 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
-                            color: MarketColors.secondary,
-                          ),
-                        ),
-                      ),
-                    if (entry.hasSaveFailed)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: MarketColors.errorContainer.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: MarketColors.error),
-                        ),
-                        child: Text(
-                          entry.saveError ?? 'Save failed',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: MarketColors.error,
+                            color: MarketColors.onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -630,13 +834,28 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
               ),
               IconButton(
                 key: Key('delete_scanned_item_$index'),
-                icon: const Icon(Icons.delete_outline_rounded, color: MarketColors.error, size: 20),
+                icon: const Icon(Icons.delete_outline_rounded, size: 20, color: MarketColors.secondary),
                 onPressed: () => _removeItem(index),
                 tooltip: 'Delete item',
-                constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               ),
             ],
           ),
+
+          if (entry.hasSaveFailed && entry.saveError != null) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: MarketColors.errorContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'Failed to save: ${entry.saveError}',
+                style: const TextStyle(fontSize: 11, color: MarketColors.error),
+              ),
+            ),
+          ],
+
           const SizedBox(height: 8),
 
           // Name field (full width)
@@ -686,8 +905,311 @@ class _ScanMenuReviewScreenState extends State<ScanMenuReviewScreen> {
               ),
             ],
           ),
+
+          // Photo selection section (Requirement 9 & 10)
+          _buildPhotoSelectionSection(index, entry),
         ],
       ),
     );
+  }
+
+  Widget _buildPhotoSelectionSection(int index, ReviewItemEntry entry) {
+    if (!stockPhotosEnabled) return const SizedBox.shrink();
+
+    // 1. If merchant picked own photo
+    if (entry.ownPhotoBytes != null) {
+      return Container(
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: MarketColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: MarketColors.cardBorder),
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.memory(
+                entry.ownPhotoBytes!,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text(
+                    'Your Photo',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: MarketColors.onSurface,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Will be uploaded on save',
+                    style: TextStyle(fontSize: 11, color: MarketColors.secondary),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.close_rounded, size: 18, color: MarketColors.secondary),
+              onPressed: () {
+                setState(() {
+                  entry.ownPhotoBytes = null;
+                  entry.ownPhotoName = null;
+                });
+              },
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 2. If candidates exist
+    if (entry.candidates.isNotEmpty) {
+      final isUnselected = entry.selectedCandidate == null;
+
+      return Container(
+        margin: const EdgeInsets.only(top: 10),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: MarketColors.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isUnselected
+                ? const Color(0xFFF59E0B) // Amber for pick a photo prompt
+                : MarketColors.cardBorder,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Prompt header
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isUnselected) ...[
+                      const Icon(Icons.touch_app_outlined, size: 14, color: Color(0xFFD97706)),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Pick a photo',
+                        key: Key('pick_a_photo_prompt'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFFB45309),
+                        ),
+                      ),
+                    ] else ...[
+                      const Icon(Icons.check_circle_rounded, size: 14, color: MarketColors.primary),
+                      const SizedBox(width: 6),
+                      const Text(
+                        'Selected photo',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: MarketColors.primary,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                // Add own photo action
+                PopupMenuButton<ImageSource>(
+                  tooltip: 'Add own photo',
+                  onSelected: (source) => _pickOwnPhoto(entry, source),
+                  itemBuilder: (ctx) => [
+                    const PopupMenuItem(
+                      value: ImageSource.camera,
+                      child: Row(
+                        children: [
+                          Icon(Icons.camera_alt_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Take Photo'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: ImageSource.gallery,
+                      child: Row(
+                        children: [
+                          Icon(Icons.photo_library_outlined, size: 18),
+                          SizedBox(width: 8),
+                          Text('Choose from Gallery'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.add_a_photo_outlined, size: 14, color: MarketColors.primary),
+                        SizedBox(width: 4),
+                        Text(
+                          'Own photo',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: MarketColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Thumbnail strip (up to 6 candidates)
+            SizedBox(
+              height: 60,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: entry.candidates.length,
+                separatorBuilder: (_, _) => const SizedBox(width: 8),
+                itemBuilder: (ctx, cIdx) {
+                  final cand = entry.candidates[cIdx];
+                  final isSelected = entry.selectedCandidate?.id == cand.id;
+
+                  return GestureDetector(
+                    key: Key('photo_candidate_${index}_$cIdx'),
+                    onTap: () {
+                      setState(() {
+                        if (isSelected) {
+                          entry.selectedCandidate = null;
+                        } else {
+                          entry.selectedCandidate = cand;
+                          entry.ownPhotoBytes = null;
+                        }
+                      });
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isSelected ? MarketColors.primary : MarketColors.cardBorder,
+                              width: isSelected ? 2.5 : 1.0,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.network(
+                              cand.thumbnailUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Container(
+                                color: MarketColors.surfaceContainerHigh,
+                                child: const Icon(Icons.broken_image, size: 20, color: MarketColors.outline),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (isSelected)
+                          Positioned(
+                            top: 2,
+                            right: 2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: const BoxDecoration(
+                                color: MarketColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.check, size: 10, color: Colors.black),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            // Photographer credit & Remove action
+            if (entry.selectedCandidate != null) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Photo by ${entry.selectedCandidate!.photographer} on Pixabay',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: MarketColors.secondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        entry.selectedCandidate = null;
+                      });
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Text(
+                        'Remove',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: MarketColors.error,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      );
+    }
+
+    // 3. Photo save error banner (e.g. "Photo not added, retry")
+    if (entry.photoSaveError != null) {
+      return Container(
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        decoration: BoxDecoration(
+          color: MarketColors.errorContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 14, color: MarketColors.error),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                entry.photoSaveError!,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: MarketColors.error),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 }

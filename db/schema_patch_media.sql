@@ -49,3 +49,27 @@ alter table promos add column if not exists product_id uuid references products(
 
 -- 6. Add promo image column to promos table (nullable text, existing promos remain valid)
 alter table promos add column if not exists image_url text;
+
+-- 7. Add stock photo attribution and source columns to products table
+-- image_source: 'own', 'stock', 'ai', or null when no photo
+-- image_credit: photographer name / attribution text
+-- image_credit_url: photo page URL / source URL
+-- Existing rows remain valid as all three columns are nullable with no default constraint breaking existing records.
+alter table products add column if not exists image_source text check (image_source in ('own', 'stock', 'ai'));
+alter table products add column if not exists image_credit text;
+alter table products add column if not exists image_credit_url text;
+
+-- 8. 24-hour stock photo search cache for Pixabay suggestions
+-- query: normalized clean English search query (primary key)
+-- results: JSONB array of candidate photo objects (same shape as Edge Function response)
+-- expires_at: timestamp when the cache entry expires (now() + interval '24 hours')
+-- RLS enabled with NO client access: anon and authenticated roles have no SELECT/INSERT/UPDATE/DELETE.
+-- Only the Edge Function using the Supabase service_role key can read or write to this table.
+create table if not exists search_cache (
+  query text primary key,
+  results jsonb not null,
+  expires_at timestamptz not null
+);
+
+alter table search_cache enable row level security;
+-- Default deny applies to all client roles. No client policies created.
