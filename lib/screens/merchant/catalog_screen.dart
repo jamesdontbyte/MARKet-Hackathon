@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../models/business.dart';
 import '../../models/product.dart';
 import '../../models/promo.dart';
+import '../../models/scanned_menu_item.dart';
 import '../../services/auth_service.dart';
 import '../../services/data_service.dart';
 import '../../widgets/app_bottom_nav.dart';
@@ -16,6 +17,8 @@ import '../../widgets/promo_photo_view.dart';
 import 'account_screen.dart';
 import 'analytics_screen.dart';
 import 'dashboard_screen.dart';
+import 'scan_menu_review_screen.dart';
+import 'scan_menu_sheet.dart';
 import 'store_qr_screen.dart';
 
 class PromoDraft {
@@ -247,6 +250,51 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to delete: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _openScanMenuSheet() async {
+    if (_business == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No registered business found.')),
+      );
+      return;
+    }
+
+    final scanResult = await showModalBottomSheet<ScanMenuResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ScanMenuSheet(business: _business!),
+    );
+
+    if (scanResult != null && scanResult.items.isNotEmpty && mounted) {
+      final addedCount = await Navigator.of(context).push<int>(
+        MaterialPageRoute(
+          builder: (_) => ScanMenuReviewScreen(
+            business: _business!,
+            existingProducts: _products,
+            scannedItems: scanResult.items,
+            dataService: _dataService,
+          ),
+        ),
+      );
+
+      if (addedCount != null && addedCount > 0 && mounted) {
+        await _loadAllData();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                addedCount == 1
+                    ? 'Added 1 item to catalog'
+                    : 'Added $addedCount items to catalog',
+              ),
+              backgroundColor: MarketColors.primary,
+            ),
           );
         }
       }
@@ -1442,13 +1490,28 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
                   itemCount: filtered.length + 1,
                   itemBuilder: (context, index) {
                     if (index == filtered.length) {
-                      // Inline Add Item button that never covers the last card
+                      // Inline Scan Menu and Add Item buttons
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: PrimaryButton(
-                          label: 'Add Item',
-                          icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
-                          onPressed: () => _openAddOrEditItemModal(),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: SecondaryButton(
+                                key: const Key('scan_menu_button'),
+                                label: 'Scan menu',
+                                icon: const Icon(Icons.document_scanner_outlined, size: 18),
+                                onPressed: _openScanMenuSheet,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: PrimaryButton(
+                                label: 'Add Item',
+                                icon: const Icon(Icons.add_rounded, size: 20, color: Colors.white),
+                                onPressed: () => _openAddOrEditItemModal(),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }
@@ -1484,10 +1547,25 @@ class _MerchantCatalogScreenState extends State<MerchantCatalogScreen> {
               style: TextStyle(fontSize: 12, color: MarketColors.secondary),
             ),
             const SizedBox(height: 20),
-            PrimaryButton(
-              label: 'Add Item',
-              icon: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
-              onPressed: () => _openAddOrEditItemModal(),
+            Row(
+              children: [
+                Expanded(
+                  child: SecondaryButton(
+                    key: const Key('empty_scan_menu_button'),
+                    label: 'Scan menu',
+                    icon: const Icon(Icons.document_scanner_outlined, size: 18),
+                    onPressed: _openScanMenuSheet,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: PrimaryButton(
+                    label: 'Add Item',
+                    icon: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
+                    onPressed: () => _openAddOrEditItemModal(),
+                  ),
+                ),
+              ],
             ),
           ],
         ),

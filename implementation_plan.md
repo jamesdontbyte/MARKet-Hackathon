@@ -700,4 +700,40 @@ lib/
      - Test: Clamping start times earlier than now today to `now`.
      - Test: Round-trip JSON deserialization with `.toLocal()`.
 
+---
+
+### Phase 16: Merchant "Scan Menu" AI Extraction & Review Flow
+
+**Goal:** Allow merchants to photograph or upload menu / price list photos (max 4, downscaled to 1600x1600 80% quality), extract items using Gemini structured output in a secure Supabase Edge Function (`scan-menu`), review and edit detected items with confidence/duplicate flagging, and batch save items into their catalog using `DataService.createProduct`.
+
+- **Components:**
+  1. **Edge Function (`supabase/functions/scan-menu/index.ts`):**
+     - Self-contained single TypeScript file for Supabase dashboard pasting.
+     - Role & business verification: verify caller JWT, verify caller role is `merchant` in `profiles`, verify caller owns a business in `businesses`.
+     - Payload validation: 1–4 images, base64 data <= 4MB decoded, valid image MIME.
+     - Rate limit: 10 scans/hr per user via `ai_usage`.
+     - Gemini REST endpoint call with structured JSON schema (`GEMINI_MODEL = "gemini-3-flash-preview"`), system prompt rules for Philippine pesos, size variants, categories, and untrusted image text.
+     - Server-side validation: max 80 items, trimmed names <= 80 chars, drop nameless items, drop prices < 0 or > 1,000,000, round prices to 2 decimals, deduplicate by lowercase name + price.
+     - Error mapping: 429 rate limit, 502 server error, 422 unreadable/safety.
+  2. **Dependencies (`pubspec.yaml`):**
+     - Add `image_picker: ^1.1.2`.
+  3. **Scan Service (`lib/services/scan_service.dart`):**
+     - `ScanService` invoking `supabase.functions.invoke('scan-menu')` with injectable `FunctionInvoker` for testability.
+     - Progress cancellation support and error handling (no internet, rate limit, unreadable, server error).
+  4. **Catalog Screen Integration (`lib/screens/merchant/catalog_screen.dart`):**
+     - Add "Scan menu" button next to "Add Item".
+     - Options: Take photo (with camera permission handling), Choose from gallery (multi-image max 4).
+     - Downscale options (`maxWidth: 1600, maxHeight: 1600, imageQuality: 80`).
+     - Modal / bottom sheet showing thumbnails with remove action, "Reading your menu..." progress state with cancel, and retry on error.
+  5. **Review Screen (`lib/screens/merchant/scan_menu_review_screen.dart`):**
+     - Scrollable list of detected items, each row editable (name, price, category), delete action.
+     - Flag low confidence (<0.6) or missing price with "Check this" label and highlighted border.
+     - Pre-existing products in catalog marked as "Already in catalog" and unchecked by default.
+     - "Add item" action to append empty row for missed items.
+     - Block "Add N items" if any checked row has empty name or invalid price.
+     - Save checked items via `DataService.createProduct`, handle partial failures with retry.
+     - Responsive overflow-free layout at 360x640 and 411x891 at text scale 1.0 and 1.5 with `AppHeader` and `AppBottomNav`.
+  6. **Tests (`test/scan_menu_test.dart`):**
+     - Fake service tests: successful scan to review to save; low-confidence / missing-price flagging blocks saving; catalog duplicates unchecked; friendly errors for rate-limit and no internet; no saving before confirmation; widget overflow tests at 360x640 and 411x891 at 1.0 and 1.5 scale.
+
 
