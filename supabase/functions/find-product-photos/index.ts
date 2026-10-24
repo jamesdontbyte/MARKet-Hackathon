@@ -1,3 +1,4 @@
+
 // Supabase Edge Function: Find Product Photos & AI Re-ranking
 // Self-contained file for pasting into the Supabase dashboard editor.
 // Uses Pixabay Search API + Google Gemini generateContent REST endpoint.

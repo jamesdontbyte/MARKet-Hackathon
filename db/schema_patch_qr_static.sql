@@ -37,7 +37,7 @@ end;
 $$;
 
 -- Pre-seed codes for existing promotions if not yet populated
-insert into promo_store_codes (promo_id, store_code)
+insert into promo_store_codes (promo_id, store_code)  
 select id, upper(substring(md5(id::text || ':' || random()::text) from 1 for 8))
 from promos
 on conflict (promo_id) do nothing;
